@@ -16,15 +16,26 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 
 /**
+  * JS-1387, JS-1686, JS-1687 &lt;show_calendar>.
+  *
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1387IT extends MyTests(isDistributed = true) {
-  override protected lazy val testConfiguration = TestConfiguration(getClass, mainArguments = List("-distributed-orders"))
-}
+final class JS1387IT extends FreeSpec with ScalaSchedulerTest {
+  override protected lazy val testConfiguration = TestConfiguration(getClass,
+    mainArguments = List("-distributed-orders"))
 
-@RunWith(classOf[JUnitRunner])
-final class JS1387nonDistributedIT extends MyTests(isDistributed = false)
+  s"Command show_calendar" in {
+    for (o ← TimedOrders) scheduler executeXml o.toOrderCommand
+    val answer = (scheduler executeXml <show_calendar what="orders" before="2030-12-31T12:00:00Z" limit="10"/>).answer
+    val entries = (answer \ "calendar" \ "_") collect { case e: xml.Elem ⇒ e }
+    val expected = TimedOrders flatMap { _.toExpectedCalendarEntries }
+    logger.info(entries.mkString("\n", "\n", ""))
+    if (entries.toSet != expected.toSet) logger.info("BUT EXPECTED WAS: " + expected.mkString("\n", "\n", ""))
+    assert(entries.size == expected.size)
+    assert(entries.toSet == expected.toSet)
+  }
+}
 
 private[js1387] object JS1387IT {
   private val NonDistributedJobChainPath = JobChainPath("/test-non-distributed")
@@ -44,32 +55,13 @@ private[js1387] object JS1387IT {
       RepeatTimedOrder      (DistributedJobChainPath, LocalTime.of(4, 4, 4)))
   }
 
-  abstract class MyTests(isDistributed: Boolean) extends FreeSpec with ScalaSchedulerTest {
-    s"Command show_calendar" in {
-      for (o ← TimedOrders) scheduler executeXml o.toOrderCommand
-      val answer = (scheduler executeXml <show_calendar what="orders" before="2030-12-31T12:00:00Z" limit="10"/>).answer
-      val entries = (answer \ "calendar" \ "_") collect { case e: xml.Elem ⇒ e }
-      val expected = TimedOrders flatMap { _.toExpectedCalendarEntries(isDistributed) }
-      logger.info(entries.mkString("\n", "\n", ""))
-      if (entries.toSet != expected.toSet) info("BUT EXPECTED WAS: " + expected.mkString("\n", "\n", ""))
-      assert(entries.size == expected.size)
-      assert(entries.toSet == expected.toSet)
-    }
-  }
-
   private trait TimedOrder {
     val jobChainPath: JobChainPath
     def orderKey = jobChainPath orderKey getClass.getSimpleName
     val at: Instant
 
     def toOrderCommand: xml.Elem
-    protected def toExpectedStaticCalendarEntry: Option[xml.Elem]
-    protected def toExpectedDynamicCalendarEntry: Option[xml.Elem]
-
-    final def toExpectedCalendarEntries(isDistributed: Boolean): Iterable[xml.Elem] =
-      toExpectedDynamicCalendarEntry ++ (
-        if (jobChainPath == NonDistributedJobChainPath || !isDistributed) toExpectedStaticCalendarEntry
-        else None)
+    def toExpectedCalendarEntries: List[xml.Elem]
   }
 
   private final case class AtTimedOrder(jobChainPath: JobChainPath, at: Instant) extends TimedOrder {
@@ -78,9 +70,7 @@ private[js1387] object JS1387IT {
              id={orderKey.id.string}
              at={formatLocally(Scheduler.DefaultZoneId, at)}/>
 
-    def toExpectedStaticCalendarEntry = None
-
-    def toExpectedDynamicCalendarEntry = Some(
+    def toExpectedCalendarEntries = List(
       <at job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
           at={formatUtc(at)}/>)
@@ -94,12 +84,10 @@ private[js1387] object JS1387IT {
         </run_time>
       </order>
 
-    def toExpectedStaticCalendarEntry = Some(
+    def toExpectedCalendarEntries = List(
       <period job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
-          single_start={formatUtc(at)}/>)
-
-    def toExpectedDynamicCalendarEntry = Some(
+          single_start={formatUtc(at)}/>,
       <at job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
           at={formatUtc(at)}/>)
@@ -118,12 +106,10 @@ private[js1387] object JS1387IT {
         </run_time>
       </order>
 
-    def toExpectedStaticCalendarEntry = Some(
+    def toExpectedCalendarEntries = List(
       <period job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
-          single_start={formatUtc(at)}/>)
-
-    def toExpectedDynamicCalendarEntry = Some(
+          single_start={formatUtc(at)}/>,
       <at job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
           at={formatUtc(at)}/>)
@@ -143,14 +129,12 @@ private[js1387] object JS1387IT {
         </run_time>
       </order>
 
-    def toExpectedStaticCalendarEntry = Some(
+    def toExpectedCalendarEntries = List(
       <period job_chain={orderKey.jobChainPath.string}
           order={orderKey.id.string}
           begin={formatUtc(at)}
           end={formatUtc(end)}
-          absolute_repeat="3600"/>)
-
-    def toExpectedDynamicCalendarEntry = Some(
+          absolute_repeat="3600"/>,
       <at job_chain={orderKey.jobChainPath.string}
                 order={orderKey.id.string}
                 at={formatUtc(at)}/>)

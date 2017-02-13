@@ -39,16 +39,15 @@ import scala.concurrent.Promise
 @RunWith(classOf[JUnitRunner])
 final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  private lazy val tcpPort :: agentTcpPorts = findRandomFreeTcpPorts(1 + n)
+  private lazy val agentTcpPorts = findRandomFreeTcpPorts(n)
   private lazy val agentRefs = (0 until n).toList zip agentTcpPorts map { case (i, port) ⇒ AgentRef(('A' + i).toChar.toString, port) } ensuring { _.size == n }
   private lazy val runningAgents = mutable.Map[AgentRef, Agent]()
   private var waitingTaskRun: TaskRun = null
-  private var orderFinished = Promise[Unit]()
+  private val orderFinished = Promise[Unit]()
   private var waitingStopwatch: Stopwatch = null
 
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort"),
     cppSettings = Map(CppSettingName.agentConnectRetryDelay → AgentConnectRetryDelay.getSeconds.toString))
 
   "ignoreExtraEntries" in {

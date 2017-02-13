@@ -3,20 +3,18 @@ package com.sos.scheduler.engine.tests.jira.js1187
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, startJob, taskOverview}
-import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1187.JS1187IT._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * JS-1187 Job waits until agent is available.
@@ -26,12 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @RunWith(classOf[JUnitRunner])
 final class JS1187IT extends FreeSpec with ScalaSchedulerTest {
 
-  private lazy val Seq(tcpPort, agentHttpPort) = findRandomFreeTcpPorts(2)
+  private lazy val agentHttpPort = findRandomFreeTcpPort()
   private lazy val agentUri = s"http://127.0.0.1:$agentHttpPort"
-
-  protected override lazy val testConfiguration = TestConfiguration(
-    testClass = getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort"))
 
   "With invalid remote_scheduler address, task does not start" in {
     def ignorable(e: ErrorLogged) = (e.message contains "spray.http.IllegalUriException") || (e.codeOption contains MessageCode("SCHEDULER-280"))

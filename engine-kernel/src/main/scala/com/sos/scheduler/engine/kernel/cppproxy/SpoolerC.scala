@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppThreadSafe}
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppField, CppThreadSafe}
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest
 import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse
@@ -91,4 +91,7 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   @CppThreadSafe def write_to_scheduler_log(category: String, text: String): Unit
   def time_zone_name: String
   def supervisor_uri: String
+
+  @CppExpression("$->_mail_defaults.to_java()")
+  def mailDefaults: java.util.List[String]
 }

@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey, TaskStart
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
-import com.sos.scheduler.engine.test.util.Sockets._
 import com.sos.scheduler.engine.tests.jira.js866.JS866IT._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -14,9 +13,8 @@ import org.scalatest.junit.JUnitRunner
 final class JS866IT extends FunSuite with ScalaSchedulerTest {
 
   protected override lazy val testConfiguration = TestConfiguration(
-      testClass = getClass,
-      mainArguments = List("-tcp-port="+ findAvailablePort()),
-      terminateOnError = false)
+    testClass = getClass,
+    terminateOnError = false)
 
   test("kill local API job") {
     checkedKillTask(localJobPath)
