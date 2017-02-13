@@ -5,7 +5,6 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1688.JS1688IT._
@@ -34,7 +33,7 @@ final class JS1688IT extends FreeSpec with ScalaSchedulerTest {
     sleep(1.s)
     val taskId = runJob(TestJobPath).taskId
     //println(testEnvironment.schedulerLog.contentString)
-    assert(taskId == TaskId(SchedulerConstants.taskIdOffset))
+    assert(taskId == TaskId.First)
   }
 }
 
