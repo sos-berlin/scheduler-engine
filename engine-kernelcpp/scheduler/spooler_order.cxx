@@ -1408,23 +1408,27 @@ bool Order_queue_node::is_ready_for_order_processing()
 
 bool Order_queue_node::request_order(const Time& now, const string& cause)
 {
-    bool result = order_queue()->request_order(now, cause);
-    if (!result && _job_chain->untouched_is_allowed()) {
-        Z_FOR_EACH(Order_source_list, _order_source_list, j) {
-            result = (*j)->request_order(cause);
-            if (result)  break;
-        }
-        // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
-        vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
-        Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
-            Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+    if (_job_chain->is_stopped()) 
+        return false;
+    else {
+        bool result = order_queue()->request_order(now, cause);
+        if (!result && _job_chain->untouched_is_allowed()) {
+            Z_FOR_EACH(Order_source_list, _order_source_list, j) {
                 result = (*j)->request_order(cause);
                 if (result)  break;
             }
-            if (result)  break;
+            // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
+            vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+            Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+                Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+                    result = (*j)->request_order(cause);
+                    if (result)  break;
+                }
+                if (result)  break;
+            }
         }
+        return result;
     }
-    return result;
 }
 
 //--------------------------------------------------------Order_queue_node::withdraw_order_requests
