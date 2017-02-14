@@ -1346,6 +1346,9 @@ void Spooler::set_state( State state )
     {
         log_show_state();
     }
+    if (_cluster && (_state == s_paused || old_state == s_paused)) {
+        _cluster->set_paused(_state == s_paused);
+    }
     Scheduler_object::report_event(CppEventFactoryJ::newSchedulerStateChanged(_state));
 }
 
@@ -2527,6 +2530,9 @@ void Spooler::run()
                 _is_activated = true;
                 activate();
                 _assert_is_active = true;
+                if (_cluster && _cluster->previous_exclusive_scheduler_was_paused()) {
+                    set_state(s_paused);
+                }
             }
             else
             if( _state == s_starting )

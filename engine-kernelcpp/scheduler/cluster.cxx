@@ -86,6 +86,7 @@ struct Cluster : Cluster_subsystem_interface
     void                        post_command_to_cluster_member(const xml::Element_ptr&, const string& member_id);
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
+    void set_paused(bool);
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -140,6 +141,10 @@ struct Cluster : Cluster_subsystem_interface
     string                      least_busy_member_id        () const;
     vector<string>              fetch_all_member_ids        () const;
 
+    bool previous_exclusive_scheduler_was_paused() const {
+        return _previous_exclusive_scheduler_was_paused;
+    }
+
     friend struct               Cluster_member;
     friend struct               Heart_beat_watchdog_thread;
     friend struct               Heart_beat;
@@ -177,6 +182,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_in_error;
     bool                       _closed;
     bool                       _scheduler_stops_because_of_error;
+    bool                       _previous_exclusive_scheduler_was_paused;
 
     ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
     ptr<Heart_beat>                   _heart_beat;
@@ -249,6 +255,9 @@ struct Cluster_member : Object, Abstract_scheduler_object
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
 
+    bool is_paused() const {
+        return _is_paused;
+    }
 
     Fill_zero                  _zero_;
     string                     _member_id;
@@ -259,6 +268,7 @@ struct Cluster_member : Object, Abstract_scheduler_object
     bool                       _is_exclusive;
     bool                       _is_active;
     bool                       _is_checked;
+    bool                       _is_paused;
     string                     _deactivating_member_id;
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;
@@ -492,6 +502,7 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
     _deactivating_member_id = record.as_string( "deactivating_member_id" );
     _http_url               = record.as_string( "http_url"  );
     _is_db_dead             = !record.null    ( "dead"      );
+    _is_paused = !record.null("paused");
     
     time_t last_heart_beat = record.null( "last_heart_beat" )? 0 : record.as_int64( "last_heart_beat" );
     time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
@@ -853,6 +864,7 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     if( _is_active    )  result.setAttribute( "active"   , "yes" );
     if( _is_exclusive )  result.setAttribute( "exclusive", "yes" );
     if( _is_dead      )  result.setAttribute( "dead"     , "yes" );
+    if (_is_paused) result.setAttribute("paused", "yes");
 
     if( _heart_beat_count )  
     {
@@ -1488,6 +1500,7 @@ void Cluster::create_table_when_needed()
             "`active`"                         " boolean"         << null << ","    // null oder 1 (not null)
             "`exclusive`"                      " boolean"         << null << ","    // null oder 1 (not null)
             "`dead`"                           " boolean"         << null << ","    // null oder 1 (not null)
+            "`paused`"                         " boolean"         << null << ","    // null oder 1 (not null)
             "`command`"                        " varchar(250)"    << null << ","
             "`http_url`"                       " varchar(100)"    << null << ","
             "`deactivating_member_id`"         " varchar(100)"    << null << ","
@@ -1904,7 +1917,7 @@ bool Cluster::check_schedulers_heart_beat()
         Read_transaction ta ( db() );
 
         Any_file result_set = ta.open_result_set( S() << 
-                     "select `member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `dead`, `deactivating_member_id`, `http_url` "
+                     "select `member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `dead`, `paused`, `deactivating_member_id`, `http_url` "
                       " from " << db()->_clusters_tablename << 
                      "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ),
                         //" and `active` is not null",
@@ -2000,8 +2013,10 @@ bool Cluster::mark_as_exclusive()
     time_t now = ::time(NULL);
 
 
-    if( !_exclusive_scheduler )
-    {
+    if (_exclusive_scheduler) {
+        _previous_exclusive_scheduler_was_paused = _exclusive_scheduler->is_paused();
+    }
+    else {
         check_empty_member_record();
         check_schedulers_heart_beat();  // Setzt _exclusive_member
 
@@ -2010,6 +2025,7 @@ bool Cluster::mark_as_exclusive()
             _log->error( S() << Z_FUNCTION << "  Missing exclusive member record" );
             return false;
         }
+        _previous_exclusive_scheduler_was_paused = false;
     }
 
 
@@ -2287,6 +2303,24 @@ string Cluster::async_state_text_() const
 void Cluster::check()
 {
     if( _cluster_operation )  _cluster_operation->async_check_exception( "Error in cluster operation" );
+}
+
+
+void Cluster::set_paused(bool paused) {
+    if (db() && db()->opened())
+    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+        sql::Update_stmt update(ta.database_descriptor(), db()->_clusters_tablename);
+     
+        if (paused) {
+            update["paused"] = 1;
+        } else {
+            update["paused"] = sql::null_value;
+        }
+        update.and_where_condition("member_id", my_member_id());
+        ta.execute(update, Z_FUNCTION);
+        ta.commit(Z_FUNCTION);
+    }
+    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_clusters_tablename, x), Z_FUNCTION); }
 }
 
 //---------------------------------------------------Cluster::set_command_for_all_schedulers_but_me
