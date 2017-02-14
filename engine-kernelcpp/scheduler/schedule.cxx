@@ -1245,8 +1245,6 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
     }
 
     _once = element.bool_getAttribute( "once", _once );
-    //if( _host_object  &&  _host_object->scheduler_type_code() == Scheduler_object::type_order  &&  !_once )  z::throw_xc( "SCHEDULER-220", "once='no'" );
-    _start_time_function = element.getAttribute( "start_time_function" );
 
     if (element.hasAttribute("name")) {
         require_not_attribute(element, "time_zone");
@@ -1376,16 +1374,9 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
 
     Period result;
 
-    if( !beginning_time.is_never()  &&
-        ( _start_time_function != ""  ||  is_filled() ) )
+    if (!beginning_time.is_never() && is_filled())
     {
-        bool   is_no_function_warning_logged = false; 
-        Period last_function_result;
-        
-        last_function_result.set_single_start(Time(0));
-
         Time limited_before = min( before, beginning_time + Duration(foresee_years*366*24*60*60));     // Längstens soviele Jahre ab beginning_time voraussehen
-
 
         for( Time t = beginning_time;  result.empty()  &&  t < limited_before;  t = t.midnight() + Duration::day)     
         {
@@ -1395,32 +1386,7 @@ Period Schedule::Inlay::next_local_period( Schedule_use* use, const Time& beginn
             }
             else
             {
-                if( _start_time_function != ""  &&  single_start & ( wss_next_any_start | wss_next_single_start ) )
-                {
-                    if( _spooler->scheduler_script_subsystem()->subsystem_state() != subsys_active  &&  !is_no_function_warning_logged )
-                    {
-                        log()->warn( message_string( "SCHEDULER-844", _start_time_function, Z_FUNCTION ) );
-                        is_no_function_warning_logged = true;
-                    }
-                    else
-                    if( last_function_result.begin() < t )
-                    {
-                        try
-                        {
-                            last_function_result = min( result, call_function( use, t ) );
-                            result = last_function_result;
-                        }
-                        catch( exception& x )
-                        {
-                            log()->error( x.what() );
-                            log()->error( message_string( "SCHEDULER-398", _start_time_function ) );
-                        }
-                    }
-                }
-            
-
                 result = min( result, next_period_of_same_day( t, single_start ) );
-
 
                 // Gestern war Feiertag? Periode mit when_holiday="next_non_holiday" suchen
                 Duration foresee_duration = Duration(foresee_years*24*60*60);
@@ -1468,58 +1434,6 @@ Period Schedule::Inlay::next_period_of_same_day( const Time& t, With_single_star
     if( _weekday_set .is_filled() )  result = min( result, _weekday_set .next_period_of_same_day( t, single_start ) );
     if( _monthday_set.is_filled() )  result = min( result, _monthday_set.next_period_of_same_day( t, single_start ) );
     if( _ultimo_set  .is_filled() )  result = min( result, _ultimo_set  .next_period_of_same_day( t, single_start ) );
-
-    return result;
-}
-
-//-------------------------------------------------------------------Schedule::Inlay::call_function
-
-Period Schedule::Inlay::call_function( Schedule_use* use, const Time& requested_beginning )
-{
-    // Die Funktion sollte keine Zeit in der wiederholten Stunde nach Ende der Sommerzeit liefern.
-
-    Period result;
-
-    if( !_start_time_function_error )
-    {
-        try
-        {
-
-            string            date_string      = requested_beginning.utc_string( time::without_ms );
-            string            param2           = use->name_for_function();
-            Scheduler_script* scheduler_script = _spooler->scheduler_script_subsystem()->default_scheduler_script();
-            string            function_name    = _start_time_function;
-            if( scheduler_script ->module()->kind() == Module::kind_java )  function_name += "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
-
-            Variant v = scheduler_script ->module_instance()->call( function_name, date_string, param2 );
-            
-            if( !v.is_null_or_empty_string() )
-            {
-                Time t;
-                if( variant_is_numeric( v ) )  t = Time((time_t)v.as_int64());
-                else
-                if( v.vt == VT_DATE         )  t = Time(seconds_since_1970_from_com_date( V_DATE( &v ) ));
-                else                           
-                                               t = Time::of_date_time( v.as_string(), "(NO-TIME-ZONE)" );
-
-                if( t < requested_beginning )
-                {
-                    //if( _log )  _log->warn( message_string( "SCHEDULER-394", _start_time_function, t, requested_beginning ) );
-                    z::throw_xc( "SCHEDULER-394", _start_time_function, t, requested_beginning );
-                }
-                else 
-                if( !t.is_never() ) 
-                {
-                    result.set_single_start( t );
-                }
-            }
-        }
-        catch( exception& x )
-        {
-            _start_time_function_error = true;
-            z::throw_xc( "SCHEDULER-393", _start_time_function, x );
-        }
-    }
 
     return result;
 }
