@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js866
 
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey, TaskStarted}
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js866.JS866IT._
@@ -20,11 +19,11 @@ final class JS866IT extends FunSuite with ScalaSchedulerTest {
     checkedKillTask(localJobPath)
   }
 
-  test("kill remote API job") {
-    val h = "localhost:"+ instance[SchedulerConfiguration].tcpPort
-    scheduler executeXml <process_class name="remote" remote_scheduler={h}/>
-    checkedKillTask(remoteJobPath)
-  }
+  //test("kill remote API job") {
+  //  val h = "localhost:"+ instance[SchedulerConfiguration].tcpPort
+  //  scheduler executeXml <process_class name="remote" remote_scheduler={h}/>
+  //  checkedKillTask(remoteJobPath)
+  //}
 
   private def checkedKillTask(jobPath: JobPath): Unit = {
     val eventPipe = controller.newEventPipe()
