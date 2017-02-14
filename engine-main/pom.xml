@@ -127,10 +127,10 @@
                                     <groupId>com.h2database</groupId>
                                     <artifactId>h2</artifactId>
                                 </artifactItem>
-                                <!-- GPL: artifactItem>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
-                                </artifactItem-->
+                                <dependency>
+                                    <groupId>org.mariadb.jdbc</groupId>
+                                    <artifactId>mariadb-java-client</artifactId>
+                                </dependency>
                                 <artifactItem>
                                     <groupId>org.postgresql</groupId>
                                     <artifactId>postgresql</artifactId>
