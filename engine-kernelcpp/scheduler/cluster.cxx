@@ -86,6 +86,7 @@ struct Cluster : Cluster_subsystem_interface
     void                        post_command_to_cluster_member(const xml::Element_ptr&, const string& member_id);
     string                      http_url_of_member_id       ( const string& cluster_member_id );
     void                        check                       ();
+    void set_paused(bool);
 
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
@@ -120,7 +121,7 @@ struct Cluster : Cluster_subsystem_interface
     void                        start_operations            ();
     void                        close_operations            ();
 
-    void                        check_empty_member_record   ();
+    void                        check_empty_member_record   (bool read_only = false);
     void                        insert_member_record        ();
 
     void                        assert_database_integrity   ( const string& message_text );
@@ -139,6 +140,10 @@ struct Cluster : Cluster_subsystem_interface
     void                        recommend_next_deadline_check_time( time_t );
     string                      least_busy_member_id        () const;
     vector<string>              fetch_all_member_ids        () const;
+
+    bool is_paused() const {
+        return _is_paused;
+    }
 
     friend struct               Cluster_member;
     friend struct               Heart_beat_watchdog_thread;
@@ -177,6 +182,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_in_error;
     bool                       _closed;
     bool                       _scheduler_stops_because_of_error;
+    bool                       _is_paused;
 
     ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
     ptr<Heart_beat>                   _heart_beat;
@@ -248,7 +254,6 @@ struct Cluster_member : Object, Abstract_scheduler_object
     bool                        delete_dead_record          ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
-
 
     Fill_zero                  _zero_;
     string                     _member_id;
@@ -1488,6 +1493,7 @@ void Cluster::create_table_when_needed()
             "`active`"                         " boolean"         << null << ","    // null oder 1 (not null)
             "`exclusive`"                      " boolean"         << null << ","    // null oder 1 (not null)
             "`dead`"                           " boolean"         << null << ","    // null oder 1 (not null)
+            "`paused`"                         " boolean"         << null << ","    // null oder 1 (not null)
             "`command`"                        " varchar(250)"    << null << ","
             "`http_url`"                       " varchar(100)"    << null << ","
             "`deactivating_member_id`"         " varchar(100)"    << null << ","
@@ -2000,8 +2006,7 @@ bool Cluster::mark_as_exclusive()
     time_t now = ::time(NULL);
 
 
-    if( !_exclusive_scheduler )
-    {
+    if (!_exclusive_scheduler) {
         check_empty_member_record();
         check_schedulers_heart_beat();  // Setzt _exclusive_member
 
@@ -2010,6 +2015,8 @@ bool Cluster::mark_as_exclusive()
             _log->error( S() << Z_FUNCTION << "  Missing exclusive member record" );
             return false;
         }
+    } else {
+        check_empty_member_record(/*read_only=*/true);
     }
 
 
@@ -2147,9 +2154,8 @@ void Cluster::assert_database_integrity( const string& message_text )
 
 //--------------------------------------------------------------Cluster::check_empty_member_record
 
-void Cluster::check_empty_member_record()
+void Cluster::check_empty_member_record(bool read_only)
 {
-    Record record;
     bool   second_try = false;
 
 
@@ -2163,12 +2169,13 @@ void Cluster::check_empty_member_record()
 
             Any_file result_set   = ta.open_result_set
             (
-                S() << "select `active`  from " << db()->_clusters_tablename << "  " << where_clause,
+                S() << "select `paused`  from " << db()->_clusters_tablename << "  " << where_clause,
                 Z_FUNCTION
             );
 
             if( !result_set.eof() )
             {
+                _is_paused = !result_set.get_record().null("paused");
                 //if( result_set.get_record().null( "active" ) )
                 //{
                 //    sql::Update_stmt update ( db()->database_descriptor(), db()->_clusters_tablename );
@@ -2178,7 +2185,7 @@ void Cluster::check_empty_member_record()
                 //}
             }
             else
-            if( !_is_backup_member )
+            if (!read_only && !_is_backup_member)
             {
                 Any_file result_set = ta.open_commitable_result_set
                 (
@@ -2287,6 +2294,22 @@ string Cluster::async_state_text_() const
 void Cluster::check()
 {
     if( _cluster_operation )  _cluster_operation->async_check_exception( "Error in cluster operation" );
+}
+
+
+void Cluster::set_paused(bool paused) {
+    if (has_exclusiveness()) {
+        if (db() && db()->opened()) {
+            for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                sql::Update_stmt update(ta.database_descriptor(), db()->_clusters_tablename);
+                update["paused"] = paused ? sql::Value(1) : sql::null_value;
+                update.and_where_condition("member_id", empty_member_id());
+                ta.execute(update, Z_FUNCTION);
+                ta.commit(Z_FUNCTION);
+            }
+            catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_clusters_tablename, x), Z_FUNCTION); }
+        }
+    }
 }
 
 //---------------------------------------------------Cluster::set_command_for_all_schedulers_but_me
@@ -2725,6 +2748,7 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
     if( _is_backup_member  )  result.setAttribute( "backup"   , "yes" );
+    if (_is_paused) result.setAttribute("paused", "yes");
     result.setAttribute( "is_member_allowed_to_start", is_member_allowed_to_start()? "yes" : "no" );
 
 

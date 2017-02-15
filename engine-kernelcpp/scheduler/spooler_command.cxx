@@ -1294,7 +1294,9 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     //    order->add_to_job( job_name );
     //}
 
-
+    if (job_chain->max_orders() == 0) {
+        order->log()->info(message_string("SCHEDULER-720", job_chain->path()));
+    }
     xml::Element_ptr result = _answer.createElement( "ok" ); 
     result.appendChild( order->dom_element( _answer, Show_what() ) );
     return result;
@@ -1354,6 +1356,9 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
         order->set_end_state(modify_order_element.getAttribute("end_state"));
     }
     if (at != "") {
+        if (job_chain->max_orders() == 0) {
+            order->log()->info(message_string("SCHEDULER-720", job_chain->path()));
+        }
         order->set_at(Time::of_date_time_with_now(at, _spooler->_time_zone_name));
     }
     if (modify_order_element.hasAttribute("setback")) {

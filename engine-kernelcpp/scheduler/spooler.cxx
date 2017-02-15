@@ -1346,6 +1346,14 @@ void Spooler::set_state( State state )
     {
         log_show_state();
     }
+    if (_cluster) {
+        if (_state == s_paused) {
+            _cluster->set_paused(true);
+        } else
+        if (_state == s_running) {
+            _cluster->set_paused(false);
+        }
+    }
     Scheduler_object::report_event(CppEventFactoryJ::newSchedulerStateChanged(_state));
 }
 
@@ -2140,7 +2148,7 @@ void Spooler::start()
 
 //--------------------------------------------------------------------------------Spooler::activate
 
-void Spooler::activate()
+void Spooler::activate(State state)
 {
     load_subsystems();
     activate_subsystems();
@@ -2154,7 +2162,7 @@ void Spooler::activate()
 
     execute_config_commands();                                                                          
 
-    set_state( s_running );
+    set_state(state);
     _java_subsystem->on_scheduler_activated();
 
     if (settings()->_pause_after_failure) {
@@ -2525,7 +2533,7 @@ void Spooler::run()
                 ( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() ) )
             {
                 _is_activated = true;
-                activate();
+                activate(_cluster && _cluster->is_paused() ? s_paused : s_running);
                 _assert_is_active = true;
             }
             else

@@ -29,7 +29,6 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   def directory: String
   def local_configuration_directory: String
   def log_show_state(): Unit
-  def assign_stdout(): Unit
   def execute_xml_string(xml: String): String
   def execute_xml_string_with_security_level(xml: String, security_level: String, clientHostName: String): String
   def java_execute_http(request: SchedulerHttpRequest, response: SchedulerHttpResponse): HttpResponseC
@@ -49,18 +48,6 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   def abort_now(restart: Boolean): Unit
   def execute_state_cmd(): Unit
   def is_termination_state_cmd: Boolean
-  def load_arg(): Unit
-  def load(): Unit
-  def self_check(): Unit
-  def update_console_title(level: Int): Unit
-  def start(): Unit
-  def activate(): Unit
-  def execute_config_commands(): Unit
-  def run_check_ctrl_c(): Unit
-  def stop(): Unit
-  def end_waiting_tasks(): Unit
-  def nichts_getan(anzahl: Int, x: String): Unit
-  def run(): Unit
   def name_is_valid(name: String): Boolean
   def check_name(name: String): Unit
   // Cluster

@@ -47,17 +47,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native void abort_now__native(long cppReference, boolean p0);
 
 
-    @Override public void activate() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            activate__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void activate__native(long cppReference);
-
-
     @Override public void assert_are_orders_distributed(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -78,17 +67,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native void assert_is_activated__native(long cppReference, java.lang.String p0);
-
-
-    @Override public void assign_stdout() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            assign_stdout__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void assign_stdout__native(long cppReference);
 
 
     @Override public void check_cluster() {
@@ -310,28 +288,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native java.lang.String distributed_member_id__native(long cppReference);
-
-
-    @Override public void end_waiting_tasks() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            end_waiting_tasks__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void end_waiting_tasks__native(long cppReference);
-
-
-    @Override public void execute_config_commands() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            execute_config_commands__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void execute_config_commands__native(long cppReference);
 
 
     @Override public void execute_state_cmd() {
@@ -569,28 +525,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem_or_null__native(long cppReference);
 
 
-    @Override public void load() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            load__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void load__native(long cppReference);
-
-
-    @Override public void load_arg() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            load_arg__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void load_arg__native(long cppReference);
-
-
     @Override public java.lang.String local_configuration_directory() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -704,17 +638,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native boolean name_is_valid__native(long cppReference, java.lang.String p0);
 
 
-    @Override public void nichts_getan(int p0, java.lang.String p1) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            nichts_getan__native(cppReference(), p0, p1);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void nichts_getan__native(long cppReference, int p0, java.lang.String p1);
-
-
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Order_subsystemC order_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -776,28 +699,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Process_class_subsystemC process_class_subsystem__native(long cppReference);
 
 
-    @Override public void run() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            run__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void run__native(long cppReference);
-
-
-    @Override public void run_check_ctrl_c() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            run_check_ctrl_c__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void run_check_ctrl_c__native(long cppReference);
-
-
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC schedule_subsystem() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -809,17 +710,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Schedule_subsystemC schedule_subsystem__native(long cppReference);
-
-
-    @Override public void self_check() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            self_check__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void self_check__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.SettingsC settings() {
@@ -855,17 +745,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Standing_order_subsystemC standing_order_subsystem__native(long cppReference);
 
 
-    @Override public void start() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            start__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void start__native(long cppReference);
-
-
     @Override public int state() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -875,17 +754,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native int state__native(long cppReference);
-
-
-    @Override public void stop() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            stop__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void stop__native(long cppReference);
 
 
     @Override public java.lang.String supervisor_uri() {
@@ -960,17 +828,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     }
 
     private static native int udp_port__native(long cppReference);
-
-
-    @Override public void update_console_title(int p0) {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            update_console_title__native(cppReference(), p0);
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native void update_console_title__native(long cppReference, int p0);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC variables() {
