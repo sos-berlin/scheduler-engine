@@ -471,7 +471,7 @@ struct Spooler : Object,
   //void                        create_window               ();
     void                        update_console_title        ( int level = 1 );
     void                        start                       ();
-    void                        activate                    ();
+    void                        activate                    (State);
     void                        execute_config_commands     ();
     void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );

@@ -73,7 +73,7 @@ struct Cluster_subsystem_interface : Object, Subsystem
 
     virtual xml::Element_ptr    dom_element                 ( const xml::Document_ptr&, const Show_what& ) = 0;
     virtual void set_paused(bool) = 0;
-    virtual bool previous_exclusive_scheduler_was_paused() const = 0;
+    virtual bool is_paused() const = 0;
 };
 
 

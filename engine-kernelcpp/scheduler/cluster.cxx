@@ -121,7 +121,7 @@ struct Cluster : Cluster_subsystem_interface
     void                        start_operations            ();
     void                        close_operations            ();
 
-    void                        check_empty_member_record   ();
+    void                        check_empty_member_record   (bool read_only = false);
     void                        insert_member_record        ();
 
     void                        assert_database_integrity   ( const string& message_text );
@@ -141,8 +141,8 @@ struct Cluster : Cluster_subsystem_interface
     string                      least_busy_member_id        () const;
     vector<string>              fetch_all_member_ids        () const;
 
-    bool previous_exclusive_scheduler_was_paused() const {
-        return _previous_exclusive_scheduler_was_paused;
+    bool is_paused() const {
+        return _is_paused;
     }
 
     friend struct               Cluster_member;
@@ -182,7 +182,7 @@ struct Cluster : Cluster_subsystem_interface
     bool                       _is_in_error;
     bool                       _closed;
     bool                       _scheduler_stops_because_of_error;
-    bool                       _previous_exclusive_scheduler_was_paused;
+    bool                       _is_paused;
 
     ptr<Heart_beat_watchdog_thread>   _heart_beat_watchdog_thread;
     ptr<Heart_beat>                   _heart_beat;
@@ -255,10 +255,6 @@ struct Cluster_member : Object, Abstract_scheduler_object
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     string                      obj_name                    () const;
 
-    bool is_paused() const {
-        return _is_paused;
-    }
-
     Fill_zero                  _zero_;
     string                     _member_id;
     bool                       _is_dead;
@@ -268,7 +264,6 @@ struct Cluster_member : Object, Abstract_scheduler_object
     bool                       _is_exclusive;
     bool                       _is_active;
     bool                       _is_checked;
-    bool                       _is_paused;
     string                     _deactivating_member_id;
     time_t                     _db_last_heart_beat;
     time_t                     _db_next_heart_beat;
@@ -502,7 +497,6 @@ bool Cluster_member::check_heart_beat( time_t now_before_select, const Record& r
     _deactivating_member_id = record.as_string( "deactivating_member_id" );
     _http_url               = record.as_string( "http_url"  );
     _is_db_dead             = !record.null    ( "dead"      );
-    _is_paused = !record.null("paused");
     
     time_t last_heart_beat = record.null( "last_heart_beat" )? 0 : record.as_int64( "last_heart_beat" );
     time_t next_heart_beat = record.null( "next_heart_beat" )? 0 : record.as_int64( "next_heart_beat" );
@@ -864,7 +858,6 @@ xml::Element_ptr Cluster_member::dom_element( const xml::Document_ptr& dom_docum
     if( _is_active    )  result.setAttribute( "active"   , "yes" );
     if( _is_exclusive )  result.setAttribute( "exclusive", "yes" );
     if( _is_dead      )  result.setAttribute( "dead"     , "yes" );
-    if (_is_paused) result.setAttribute("paused", "yes");
 
     if( _heart_beat_count )  
     {
@@ -1917,7 +1910,7 @@ bool Cluster::check_schedulers_heart_beat()
         Read_transaction ta ( db() );
 
         Any_file result_set = ta.open_result_set( S() << 
-                     "select `member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `dead`, `paused`, `deactivating_member_id`, `http_url` "
+                     "select `member_id`, `last_heart_beat`, `next_heart_beat`, `exclusive`, `active`, `dead`, `deactivating_member_id`, `http_url` "
                       " from " << db()->_clusters_tablename << 
                      "  where `scheduler_id`=" << sql::quoted( _spooler->id_for_db() ),
                         //" and `active` is not null",
@@ -2013,10 +2006,7 @@ bool Cluster::mark_as_exclusive()
     time_t now = ::time(NULL);
 
 
-    if (_exclusive_scheduler) {
-        _previous_exclusive_scheduler_was_paused = _exclusive_scheduler->is_paused();
-    }
-    else {
+    if (!_exclusive_scheduler) {
         check_empty_member_record();
         check_schedulers_heart_beat();  // Setzt _exclusive_member
 
@@ -2025,7 +2015,8 @@ bool Cluster::mark_as_exclusive()
             _log->error( S() << Z_FUNCTION << "  Missing exclusive member record" );
             return false;
         }
-        _previous_exclusive_scheduler_was_paused = false;
+    } else {
+        check_empty_member_record(/*read_only=*/true);
     }
 
 
@@ -2163,9 +2154,8 @@ void Cluster::assert_database_integrity( const string& message_text )
 
 //--------------------------------------------------------------Cluster::check_empty_member_record
 
-void Cluster::check_empty_member_record()
+void Cluster::check_empty_member_record(bool read_only)
 {
-    Record record;
     bool   second_try = false;
 
 
@@ -2179,12 +2169,13 @@ void Cluster::check_empty_member_record()
 
             Any_file result_set   = ta.open_result_set
             (
-                S() << "select `active`  from " << db()->_clusters_tablename << "  " << where_clause,
+                S() << "select `paused`  from " << db()->_clusters_tablename << "  " << where_clause,
                 Z_FUNCTION
             );
 
             if( !result_set.eof() )
             {
+                _is_paused = !result_set.get_record().null("paused");
                 //if( result_set.get_record().null( "active" ) )
                 //{
                 //    sql::Update_stmt update ( db()->database_descriptor(), db()->_clusters_tablename );
@@ -2194,7 +2185,7 @@ void Cluster::check_empty_member_record()
                 //}
             }
             else
-            if( !_is_backup_member )
+            if (!read_only && !_is_backup_member)
             {
                 Any_file result_set = ta.open_commitable_result_set
                 (
@@ -2307,20 +2298,18 @@ void Cluster::check()
 
 
 void Cluster::set_paused(bool paused) {
-    if (db() && db()->opened())
-    for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
-        sql::Update_stmt update(ta.database_descriptor(), db()->_clusters_tablename);
-     
-        if (paused) {
-            update["paused"] = 1;
-        } else {
-            update["paused"] = sql::null_value;
+    if (has_exclusiveness()) {
+        if (db() && db()->opened()) {
+            for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                sql::Update_stmt update(ta.database_descriptor(), db()->_clusters_tablename);
+                update["paused"] = paused ? sql::Value(1) : sql::null_value;
+                update.and_where_condition("member_id", empty_member_id());
+                ta.execute(update, Z_FUNCTION);
+                ta.commit(Z_FUNCTION);
+            }
+            catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_clusters_tablename, x), Z_FUNCTION); }
         }
-        update.and_where_condition("member_id", my_member_id());
-        ta.execute(update, Z_FUNCTION);
-        ta.commit(Z_FUNCTION);
     }
-    catch (exception& x) { ta.reopen_database_after_error(zschimmer::Xc("SCHEDULER-360", db()->_clusters_tablename, x), Z_FUNCTION); }
 }
 
 //---------------------------------------------------Cluster::set_command_for_all_schedulers_but_me
@@ -2759,6 +2748,7 @@ xml::Element_ptr Cluster::dom_element( const xml::Document_ptr& document, const 
     if( _is_active         )  result.setAttribute( "active"   , "yes" );
     if( _has_exclusiveness )  result.setAttribute( "exclusive", "yes" );
     if( _is_backup_member  )  result.setAttribute( "backup"   , "yes" );
+    if (_is_paused) result.setAttribute("paused", "yes");
     result.setAttribute( "is_member_allowed_to_start", is_member_allowed_to_start()? "yes" : "no" );
 
 
