@@ -48,6 +48,7 @@
 #   pragma warning( disable:4511 )   // warning C4511: Kopierkonstruktor konnte nicht generiert werden
 #   pragma warning( disable:4512 )   // warning C4512: Zuweisungsoperator konnte nicht generiert werden
 #   pragma warning( disable:4514 )   // warning C4514: 'logic_error::logic_error' : unreferenced inline function has been removed
+#   pragma warning( error  :4553 )   // warning C4553: '==' : operator has no effect; did you intend '='
 #   pragma warning( disable:4702 )   // warning C4702: Unerreichbarer Code
 #   pragma warning( error  :4706 )   // warning C4706: Zuweisung in bedingtem Ausdruck
 #   pragma warning( disable:4711 )   // warning C4711: function 'ff' selected for automatic inline expansion

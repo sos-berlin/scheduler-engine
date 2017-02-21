@@ -3695,7 +3695,7 @@ Process_class* Standard_job::default_process_class() const {
 
 bool Standard_job::is_task_ready_for_order(Process_class* process_class) {
     if (!process_class) {
-        process_class == default_process_class_or_null();
+        process_class = default_process_class_or_null(); 
         if (!process_class) return false;
     }
     Z_FOR_EACH_CONST(Task_set, _running_tasks, i) {
