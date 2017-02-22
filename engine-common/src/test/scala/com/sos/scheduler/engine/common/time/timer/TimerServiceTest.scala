@@ -1,7 +1,5 @@
 package com.sos.scheduler.engine.common.time.timer
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.Logger
@@ -13,8 +11,9 @@ import com.sos.scheduler.engine.common.time.timer.TimerServiceTest._
 import java.lang.System.nanoTime
 import java.time.Instant.now
 import java.time.{Duration, Instant}
+import java.util.concurrent.TimeUnit.MINUTES
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ArrayBlockingQueue, ConcurrentLinkedQueue}
+import java.util.concurrent.{ArrayBlockingQueue, ConcurrentLinkedQueue, CountDownLatch}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
@@ -32,10 +31,12 @@ import scala.util.{Random, Success}
 @RunWith(classOf[JUnitRunner])
 final class TimerServiceTest extends FreeSpec with ScalaFutures {
 
+  private val availableProcessors = sys.runtime.availableProcessors
+
   "Thread timeout and warm-up" in {
     new ConcurrentLinkedQueue[String]().add("WARM-UP")
     autoClosing(TimerService(idleTimeout = Some(1.s))) { timerService ⇒
-      timerService.delay(100.ms, "test")
+      timerService.delayed(200.ms)
       assert(timerService.isRunning)
       assert(waitForCondition(2.s, 10.ms) { !timerService.isRunning })
     }
@@ -69,7 +70,7 @@ final class TimerServiceTest extends FreeSpec with ScalaFutures {
       for (nr ← 1 to 2) {
         val results = new ConcurrentLinkedQueue[(String, Instant)]()
         val t = now
-        timerService.delay(200.ms, "test") onElapsed { results.add("200" → now) }
+        timerService.delayed(200.ms) onComplete { _ ⇒ results.add("200" → now) }
         val cancelledTimer = timerService.at(t + 400.ms, "test") onElapsed { results.add("400" → now) }
         assert(!cancelledTimer.isCanceled)
         timerService.cancel(cancelledTimer) shouldBe true
@@ -113,7 +114,7 @@ final class TimerServiceTest extends FreeSpec with ScalaFutures {
 
   "completeWith" in {
     autoClosing(TimerService()) { timerService ⇒
-      val a = timerService.add(new Timer(now + 100.ms, "test", completeWith = Success(777)))
+      val a = timerService.addTimer(new Timer(now + 100.ms, "test", completeWith = () ⇒ Success(777)))
       sleep(10.ms)
       assert(!a.isCompleted)
       a await 1.s shouldEqual 777
@@ -123,7 +124,7 @@ final class TimerServiceTest extends FreeSpec with ScalaFutures {
   "fullfilWith and own promise" in {
     autoClosing(TimerService()) { timerService ⇒
       val promise = Promise[Int]()
-      val a = timerService.add(new Timer(now + 100.ms, "test", Success(777), promise))
+      val a = timerService.addTimer(new Timer(now + 100.ms, "test", () ⇒ Success(777), promise))
       sleep(10.ms)
       assert(!promise.isCompleted && !a.isCompleted)
       a await 1.s shouldEqual 777
@@ -147,36 +148,40 @@ final class TimerServiceTest extends FreeSpec with ScalaFutures {
   "Massive parallel parallel timer enqueuing" in {
     autoClosing(TimerService()) { timerService ⇒
       timerService.delayed(20.ms) await 1.s  // Start clock thread
-      for (_ ← 1 to 10) {
-        val counter = new AtomicInteger
-        val n = 5000 * sys.runtime.availableProcessors
-        val delays = for (_ ← 1 to n) yield Random.nextInt(40).ms
+      for (_ ← 1 to 20) {
+        val m = 10000
+        val n = m * availableProcessors
+        val latch = new CountDownLatch(n)
         val stopwatch = new Stopwatch
-        for (delay ← delays) Future { timerService.delay(delay, "test") onElapsed { counter.incrementAndGet() }}
-        val ok = waitForCondition(2.s, 10.ms) { counter.get == n }
-        info(stopwatch.itemsPerSecondString(n, "Timer"))
-        if (!ok) logger.error(s"$counter/$n $timerService")
-        assert(counter.get == n)
+        for (_ ← 1 to availableProcessors) {
+          Future {
+            for (delay ← Iterator.fill(m) { Random.nextInt(50).ms }) {
+              timerService.delay(delay, "test") onElapsed { latch.countDown() }
+            }
+          }
+        }
+        latch.await(1, MINUTES)
+        info("Parallel: " + stopwatch.itemsPerSecondString(n, "Timer"))
       }
     }
   }
 
   "Massive wake clock-thread (JS-1567)" in {
     val n = 1000
-    val overview = testSerialTimers(delay = 1.ms, n, test = true)
+    val overview = testSerialTimers(delay = 1.ms, n, "1ms", test = true)
     overview should have ('count(0), 'completeCount(n))
     assert(overview.wakeCount >= n / 4 && overview.wakeCount <= n, "wakeCount")  // Should be nearly n on a fast machine
   }
 
   "Performance of serial 0ms timer, not short-cut for this test" in {
-    testSerialTimers(delay = 0.ms, 10000, test = true)
+    testSerialTimers(delay = 0.ms, 10000, "Normal", test = true)
   }
 
   "Performance of serial 0ms timer" in {
-    testSerialTimers(delay = 0.ms, 1000000)
+    testSerialTimers(delay = 0.ms, 1000000, "Short-cut")
   }
 
-  private def testSerialTimers(delay: Duration, n: Int, test: Boolean = false): TimerServiceOverview =
+  private def testSerialTimers(delay: Duration, n: Int, name: String, test: Boolean = false): TimerServiceOverview =
     autoClosing(TimerService(test = test)) { timerService ⇒
       val stopwatch = new Stopwatch
       @volatile var last = now
@@ -193,7 +198,7 @@ final class TimerServiceTest extends FreeSpec with ScalaFutures {
         finished.tryFailure(new RuntimeException(s"STOPPED AFTER $counter"))
       }
       Await.result(finished.future, 60.seconds)
-      info(stopwatch.itemsPerSecondString(n, "Timer"))
+      info(s"$name: " + stopwatch.itemsPerSecondString(n, "Timer"))
       assert(counter.get == n)
       timerService.overview
     }
