@@ -37,7 +37,7 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
   "Temporary order" in {
     hotEvents.clear()
     coldEvents.clear()
-    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={TemporaryOrderKey.id.toString}/>)
+    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={TemporaryOrderKey.id.string}/>)
     checkOrderStates(TemporaryOrderKey)
   }
 
@@ -45,11 +45,11 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     hotEvents.clear()
     coldEvents.clear()
     val orderKey = TemporaryOrderKey
-    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={orderKey.id.toString}/>)
+    scheduler.executeXml(<add_order job_chain={TestJobChainPath.string} id={orderKey.id.string}/>)
     eventPipe.nextAny[OrderStarted.type].key shouldEqual orderKey
     eventPipe.nextAny[OrderSuspended.type].key shouldEqual orderKey
     eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e: OrderNodeChanged) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
-    scheduler.executeXml(<remove_order job_chain={TestJobChainPath.string} order={orderKey.id.toString}/>)
+    scheduler.executeXml(<remove_order job_chain={TestJobChainPath.string} order={orderKey.id.string}/>)
     //eventPipe.next[KeyedEvent[OrderEvent]] match { case e: OrderFinished ⇒ e.getKey shouldEqual orderKey }
   }
 
@@ -65,11 +65,11 @@ final class OrderEventsIT extends FreeSpec with ScalaSchedulerTest {
     eventPipe.nextAny[OrderSuspended.type] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
     eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state1") }
     scheduler executeXml ModifyOrderCommand(orderKey, suspended = Some(false))
-    eventPipe.nextAny[OrderResumed.type] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderResumed.type] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
     eventPipe.nextAny[OrderStepStarted] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.nodeId shouldEqual NodeId("state2") }
-    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderStepEnded] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
     eventPipe.nextAny[OrderNodeChanged] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey; e.fromNodeId shouldEqual NodeId("state2") }
-    eventPipe.nextAny[OrderFinished] match { case KeyedEvent(k, e) ⇒ k shouldEqual orderKey }
+    eventPipe.nextAny[OrderFinished] match { case KeyedEvent(k, _) ⇒ k shouldEqual orderKey }
   }
 
   private def checkCollectedOrderEvents(orderKey: OrderKey): Unit = {

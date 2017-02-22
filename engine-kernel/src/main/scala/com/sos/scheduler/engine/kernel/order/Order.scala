@@ -74,7 +74,7 @@ with OrderPersistence {
     agentClientFactory.apply(agentUri).fileExists(file) onComplete {
       case Success(exists) ⇒
         try cppCall.call(exists: java.lang.Boolean)
-        catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"Order '$orderId' has vanished while agentFileExists returns $exists") }
+        catch { case t: CppProxyInvalidatedException ⇒ logger.trace(s"$orderId has vanished while agentFileExists returns $exists") }
       case Failure(t) ⇒ log.error(t.toString)
     }
   }

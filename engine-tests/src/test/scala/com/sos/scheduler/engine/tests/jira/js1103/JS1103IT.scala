@@ -62,7 +62,7 @@ final class JS1103IT extends FreeSpec with ScalaSchedulerTest {
       val allOrderRuns = inSchedulerThread {  // Block C++ thread to let OrderRun timely subscribe to events
         val ordinaryOrderRuns = callOrderRuns
         val ordinaryOrderKeys = ordinaryOrderRuns map { _.orderKey }
-        val extraOrderKeys = for (o ← ordinaryOrderKeys; i ← ExtraIndices) yield o.copy(id = OrderId(s"${o.id}-$i-extra"))
+        val extraOrderKeys = for (o ← ordinaryOrderKeys; i ← ExtraIndices) yield o.copy(id = OrderId(s"${o.id.string}-$i-extra"))
         ordinaryOrderRuns ++ (extraOrderKeys map OrderRun.apply)
       }
       allOrderRuns map { _.finished } await 60.s
