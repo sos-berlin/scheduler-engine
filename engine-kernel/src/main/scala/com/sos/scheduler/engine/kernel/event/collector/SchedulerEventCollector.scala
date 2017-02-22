@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.event.EventIdGenerator
 import com.sos.scheduler.engine.common.event.collector.{EventCollector, EventIdGenerating}
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.time.timer.TimerService
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.scheduler.engine.data.event.{Event, EventId}
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector._
@@ -23,7 +23,7 @@ final class SchedulerEventCollector @Inject()(
     protected val eventBus: SchedulerEventBus,
     protected val executionContext: ExecutionContext
 )
-extends EventCollector(configuration)(timerService, executionContext)
+extends EventCollector(initialOldestEventId = EventId.BeforeFirst, configuration)(timerService, executionContext)
 with HasCloser
 with EventIdGenerating
 {

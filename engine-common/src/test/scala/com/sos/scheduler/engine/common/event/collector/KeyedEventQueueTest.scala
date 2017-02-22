@@ -12,7 +12,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class KeyedEventQueueTest extends FreeSpec {
 
-  private val queue = new KeyedEventQueue(3)
+  private val queue = new KeyedEventQueue(initialOldestEventId = EventId.BeforeFirst, 3)
   private val eventSnapshots = for (i ← 1 to 5) yield Snapshot(EventId(i), KeyedEvent(AEvent(i)))
 
   eventSnapshots foreach queue.add
