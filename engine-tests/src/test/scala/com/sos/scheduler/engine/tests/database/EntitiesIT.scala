@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.tests.database
 
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.TimeoutWithSteps
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.TimeoutWithSteps
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedRemoved}
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.database
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.scalautil.SideEffect._
 import com.sos.scheduler.engine.test.configuration.JdbcDatabaseConfiguration
 import java.io.File
 import org.h2.tools.Server.createTcpServer

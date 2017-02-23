@@ -1,14 +1,16 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.scalautil.Collections.implicits.RichTraversable
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversable
-import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
-import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, TaskId}
+import com.sos.scheduler.engine.data.folder.FolderTree
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, JobNodeOverview, NodeKey, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderProcessingState._
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview}

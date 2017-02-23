@@ -3,7 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__event__CppEventFactory.h"
-#include "com__sos__scheduler__engine__data__event__KeyedEvent.h"
+#include "com__sos__jobscheduler__data__event__KeyedEvent.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -27,11 +27,11 @@ const ::zschimmer::javabridge::class_factory< CppEventFactory__class > CppEventF
 
 CppEventFactory__class::CppEventFactory__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
-    ,_newJobChainNodeActionChangedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method(this, "newJobChainNodeActionChangedEvent", "(Ljava/lang/String;Ljava/lang/String;I)Lcom/sos/scheduler/engine/data/event/KeyedEvent;")
-    ,_newOrderStateChangedEvent__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2__method(this, "newOrderStateChangedEvent", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sos/scheduler/engine/data/event/KeyedEvent;")
-    ,_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2J__method(this, "newOrderStepEndedEvent", "(Ljava/lang/String;Ljava/lang/String;J)Lcom/sos/scheduler/engine/data/event/KeyedEvent;")
-    ,_newSchedulerStateChanged__I__method(this, "newSchedulerStateChanged", "(I)Lcom/sos/scheduler/engine/data/event/KeyedEvent;")
-    ,_newTaskEndedEvent__ILjava_lang_String_2I__method(this, "newTaskEndedEvent", "(ILjava/lang/String;I)Lcom/sos/scheduler/engine/data/event/KeyedEvent;"){}
+    ,_newJobChainNodeActionChangedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method(this, "newJobChainNodeActionChangedEvent", "(Ljava/lang/String;Ljava/lang/String;I)Lcom/sos/jobscheduler/data/event/KeyedEvent;")
+    ,_newOrderStateChangedEvent__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2__method(this, "newOrderStateChangedEvent", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sos/jobscheduler/data/event/KeyedEvent;")
+    ,_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2J__method(this, "newOrderStepEndedEvent", "(Ljava/lang/String;Ljava/lang/String;J)Lcom/sos/jobscheduler/data/event/KeyedEvent;")
+    ,_newSchedulerStateChanged__I__method(this, "newSchedulerStateChanged", "(I)Lcom/sos/jobscheduler/data/event/KeyedEvent;")
+    ,_newTaskEndedEvent__ILjava_lang_String_2I__method(this, "newTaskEndedEvent", "(ILjava/lang/String;I)Lcom/sos/jobscheduler/data/event/KeyedEvent;"){}
 
 CppEventFactory__class::~CppEventFactory__class() {}
 
@@ -51,56 +51,56 @@ CppEventFactory::~CppEventFactory() { assign_(NULL); }
 
 
 
-::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent CppEventFactory::newJobChainNodeActionChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2) {
+::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent CppEventFactory::newJobChainNodeActionChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2) {
     ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
     parameter_list._jvalues[2].i = p2;
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent result;
+    ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent result;
     result.steal_local_ref(cls->_newJobChainNodeActionChangedEvent__Ljava_lang_String_2Ljava_lang_String_2I__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 
-::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent CppEventFactory::newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3) {
+::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent CppEventFactory::newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3) {
     ::zschimmer::javabridge::raw_parameter_list<4> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
     parameter_list._jvalues[2].l = p2.get_jobject();
     parameter_list._jvalues[3].l = p3.get_jobject();
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent result;
+    ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent result;
     result.steal_local_ref(cls->_newOrderStateChangedEvent__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 
-::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent CppEventFactory::newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jlong p2) {
+::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent CppEventFactory::newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jlong p2) {
     ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     parameter_list._jvalues[1].l = p1.get_jobject();
     parameter_list._jvalues[2].j = p2;
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent result;
+    ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent result;
     result.steal_local_ref(cls->_newOrderStepEndedEvent__Ljava_lang_String_2Ljava_lang_String_2J__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 
-::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent CppEventFactory::newSchedulerStateChanged(jint p0) {
+::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent CppEventFactory::newSchedulerStateChanged(jint p0) {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].i = p0;
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent result;
+    ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent result;
     result.steal_local_ref(cls->_newSchedulerStateChanged__I__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 
-::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent CppEventFactory::newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2) {
+::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent CppEventFactory::newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2) {
     ::zschimmer::javabridge::raw_parameter_list<3> parameter_list;
     parameter_list._jvalues[0].i = p0;
     parameter_list._jvalues[1].l = p1.get_jobject();
     parameter_list._jvalues[2].i = p2;
     CppEventFactory__class* cls = CppEventFactory__class::class_factory.clas();
-    ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent result;
+    ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent result;
     result.steal_local_ref(cls->_newTaskEndedEvent__ILjava_lang_String_2I__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }

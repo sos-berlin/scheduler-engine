@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.time
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeZone.UTC

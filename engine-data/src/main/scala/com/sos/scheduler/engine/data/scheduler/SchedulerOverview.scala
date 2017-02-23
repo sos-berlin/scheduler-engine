@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.data.scheduler
 
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
-import com.sos.scheduler.engine.base.system.SystemInformation
+import com.sos.jobscheduler.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.jobscheduler.base.system.SystemInformation
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.jobscheduler.data.system.JavaInformation
 import com.sos.scheduler.engine.data.scheduler.SchedulerStates.SchedulerStateJsonFormat
-import com.sos.scheduler.engine.data.system.JavaInformation
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._
 

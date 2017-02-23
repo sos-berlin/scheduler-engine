@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.test
 
 import com.google.common.collect.HashMultiset
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.base.utils.ScalaUtils.implicitClass
+import com.sos.jobscheduler.common.scalautil.AutoClosing.closeOnError
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.test.EventPipe._

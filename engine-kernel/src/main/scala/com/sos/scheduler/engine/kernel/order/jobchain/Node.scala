@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, SetOnce}
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.{HasCloser, SetOnce}
 import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.runtime.substitute
 
-import com.sos.scheduler.engine.common.scalautil.xmls.RichScalaXML._
+import com.sos.jobscheduler.common.scalautil.xmls.RichScalaXML._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.runtime.substitute.SubstituteScheduleIT._

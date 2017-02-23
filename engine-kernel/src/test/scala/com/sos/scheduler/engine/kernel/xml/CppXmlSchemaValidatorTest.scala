@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.xml
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.kernel.xml.CppXmlSchemaValidatorTest._
 import java.net.URL
 import javax.xml.XMLConstants._

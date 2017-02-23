@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.sprayutils.SprayUtils._
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.job.TaskId._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEvent, TaskId, TaskKey}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEvent, TaskKey}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._

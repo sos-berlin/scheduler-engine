@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.xml
 
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.xml.CppXmlSchemaValidator._
 import java.net.URL

@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.newkernel.job
 
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.job.{ReturnCode, TaskId}
 import com.sos.scheduler.engine.common.async.CallQueue
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.eventbus.EventBus
 import com.sos.scheduler.engine.newkernel.job.NewJob._
 import com.sos.scheduler.engine.newkernel.job.commands.{SomeJobCommand, StopJobCommand}

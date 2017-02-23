@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.temporary
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.filebased.FileBasedRemoved
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient

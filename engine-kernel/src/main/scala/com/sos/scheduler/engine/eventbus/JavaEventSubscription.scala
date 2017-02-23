@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import java.util.function.Consumer
 
 /**

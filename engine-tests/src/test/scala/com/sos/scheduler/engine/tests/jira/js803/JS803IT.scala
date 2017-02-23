@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js803
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

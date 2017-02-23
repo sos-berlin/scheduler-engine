@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, SetOnce}
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.{HasCloser, SetOnce}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.kernel.cppproxy.DatabaseC
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._

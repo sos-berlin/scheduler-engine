@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.event.collector
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.Event
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved}
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order.{OrderEvent, OrderFinished, OrderNodeChanged, OrderResumed, OrderStarted, OrderStepEnded, OrderStepStarted}

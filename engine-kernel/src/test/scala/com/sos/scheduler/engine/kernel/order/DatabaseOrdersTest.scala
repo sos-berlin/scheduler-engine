@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.scheduler.engine.data.order.OrderSourceType
 import com.sos.scheduler.engine.kernel.order.DatabaseOrders.OrderXmlResolved
 import java.io.StringReader

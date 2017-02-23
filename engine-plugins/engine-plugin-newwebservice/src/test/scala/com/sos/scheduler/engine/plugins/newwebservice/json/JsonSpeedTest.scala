@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.json
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.sprayutils.YamlJsonConversion.ToYamlString
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.sprayutils.YamlJsonConversion.ToYamlString
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.filebased.FileBasedState
-import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderOverview, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

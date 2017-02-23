@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1029
 
-import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.jobscheduler.common.system.OperatingSystem.isUnix
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

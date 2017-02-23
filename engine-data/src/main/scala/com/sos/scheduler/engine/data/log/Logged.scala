@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.data.log
 
-import com.sos.scheduler.engine.base.sprayjson.typed.SimpleTypedJsonFormat
-import com.sos.scheduler.engine.data.event.NoKeyEvent
+import com.sos.jobscheduler.base.sprayjson.typed.SimpleTypedJsonFormat
+import com.sos.jobscheduler.data.event.NoKeyEvent
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.log.Logged._
-import com.sos.scheduler.engine.data.message.MessageCode
 import scala.PartialFunction.condOpt
 import spray.json.DefaultJsonProtocol._
 import spray.json._

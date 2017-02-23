@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1329
 
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.jobscheduler.data.job.ReturnCode
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.{ErrorLogged, InfoLogged}
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus

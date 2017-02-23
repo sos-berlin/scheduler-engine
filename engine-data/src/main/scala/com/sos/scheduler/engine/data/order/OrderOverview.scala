@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.lazyRootFormat
+import com.sos.jobscheduler.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.jobscheduler.base.sprayjson.SprayJson.lazyRootFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.jobchain.{NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.OrderProcessingState.OccupiedByClusterMember

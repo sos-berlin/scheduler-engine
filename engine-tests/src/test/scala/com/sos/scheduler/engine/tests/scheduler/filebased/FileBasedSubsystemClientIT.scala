@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.tests.scheduler.filebased
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.filebased.TypedPath.ordering
-import com.sos.scheduler.engine.data.filebased.{FileBasedState, TypedPath}
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.filebased.TypedPath.ordering
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain._
 import com.sos.scheduler.engine.data.lock.LockPath

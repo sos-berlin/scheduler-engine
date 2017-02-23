@@ -1,22 +1,23 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.agent.data.ProcessKillScript
-import com.sos.scheduler.engine.base.process.ProcessSignal
-import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
-import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
-import com.sos.scheduler.engine.common.process.Processes.newTemporaryShellFile
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
-import com.sos.scheduler.engine.common.system.OperatingSystem.{isSolaris, isWindows}
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
-import com.sos.scheduler.engine.common.utils.{Exceptions, JavaResource}
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, ReturnCode}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.agent.data.ProcessKillScript
+import com.sos.jobscheduler.base.process.ProcessSignal
+import com.sos.jobscheduler.base.process.ProcessSignal.{SIGKILL, SIGTERM}
+import com.sos.jobscheduler.common.log.LazyScalaLogger.AsLazyScalaLogger
+import com.sos.jobscheduler.common.process.Processes.newTemporaryShellFile
+import com.sos.jobscheduler.common.scalautil.Collections.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits.RichPath
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.RichFutures
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.SideEffect._
+import com.sos.jobscheduler.common.system.OperatingSystem.{isSolaris, isWindows}
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.Exceptions.ignoreException
+import com.sos.jobscheduler.common.utils.{Exceptions, JavaResource}
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.ReturnCode
+import com.sos.scheduler.engine.data.job.{JobPath, JobState}
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.Unstop
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ProcessClassConfiguration}

@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.base.sprayjson.typed.{Subtype, TypedJsonFormat}
-import com.sos.scheduler.engine.data.event.Event
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.jobscheduler.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.data.event.Event
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import spray.json.DefaultJsonProtocol._
 
 /**
   * Event related to an Order.
   * <p>
-  *   See also [[com.sos.scheduler.engine.data.filebased.FileBasedEvent]].
+  *   See also [[com.sos.jobscheduler.data.filebased.FileBasedEvent]].
   * <p>
   *   The order's events occur in this order:
   * <ul>

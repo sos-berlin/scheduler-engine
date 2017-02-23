@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1631
 
-import com.sos.scheduler.engine.agent.test.AgentConfigDirectoryProvider.{PrivateHttpJksResource, PublicHttpJksResource}
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.agent.test.AgentConfigDirectoryProvider.{PrivateHttpJksResource, PublicHttpJksResource}
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest

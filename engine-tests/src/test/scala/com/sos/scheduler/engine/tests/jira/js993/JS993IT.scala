@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js993
 
-import com.sos.scheduler.engine.common.system.Bitness._
+import com.sos.jobscheduler.common.system.Bitness._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{interceptErrorLogged, runJob}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith

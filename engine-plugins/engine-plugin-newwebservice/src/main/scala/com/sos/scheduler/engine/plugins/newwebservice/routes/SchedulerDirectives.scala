@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.folder.FolderPath
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}
 import spray.http.Uri

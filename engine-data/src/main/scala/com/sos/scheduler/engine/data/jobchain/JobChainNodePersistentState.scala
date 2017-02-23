@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.jobchain
 
-import com.sos.scheduler.engine.base.utils.HasKey
+import com.sos.jobscheduler.base.utils.HasKey
 
 final case class JobChainNodePersistentState(
     jobChainPath: JobChainPath,

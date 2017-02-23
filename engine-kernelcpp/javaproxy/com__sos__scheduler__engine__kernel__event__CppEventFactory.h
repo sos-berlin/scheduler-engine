@@ -10,7 +10,7 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { struct KeyedEvent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace jobscheduler { namespace data { namespace event { struct KeyedEvent; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -50,11 +50,11 @@ struct CppEventFactory : ::zschimmer::javabridge::proxy_jobject< CppEventFactory
     }
   public:
 
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newJobChainNodeActionChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jlong p2);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newSchedulerStateChanged(jint p0);
-    static ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);
+    static ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent newJobChainNodeActionChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);
+    static ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent newOrderStateChangedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p3);
+    static ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent newOrderStepEndedEvent(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jlong p2);
+    static ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent newSchedulerStateChanged(jint p0);
+    static ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent newTaskEndedEvent(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, jint p2);
 
     ::zschimmer::javabridge::Class* java_object_class_() const;
 

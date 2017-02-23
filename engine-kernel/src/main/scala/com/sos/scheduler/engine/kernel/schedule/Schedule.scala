@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.schedule
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.kernel.cppproxy.ScheduleC

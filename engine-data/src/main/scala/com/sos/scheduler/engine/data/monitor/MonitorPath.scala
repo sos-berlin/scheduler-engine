@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.monitor
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.jobscheduler.data.filebased.TypedPath
 
 /**
  * @author Joacim Zschimmer

@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.newkernel.job
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.{Job_nodeC, SpoolerC, Variable_setC}

@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.tests.scheduler.job.start_when_directory_change
 
 import com.google.common.base.Splitter
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{KeyedEvent, NoKeyEvent}
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.system.OperatingSystem.isWindows
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.{KeyedEvent, NoKeyEvent}
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand.Cmd.{Stop, Unstop}

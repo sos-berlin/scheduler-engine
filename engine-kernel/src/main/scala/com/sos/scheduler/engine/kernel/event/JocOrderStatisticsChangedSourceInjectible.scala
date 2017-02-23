@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.event
 
-import com.sos.scheduler.engine.common.event.collector.EventCollector
+import com.sos.jobscheduler.common.event.collector.EventCollector
 import com.sos.scheduler.engine.data.queries.JobChainNodeQuery
 import com.sos.scheduler.engine.kernel.order.DirectOrderClient
 import javax.inject.{Inject, Singleton}

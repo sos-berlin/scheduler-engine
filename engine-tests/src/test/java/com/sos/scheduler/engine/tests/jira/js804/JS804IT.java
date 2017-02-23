@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js804;
 
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;

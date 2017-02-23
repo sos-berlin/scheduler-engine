@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.filebased
 
-import com.sos.scheduler.engine.data.event._
+import com.sos.jobscheduler.data.event._
+import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.job.JobPath
 import org.junit.runner.RunWith

@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1354
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient

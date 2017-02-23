@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.inject.{AbstractModule, Guice, Provides}
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.eventbus.EventBus
 import com.sos.scheduler.engine.kernel.plugin.PluginSubsystemTest._
 import java.util.NoSuchElementException

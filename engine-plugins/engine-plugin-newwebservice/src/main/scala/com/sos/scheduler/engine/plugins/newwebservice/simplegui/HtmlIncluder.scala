@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder._
 import java.math.BigInteger
 import java.net.URL

@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.playground.zschimmer.cpptoutf8
 
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.base.Charsets._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits.RichFile
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil.writingFileIfDifferent
 import java.io.{FilenameFilter, Writer, File}
 import java.nio.charset.{CodingErrorAction, CoderResult}

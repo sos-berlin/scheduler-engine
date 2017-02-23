@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1163
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 
 final class TestJob extends sos.spooler.Job_impl {
 

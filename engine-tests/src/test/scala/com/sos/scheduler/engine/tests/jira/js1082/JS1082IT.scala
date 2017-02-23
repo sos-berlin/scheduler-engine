@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1082
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerException
 import com.sos.scheduler.engine.persistence.entities.TaskHistoryEntity

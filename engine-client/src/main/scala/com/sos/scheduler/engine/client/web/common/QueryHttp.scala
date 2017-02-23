@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.client.web.common
 
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
+import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.sprayutils.SprayUtils._
+import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.cplusplus.runtime.CppException
-import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import scala.util.{Failure, Success, Try}
 import shapeless.{::, HNil}

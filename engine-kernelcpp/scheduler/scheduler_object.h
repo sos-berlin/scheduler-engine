@@ -5,8 +5,8 @@
 
 #include "Event_code.h"
 
-#include "../javaproxy/com__sos__scheduler__engine__data__event__KeyedEvent.h"
-typedef javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent KeyedEventJ;
+#include "../javaproxy/com__sos__jobscheduler__data__event__KeyedEvent.h"
+typedef javaproxy::com::sos::jobscheduler::data::event::KeyedEvent KeyedEventJ;
 
 namespace sos {
 namespace scheduler {

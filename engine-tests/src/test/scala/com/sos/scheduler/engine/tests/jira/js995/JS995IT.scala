@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js995
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState}
 import com.sos.scheduler.engine.data.schedule.SchedulePath

@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.tests.jira.js1674
 
-import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.jobscheduler.base.generic.SecretString
+import com.sos.jobscheduler.common.auth.{UserAndPassword, UserId}
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
 import com.sos.scheduler.engine.common.javautils.ScalaInJava.toJavaOptional
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview, SupervisorUri}
+import com.sos.scheduler.engine.data.scheduler.{SchedulerOverview, SupervisorUri}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import java.time.ZoneId
 import java.util.Optional

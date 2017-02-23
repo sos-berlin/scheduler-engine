@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.event.NoKeyEvent
+import com.sos.jobscheduler.data.event.NoKeyEvent
 import spray.json.DefaultJsonProtocol._
 
 /**

@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.event.collector
 
-import com.sos.scheduler.engine.common.event.EventIdGenerator
-import com.sos.scheduler.engine.common.event.collector.{EventCollector, EventIdGenerating}
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.time.timer.TimerService
-import com.sos.scheduler.engine.data.event.{Event, EventId}
+import com.sos.jobscheduler.common.event.EventIdGenerator
+import com.sos.jobscheduler.common.event.collector.{EventCollector, EventIdGenerating}
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.time.timer.TimerService
+import com.sos.jobscheduler.data.event.{Event, EventId}
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector._

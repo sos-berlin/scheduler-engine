@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.main;
 
 import com.google.inject.Injector;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.scheduler.SchedulerClosed$;
 import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;

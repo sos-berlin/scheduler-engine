@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.StartTaskResponse
-import com.sos.scheduler.engine.tunnel.data.TunnelToken
+import com.sos.jobscheduler.agent.data.AgentTaskId
+import com.sos.jobscheduler.agent.data.commandresponses.StartTaskResponse
+import com.sos.jobscheduler.tunnel.data.TunnelToken
 
 /**
  * XML response from command &lt;start_remote_task>.

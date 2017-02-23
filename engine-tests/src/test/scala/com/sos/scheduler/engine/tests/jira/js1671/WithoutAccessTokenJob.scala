@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1671
 
-import com.sos.scheduler.engine.base.generic.SecretString
+import com.sos.jobscheduler.base.generic.SecretString
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.auth.{UserAndPassword, UserId}
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.auth.{UserAndPassword, UserId}
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import org.scalatest.Assertions._
 import spray.httpx.UnsuccessfulResponseException
 

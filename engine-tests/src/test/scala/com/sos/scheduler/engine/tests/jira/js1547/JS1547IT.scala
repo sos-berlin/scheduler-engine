@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1547
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

@@ -1,12 +1,11 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitName
 import com.sos.scheduler.engine.test.configuration.{JdbcDatabaseConfiguration, TestConfiguration}
 import javax.persistence.Persistence.createEntityManagerFactory
 import javax.persistence.PersistenceException
-import java.time.Duration
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import scala.collection.JavaConversions._
 
 trait ProvidesTestEnvironment extends ProvidesTestDirectory {

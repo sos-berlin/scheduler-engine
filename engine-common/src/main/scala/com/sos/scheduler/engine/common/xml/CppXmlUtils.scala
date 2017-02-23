@@ -2,12 +2,13 @@ package com.sos.scheduler.engine.common.xml
 
 import akka.util.ByteString
 import com.google.common.base.MoreObjects.firstNonNull
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.ScalaThreadLocal._
-import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
-import com.sos.scheduler.engine.common.scalautil.StringWriters.writingString
-import com.sos.scheduler.engine.common.scalautil.xmls.{SafeXML, ScalaStax}
-import com.sos.scheduler.engine.common.xml.XmlUtils._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.ScalaThreadLocal._
+import com.sos.jobscheduler.common.scalautil.SideEffect.ImplicitSideEffect
+import com.sos.jobscheduler.common.scalautil.StringWriters.writingString
+import com.sos.jobscheduler.common.scalautil.xmls.{SafeXML, ScalaStax}
+import com.sos.jobscheduler.common.xml.XmlUtils.removeXmlProlog
+import com.sos.jobscheduler.common.xml.XxeVulnerability
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import java.io._
 import java.nio.charset.Charset

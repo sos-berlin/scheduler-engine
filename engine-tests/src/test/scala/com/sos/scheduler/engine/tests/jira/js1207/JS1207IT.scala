@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1207
 
-import com.sos.scheduler.engine.common.scalautil.Closers._
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.common.scalautil.Closers._
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderNestedFinished, OrderNestedStarted, OrderStarted, OrderStepEnded, OrderStepStarted}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderNestedFinished, OrderNestedStarted, OrderStarted, OrderStepEnded, OrderStepStarted}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.eventbus.EventHandlerFailedEvent
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread

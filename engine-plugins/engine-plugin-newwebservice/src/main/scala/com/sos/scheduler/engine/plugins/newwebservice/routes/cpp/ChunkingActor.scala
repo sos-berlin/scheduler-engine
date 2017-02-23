@@ -5,10 +5,10 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.cpp
   */
 import akka.actor._
 import akka.util.ByteString
-import com.sos.scheduler.engine.base.exceptions.StandardPublicException
-import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
-import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
-import com.sos.scheduler.engine.common.utils.Exceptions.logException
+import com.sos.jobscheduler.base.exceptions.StandardPublicException
+import com.sos.jobscheduler.common.log.LazyScalaLogger.AsLazyScalaLogger
+import com.sos.jobscheduler.common.scalautil.{Logger, SetOnce}
+import com.sos.jobscheduler.common.utils.Exceptions.logException
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyInvalidatedException
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.schedulerThreadFuture

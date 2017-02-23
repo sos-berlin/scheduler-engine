@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.async
 
 import com.sos.scheduler.engine.common.async.{CallQueue, PoppableCallQueue, TimedCall}
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue._
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import scala.util.control.NonFatal

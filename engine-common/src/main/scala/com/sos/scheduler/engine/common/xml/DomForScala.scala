@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.xml
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichTraversableOnce
+import com.sos.jobscheduler.common.scalautil.Collections.implicits.RichTraversableOnce
 import org.w3c.dom.{Element, Node, NodeList}
 import scala.collection.immutable
 

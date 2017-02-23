@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.agent
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import scala.concurrent.Future
 

@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.event.{Event, EventId, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.event.{Event, EventId, ReverseEventRequest, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobOverview
 import com.sos.scheduler.engine.data.processclass.ProcessClassOverview

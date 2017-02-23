@@ -3,10 +3,10 @@ package com.sos.scheduler.engine.plugins.newwebservice
 import akka.actor.Props
 import com.google.inject.{AbstractModule, Injector, Provides}
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.sprayutils.WebLogDirectives.handleErrorAndLog
-import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
+import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.sprayutils.WebLogDirectives.handleErrorAndLog
+import com.sos.jobscheduler.common.sprayutils.web.auth.GateKeeper
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

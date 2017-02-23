@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.tests.jira.js1670
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAny
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.sprayutils.https.{Https, KeystoreReference}
-import com.sos.scheduler.engine.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
-import com.sos.scheduler.engine.common.sprayutils.web.auth.GateKeeper
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerOverview}
+import com.sos.jobscheduler.base.generic.SecretString
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAny
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.sprayutils.https.{Https, KeystoreReference}
+import com.sos.jobscheduler.common.sprayutils.sprayclient.ExtendedPipelining.extendedSendReceive
+import com.sos.jobscheduler.common.sprayutils.web.auth.GateKeeper
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

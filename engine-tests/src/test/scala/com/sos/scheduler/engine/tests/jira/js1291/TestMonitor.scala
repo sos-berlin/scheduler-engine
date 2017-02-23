@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1291
 
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Collections.emptyToNone
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.tests.jira.js1291.JS1291AgentIT.SignalName
 import java.nio.charset.StandardCharsets.ISO_8859_1
 import java.nio.file.Paths

@@ -2,15 +2,15 @@ package com.sos.scheduler.engine.tests.extrascheduler
 
 import akka.actor.ActorRefFactory
 import com.google.inject.{AbstractModule, Guice, Provides}
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.configuration.{AgentConfiguration, Akkas}
+import com.sos.jobscheduler.agent.Agent
+import com.sos.jobscheduler.agent.configuration.{AgentConfiguration, Akkas}
+import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.Closers.withCloser
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler

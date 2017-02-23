@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1480
 
 import com.sos.scheduler.engine.client.agent.SchedulerAgentClientFactory
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus

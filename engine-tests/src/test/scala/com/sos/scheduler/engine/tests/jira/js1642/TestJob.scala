@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.tests.jira.js1642.TestJob._
 import java.nio.file.Files.exists
 import java.nio.file.Paths

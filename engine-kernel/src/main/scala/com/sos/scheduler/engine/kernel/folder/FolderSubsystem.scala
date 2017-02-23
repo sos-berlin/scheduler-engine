@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.folder
 
 import com.google.inject.Injector
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.{FolderC, Folder_subsystemC}

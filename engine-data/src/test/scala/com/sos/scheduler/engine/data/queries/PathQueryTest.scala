@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.queries
 
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.data.filebased.UnknownTypedPath
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import org.junit.runner.RunWith

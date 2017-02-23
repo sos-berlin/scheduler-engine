@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.system.Files._
 import com.sos.scheduler.engine.test.ProvidesTestDirectory._
 import java.io.File

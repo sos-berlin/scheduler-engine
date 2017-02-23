@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

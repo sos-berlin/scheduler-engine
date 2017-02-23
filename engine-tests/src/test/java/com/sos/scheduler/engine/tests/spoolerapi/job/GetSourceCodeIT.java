@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.spoolerapi.job;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.data.job.TaskKey;
 import com.sos.scheduler.engine.eventbus.EventHandler;

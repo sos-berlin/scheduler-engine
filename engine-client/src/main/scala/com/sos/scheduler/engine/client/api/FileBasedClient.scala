@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.scheduler.engine.data.event.Snapshot
-import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
+import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.filebased.FileBasedView
 import com.sos.scheduler.engine.data.queries.PathQuery
 import scala.collection.immutable
 import scala.concurrent.Future

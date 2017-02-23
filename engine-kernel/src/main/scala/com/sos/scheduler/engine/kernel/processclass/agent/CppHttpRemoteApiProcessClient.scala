@@ -1,17 +1,17 @@
 package com.sos.scheduler.engine.kernel.processclass.agent
 
 import akka.pattern.AskTimeoutException
-import com.sos.scheduler.engine.base.process.ProcessSignal.SIGTERM
+import com.sos.jobscheduler.base.process.ProcessSignal.SIGTERM
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.client.agent.{ApiProcessConfiguration, HttpRemoteProcess, HttpRemoteProcessStarter}
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.processclass.agent.CppHttpRemoteApiProcessClient._
 import com.sos.scheduler.engine.kernel.processclass.common.{FailableCollection, FailableSelector}
 import java.time.Duration
-import javax.inject.{Singleton, Inject, Provider}
+import javax.inject.{Inject, Provider, Singleton}
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 

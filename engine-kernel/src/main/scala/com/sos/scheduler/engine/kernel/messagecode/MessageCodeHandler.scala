@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.messagecode
 
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler._
 import scala.collection.mutable
 

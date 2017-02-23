@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1141
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient

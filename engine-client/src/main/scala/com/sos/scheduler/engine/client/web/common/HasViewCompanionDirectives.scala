@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.web.common
 
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils._
+import com.sos.jobscheduler.common.sprayutils.SprayUtils._
 import com.sos.scheduler.engine.data.common.HasViewCompanion
 import shapeless.{::, HNil}
 import spray.routing.Directives._

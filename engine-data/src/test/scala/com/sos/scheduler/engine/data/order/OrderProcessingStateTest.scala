@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.order.OrderProcessingState._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId

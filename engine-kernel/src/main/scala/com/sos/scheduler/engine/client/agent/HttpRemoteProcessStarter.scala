@@ -2,11 +2,11 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.sos.scheduler.engine.agent.data.web.AgentUris
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
-import com.sos.scheduler.engine.tunnel.client.WebTunnelClient
+import com.sos.jobscheduler.agent.data.web.AgentUris
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
+import com.sos.jobscheduler.tunnel.client.WebTunnelClient
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.events.custom
 
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent
 import scala.collection.JavaConversions._
 import spray.json.DefaultJsonProtocol._
 

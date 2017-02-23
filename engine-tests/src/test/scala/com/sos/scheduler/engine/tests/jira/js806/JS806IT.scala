@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js806
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
-import com.sos.scheduler.engine.data.filebased.FileBasedActivated
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{InfoLogged, Logged}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet

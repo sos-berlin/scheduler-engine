@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.plugins.nodeorder
 
-import com.sos.scheduler.engine.common.scalautil.Closers._
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.common.scalautil.Closers._
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogged
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.plugins.nodeorder.NodeOrderPlugin._

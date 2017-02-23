@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.data.processclass
 
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskKey}
+import com.sos.jobscheduler.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskKey}
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._
 

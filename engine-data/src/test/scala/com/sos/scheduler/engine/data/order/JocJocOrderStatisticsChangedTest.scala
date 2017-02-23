@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

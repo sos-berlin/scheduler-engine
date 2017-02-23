@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.persistence.entities
 
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.data.job.{JobPath, JobPersistentState}
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
-import java.util.{Date => JavaDate}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import java.time.Instant
+import java.util.{Date ⇒ JavaDate}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._

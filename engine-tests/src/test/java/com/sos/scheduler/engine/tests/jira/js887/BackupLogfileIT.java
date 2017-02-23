@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js887;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.TaskEnded;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;

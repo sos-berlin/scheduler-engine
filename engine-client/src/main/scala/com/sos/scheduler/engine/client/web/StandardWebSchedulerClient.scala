@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorSystem
+import com.sos.jobscheduler.common.auth.UserAndPassword
+import com.sos.jobscheduler.common.configutils.Configs
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient._
-import com.sos.scheduler.engine.common.auth.UserAndPassword
-import com.sos.scheduler.engine.common.configutils.Configs
-import com.sos.scheduler.engine.common.utils.JavaResource
 
 /**
   * @author Joacim Zschimmer

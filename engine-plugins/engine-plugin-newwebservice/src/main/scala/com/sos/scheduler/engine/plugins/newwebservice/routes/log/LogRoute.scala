@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.log
 
 import akka.actor.{ActorRefFactory, Props}
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.accept
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.accept
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration.SchedulerHttpCharset

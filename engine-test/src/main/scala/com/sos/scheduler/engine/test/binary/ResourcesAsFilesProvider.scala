@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.test.binary
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.TimeoutWithSteps
+import com.sos.jobscheduler.common.time.WaitForCondition.{waitForCondition, waitFromNowFor}
 import com.sos.scheduler.engine.common.system.Files.copyURLToFile
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.TimeoutWithSteps
-import com.sos.scheduler.engine.common.time.WaitForCondition.{waitForCondition, waitFromNowFor}
 import com.sos.scheduler.engine.kernel.util.Util.ignore
 import com.sos.scheduler.engine.test.binary.ResourcesAsFilesProvider._
 import java.io.File

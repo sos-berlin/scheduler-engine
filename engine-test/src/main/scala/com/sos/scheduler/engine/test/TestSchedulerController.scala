@@ -3,15 +3,16 @@ package com.sos.scheduler.engine.test
 import com.google.common.base.Splitter
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.base.Throwables._
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.{autoClosing, closeOnError}
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.AutoClosing.{autoClosing, closeOnError}
+import com.sos.jobscheduler.common.scalautil.{HasCloser, Logger}
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.{loadXml, prettyXml}
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
-import com.sos.scheduler.engine.data.log.{ErrorLogged, SchedulerLogLevel}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.log.PrefixLog

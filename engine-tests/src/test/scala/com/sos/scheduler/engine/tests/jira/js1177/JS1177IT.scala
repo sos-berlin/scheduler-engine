@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1177
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.test.ClusterTest

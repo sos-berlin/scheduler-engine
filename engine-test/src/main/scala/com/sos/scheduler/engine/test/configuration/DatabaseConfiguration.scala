@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.configuration
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import java.io.File
 import java.time.Duration
 

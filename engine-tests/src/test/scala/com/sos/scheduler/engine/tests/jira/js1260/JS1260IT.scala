@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1260
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits.RichFile
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1260.JS1260IT._

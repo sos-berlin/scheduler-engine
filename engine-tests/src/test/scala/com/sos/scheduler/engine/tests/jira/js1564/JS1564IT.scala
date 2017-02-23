@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1564
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.RichFutures
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

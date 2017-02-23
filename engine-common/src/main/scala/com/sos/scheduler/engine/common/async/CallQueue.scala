@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.async
 
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.common.async.CallQueue._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import java.time.Instant
 import java.util.NoSuchElementException
 import scala.concurrent.ExecutionContext

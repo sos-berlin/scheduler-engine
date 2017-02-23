@@ -1,15 +1,16 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
 import com.google.common.io.Closer
+import com.sos.jobscheduler.common.event.EventIdGenerator
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
-import com.sos.scheduler.engine.common.event.EventIdGenerator
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
-import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, TypedPath, UnknownTypedPath}
+import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedEvent, UnknownTypedPath}
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.test.TestSchedulerController
 import com.sos.scheduler.engine.tests.jira.js1642.EventReader._

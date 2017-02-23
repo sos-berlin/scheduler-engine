@@ -3,7 +3,7 @@
 #include "_precompiled.h"
 
 #include "com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
-#include "com__sos__scheduler__engine__data__event__KeyedEvent.h"
+#include "com__sos__jobscheduler__data__event__KeyedEvent.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 
@@ -15,7 +15,7 @@ struct EventSubsystem__class : ::zschimmer::javabridge::Class
    ~EventSubsystem__class();
 
     ::zschimmer::javabridge::Method const _checkNumberOfEventCodes__I__method;
-    ::zschimmer::javabridge::Method const _report__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method;
+    ::zschimmer::javabridge::Method const _report__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method;
     ::zschimmer::javabridge::Method const _reportEventClass__ILjava_lang_Object_2__method;
     ::zschimmer::javabridge::Method const _reportLogged__ILjava_lang_String_2Ljava_lang_String_2__method;
 
@@ -27,7 +27,7 @@ const ::zschimmer::javabridge::class_factory< EventSubsystem__class > EventSubsy
 EventSubsystem__class::EventSubsystem__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
     ,_checkNumberOfEventCodes__I__method(this, "checkNumberOfEventCodes", "(I)V")
-    ,_report__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method(this, "report", "(Lcom/sos/scheduler/engine/data/event/KeyedEvent;)V")
+    ,_report__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method(this, "report", "(Lcom/sos/jobscheduler/data/event/KeyedEvent;)V")
     ,_reportEventClass__ILjava_lang_Object_2__method(this, "reportEventClass", "(ILjava/lang/Object;)V")
     ,_reportLogged__ILjava_lang_String_2Ljava_lang_String_2__method(this, "reportLogged", "(ILjava/lang/String;Ljava/lang/String;)V"){}
 
@@ -56,11 +56,11 @@ void EventSubsystem::checkNumberOfEventCodes(jint p0) const {
     cls->_checkNumberOfEventCodes__I__method.call(get_jobject(), parameter_list);
 }
 
-void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent >& p0) const {
+void EventSubsystem::report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent >& p0) const {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     EventSubsystem__class* cls = _class.get();
-    cls->_report__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method.call(get_jobject(), parameter_list);
+    cls->_report__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method.call(get_jobject(), parameter_list);
 }
 
 void EventSubsystem::reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const {

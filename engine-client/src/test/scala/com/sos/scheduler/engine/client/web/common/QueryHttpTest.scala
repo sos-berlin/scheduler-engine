@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.client.web.common
 
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.{fromPathAndParameters, toPathAndParameters}
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable.{fromPathAndParameters, toPathAndParameters}
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.client.web.common.QueryHttp.{jobChainQuery, orderQuery}
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}

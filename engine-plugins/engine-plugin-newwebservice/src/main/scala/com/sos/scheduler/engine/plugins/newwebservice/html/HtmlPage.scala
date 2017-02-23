@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Logger
 import scala.language.implicitConversions
 import scalatags.Text.TypedTag
 import scalatags.Text.all._

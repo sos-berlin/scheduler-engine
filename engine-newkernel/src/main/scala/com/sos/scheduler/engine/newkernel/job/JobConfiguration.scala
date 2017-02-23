@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import com.sos.scheduler.engine.data.filebased.AbsolutePath
+import com.sos.jobscheduler.data.filebased.AbsolutePath
 import com.sos.scheduler.engine.newkernel.schedule.Schedule
 
 case class JobConfiguration(

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
+import com.sos.jobscheduler.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderSourceType}
 import org.jetbrains.annotations.TestOnly

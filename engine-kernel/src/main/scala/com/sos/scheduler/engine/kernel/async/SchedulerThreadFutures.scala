@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.async
 
 import com.sos.scheduler.engine.common.async.FutureCompletion.{callFuture, timedCallFuture}
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
 import java.lang.Thread.currentThread
 import java.time.Instant
 import scala.concurrent.duration.Duration

@@ -1,15 +1,15 @@
 package com.sos.scheduler.engine.tests.jira.js1176
 
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.{InfoLogged, WarningLogged}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitFailure, awaitSuccess}

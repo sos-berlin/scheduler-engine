@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1457
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskClosed}
 import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

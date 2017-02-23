@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.schedulertest;
 
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
 import com.sos.scheduler.engine.test.SchedulerTest;

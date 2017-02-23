@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.base.utils.ScalaUtils.SwitchStatement
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.job.ReturnCode
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.domElementToStaxSource
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobNodeOverview, NodeObstacle}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

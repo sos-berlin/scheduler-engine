@@ -1,16 +1,16 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.AgentClient
-import com.sos.scheduler.engine.agent.test.AgentTest
-import com.sos.scheduler.engine.agent.views.AgentOverview
+import com.sos.jobscheduler.agent.client.AgentClient
+import com.sos.jobscheduler.agent.test.AgentTest
+import com.sos.jobscheduler.agent.views.AgentOverview
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.client.api.ProcessClassClient
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.processclass.ProcessClassView.Companion
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.PathQuery

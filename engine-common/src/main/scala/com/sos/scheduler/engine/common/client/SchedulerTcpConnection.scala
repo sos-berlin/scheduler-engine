@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.common.client
 
 import com.google.common.io.ByteStreams
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.client.SchedulerTcpConnection._
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import java.io.{ByteArrayInputStream, InputStream, StringWriter}
 import java.net.{Socket, SocketAddress}
 import java.nio.charset.StandardCharsets.UTF_8

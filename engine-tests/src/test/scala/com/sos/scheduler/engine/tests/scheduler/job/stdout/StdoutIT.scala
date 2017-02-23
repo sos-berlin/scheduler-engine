@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.SchedulerTestUtils._

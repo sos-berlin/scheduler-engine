@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.xmlcommands
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.data.agent.AgentAddress
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

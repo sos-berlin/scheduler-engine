@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.common.time.Stopwatch.measureTime
+import com.sos.jobscheduler.common.time.Stopwatch.measureTime
 import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

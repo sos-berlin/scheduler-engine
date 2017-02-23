@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, JobChainState, NodeId}
 import org.junit.runner.RunWith

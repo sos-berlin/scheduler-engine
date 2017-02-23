@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js655;
 
+import com.sos.jobscheduler.data.event.Event;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.common.sync.Gate;
 import com.sos.scheduler.engine.common.system.Files;
-import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated$;
 import com.sos.scheduler.engine.data.filebased.FileBasedRemoved$;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;

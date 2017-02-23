@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
 import akka.util.ByteString
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import java.io.ByteArrayInputStream
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.Elem

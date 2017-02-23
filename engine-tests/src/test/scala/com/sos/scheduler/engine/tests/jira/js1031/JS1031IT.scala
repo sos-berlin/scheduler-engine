@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1031
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStarted}
 import com.sos.scheduler.engine.data.schedule.SchedulePath
 import com.sos.scheduler.engine.test.SchedulerTestUtils.writeConfigurationFile

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1221
 
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderStepStarted}

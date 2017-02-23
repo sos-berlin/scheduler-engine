@@ -10,7 +10,7 @@
 #include "../zschimmer/lazy.h"
 #include "java__lang__Object.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { struct KeyedEvent; }}}}}}}
+namespace javaproxy { namespace com { namespace sos { namespace jobscheduler { namespace data { namespace event { struct KeyedEvent; }}}}}}
 namespace javaproxy { namespace java { namespace lang { struct Object; }}}
 namespace javaproxy { namespace java { namespace lang { struct String; }}}
 
@@ -51,7 +51,7 @@ struct EventSubsystem : ::zschimmer::javabridge::proxy_jobject< EventSubsystem >
   public:
 
     void checkNumberOfEventCodes(jint p0) const;
-    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent >& p0) const;
+    void report(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent >& p0) const;
     void reportEventClass(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::Object >& p1) const;
     void reportLogged(jint p0, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p1, const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::java::lang::String >& p2) const;
 

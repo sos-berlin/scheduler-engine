@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.jobscheduler.base.generic.SecretString
+import com.sos.jobscheduler.common.scalautil.Collections.emptyToNone
 import scala.collection.mutable
 
 /**

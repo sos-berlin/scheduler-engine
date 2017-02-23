@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1145
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.test.SchedulerTestUtils._

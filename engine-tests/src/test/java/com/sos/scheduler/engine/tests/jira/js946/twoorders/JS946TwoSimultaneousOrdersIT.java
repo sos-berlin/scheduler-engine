@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js946.twoorders;
 
-import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.Event;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.data.order.OrderStepStarted;
 import com.sos.scheduler.engine.eventbus.EventHandler;

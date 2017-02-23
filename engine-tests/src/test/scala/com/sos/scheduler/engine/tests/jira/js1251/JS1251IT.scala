@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1251
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStepEnded}

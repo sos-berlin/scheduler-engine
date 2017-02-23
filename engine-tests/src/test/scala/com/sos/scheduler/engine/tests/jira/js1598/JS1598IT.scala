@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1598
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration

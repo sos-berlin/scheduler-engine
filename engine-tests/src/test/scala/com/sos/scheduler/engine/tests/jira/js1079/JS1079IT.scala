@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1079
 
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

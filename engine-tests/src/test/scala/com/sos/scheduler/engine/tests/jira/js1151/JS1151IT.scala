@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1151
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager

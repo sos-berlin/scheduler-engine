@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.cpp
 
 import akka.actor._
 import com.google.common.base.Charsets._
-import com.sos.scheduler.engine.base.utils.ScalaUtils.RichThrowable
+import com.sos.jobscheduler.base.utils.ScalaUtils.RichThrowable
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.common.async.CallQueue
-import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.cplusplus.runtime.{CppReference, DisposableCppProxyRegister}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

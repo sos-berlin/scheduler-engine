@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.playground.zschimmer.plugin.watchdog
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

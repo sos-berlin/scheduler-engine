@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1190
 
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.jobscheduler.data.job.ReturnCode
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderNodeChanged, OrderNodeTransition, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

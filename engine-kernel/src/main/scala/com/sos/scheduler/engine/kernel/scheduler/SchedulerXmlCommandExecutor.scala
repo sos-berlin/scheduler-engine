@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
 import com.google.inject.ImplementedBy
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerXmlCommandExecutor.Result
 import com.sos.scheduler.engine.kernel.security.SchedulerSecurityLevel

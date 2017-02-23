@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.tests.jira.js1659
 
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.event.EventIdGenerator
-import com.sos.scheduler.engine.common.event.collector.EventCollector
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
-import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskEvent, TaskId, TaskKey, TaskStarted}
+import com.sos.jobscheduler.common.event.EventIdGenerator
+import com.sos.jobscheduler.common.event.collector.EventCollector
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.job.{ReturnCode, TaskId}
+import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, TaskClosed, TaskEnded, TaskEvent, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, JobChainState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
 import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}

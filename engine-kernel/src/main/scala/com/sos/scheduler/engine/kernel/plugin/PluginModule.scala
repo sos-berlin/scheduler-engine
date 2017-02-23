@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.inject.TypeLiteral
-import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
+import com.sos.jobscheduler.common.guice.ScalaAbstractModule
 import scala.collection.immutable
 
 final class PluginModule(pluginConfigurations: immutable.Seq[PluginConfiguration])

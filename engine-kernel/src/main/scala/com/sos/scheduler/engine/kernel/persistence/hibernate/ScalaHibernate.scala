@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.Logger
 import javax.persistence.{EntityManagerFactory, EntityManager}
 
 object ScalaHibernate {

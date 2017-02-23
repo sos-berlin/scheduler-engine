@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
+import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NestedJobChainNodeOverview}

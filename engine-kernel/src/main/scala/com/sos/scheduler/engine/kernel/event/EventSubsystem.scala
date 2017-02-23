@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel.event
 
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
-import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.eventbus.{EventSource, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.event.EventSubsystem._
 import com.sos.scheduler.engine.kernel.log.CppLogger
@@ -13,7 +14,7 @@ import javax.inject.{Inject, Singleton}
 @ForCpp @Singleton
 private[kernel] final class EventSubsystem @Inject private(eventBus: SchedulerEventBus) extends Subsystem {
 
-  /** @param e [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]] statt [[com.sos.scheduler.engine.data.event.AnyKeyedEvent]],
+  /** @param e [[com.sos.jobscheduler.data.event.AnyKeyedEvent]] statt [[com.sos.jobscheduler.data.event.AnyKeyedEvent]],
     *          weil C++/Java-Generator die Interface-Hierarchie nicht berücksichtig. */
   @ForCpp private def report(e: AnyKeyedEvent): Unit = {
     eventBus.publish(e)

@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
+import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

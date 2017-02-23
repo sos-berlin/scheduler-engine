@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
-import com.sos.scheduler.engine.common.sprayutils.web.SprayWebServer
-import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
+import com.sos.jobscheduler.common.sprayutils.WebServerBinding
+import com.sos.jobscheduler.common.sprayutils.web.SprayWebServer
+import com.sos.jobscheduler.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext
 

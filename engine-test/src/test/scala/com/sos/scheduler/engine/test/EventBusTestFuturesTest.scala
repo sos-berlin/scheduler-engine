@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventBus
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.EventBusTestFuturesTest._

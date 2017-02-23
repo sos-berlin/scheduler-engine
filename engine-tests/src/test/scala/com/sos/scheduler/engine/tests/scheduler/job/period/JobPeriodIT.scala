@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.job.period
 
 import com.sos.scheduler.engine.common.time.ScalaJoda._
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.job.period.JobPeriodIT._

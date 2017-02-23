@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import com.sos.scheduler.engine.data.filebased.{AbsolutePath, FileBasedType}
+import com.sos.jobscheduler.data.filebased.AbsolutePath
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 
 /**
  * @author Joacim Zschimmer

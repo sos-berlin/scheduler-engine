@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.kernel.extrascheduler
 
 import com.google.common.base.Strings._
 import com.sos.scheduler.engine.common.io.ReaderIterator
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
-import com.sos.scheduler.engine.common.system.OperatingSystem
-import com.sos.scheduler.engine.common.system.OperatingSystem._
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.{HasCloser, Logger}
+import com.sos.jobscheduler.common.system.OperatingSystem
+import com.sos.jobscheduler.common.system.OperatingSystem._
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler.{logger, _}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants._
 import java.io.{File, IOException, InputStream, InputStreamReader}

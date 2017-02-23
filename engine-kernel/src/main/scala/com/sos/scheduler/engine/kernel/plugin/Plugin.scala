@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.plugin
 
-import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.scalautil.HasCloser
 
 /**
  * @author Joacim Zschimmer

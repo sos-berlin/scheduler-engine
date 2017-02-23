@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.data.log
 
-import com.sos.scheduler.engine.data.event.KeyedTypedEventJsonFormat.KeyedSubtype
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.event.KeyedTypedEventJsonFormat.KeyedSubtype
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.data.message.MessageCode
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._

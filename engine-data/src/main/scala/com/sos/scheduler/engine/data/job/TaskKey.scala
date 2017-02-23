@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.data.job
 
+import com.sos.jobscheduler.data.job.TaskId
 import spray.json.DefaultJsonProtocol._
 
 /**

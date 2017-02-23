@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.jobscheduler.common.sprayutils.YamlPrinter
+import com.sos.jobscheduler.data.event.Snapshot
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
-import com.sos.scheduler.engine.common.sprayutils.YamlPrinter
-import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import scala.concurrent.{ExecutionContext, Future}

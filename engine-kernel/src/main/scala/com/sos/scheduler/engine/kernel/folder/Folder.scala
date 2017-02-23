@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.folder
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.kernel.cppproxy.FolderC
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector

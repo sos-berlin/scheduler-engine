@@ -2,8 +2,8 @@ package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
+import com.sos.jobscheduler.common.scalautil.AssignableFrom.assignableFrom
+import com.sos.jobscheduler.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister

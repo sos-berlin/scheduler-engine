@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.data.filebased
 
+import com.sos.jobscheduler.data.filebased.TypedPath
+
 /**
   * @author Joacim Zschimmer
   */
@@ -13,7 +15,7 @@ object UnknownTypedPath extends TypedPath.Companion[UnknownTypedPath]{
 
   override val camelName = "Unknown"
 
-  override protected[engine] def isEmptyAllowed = true
-  override protected[engine] def isSingleSlashAllowed = true
-  override protected[engine] def isCommaAllowed = true
+  override def isEmptyAllowed = true
+  override def isSingleSlashAllowed = true
+  override def isCommaAllowed = true
 }

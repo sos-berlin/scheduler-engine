@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.spoolerapi.scala
 
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded}
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

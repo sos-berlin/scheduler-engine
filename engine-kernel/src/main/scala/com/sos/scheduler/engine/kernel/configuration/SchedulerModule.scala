@@ -4,21 +4,22 @@ import akka.actor.{ActorRefFactory, ActorSystem}
 import com.google.common.base.Splitter
 import com.google.inject.Scopes.SINGLETON
 import com.google.inject.{Injector, Provides}
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
-import com.sos.scheduler.engine.common.akkautils.DeadLetterActor
+import com.sos.jobscheduler.base.utils.ScalaUtils.implicitClass
+import com.sos.jobscheduler.common.akkautils.DeadLetterActor
+import com.sos.jobscheduler.common.auth.EncodedPasswordValidator
+import com.sos.jobscheduler.common.configutils.Configs.parseConfigIfExists
+import com.sos.jobscheduler.common.event.collector.EventCollector
+import com.sos.jobscheduler.common.guice.ScalaAbstractModule
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.soslicense.LicenseKeyString
+import com.sos.jobscheduler.common.sprayutils.web.auth.{CSRF, GateKeeper}
+import com.sos.jobscheduler.common.time.timer.TimerService
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.common.async.StandardCallQueue
-import com.sos.scheduler.engine.common.auth.EncodedPasswordValidator
-import com.sos.scheduler.engine.common.configutils.Configs.parseConfigIfExists
-import com.sos.scheduler.engine.common.event.collector.EventCollector
-import com.sos.scheduler.engine.common.guice.ScalaAbstractModule
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
-import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
-import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId, SchedulerState, SupervisorUri}
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerState, SupervisorUri}
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

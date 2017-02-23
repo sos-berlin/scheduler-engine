@@ -1,5 +1,8 @@
 package com.sos.scheduler.engine.common.system;
 
+import com.sos.jobscheduler.common.system.CpuArchitecture;
+import com.sos.jobscheduler.common.system.OperatingSystem$;
+
 /**
  * @author Joacim Zschimmer
  */

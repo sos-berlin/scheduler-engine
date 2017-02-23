@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
+import com.sos.jobscheduler.data.event.{Event, EventSeq, KeyedEvent, Snapshot, SomeEventRequest}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{Event, EventSeq, KeyedEvent, Snapshot, SomeEventRequest}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.OrderView

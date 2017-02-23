@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
-import com.sos.scheduler.engine.data.event.{Event, NoKeyEvent}
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.data.event.{Event, NoKeyEvent}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

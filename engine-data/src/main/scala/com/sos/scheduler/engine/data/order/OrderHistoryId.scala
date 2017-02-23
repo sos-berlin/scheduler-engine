@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.base.generic.GenericInt
+import com.sos.jobscheduler.base.generic.GenericInt
 
 /**
   * @author Joacim Zschimmer

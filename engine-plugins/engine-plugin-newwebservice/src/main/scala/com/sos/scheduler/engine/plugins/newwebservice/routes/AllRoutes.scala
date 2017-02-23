@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import akka.actor.ActorRefFactory
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{passIf, passSome, pathSegments}
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.{passIf, passSome, pathSegments}
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.htmlPreferred
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes._

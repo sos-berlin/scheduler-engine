@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits.RichJsValue
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.data.filebased.{TypedPath, UnknownTypedPath}
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
+import com.sos.jobscheduler.base.sprayjson.SprayJson.implicits.RichJsValue
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.scheduler.engine.data.filebased.UnknownTypedPath
 import com.sos.scheduler.engine.data.queries.PathQuery._
 import scala.language.implicitConversions
 import spray.json.{JsObject, JsString, JsValue, RootJsonFormat}

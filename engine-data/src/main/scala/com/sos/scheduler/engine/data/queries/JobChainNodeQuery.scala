@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
+import com.sos.jobscheduler.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.queries.CommaSeparated._

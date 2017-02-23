@@ -1,14 +1,15 @@
 package com.sos.scheduler.engine.kernel.scheduler
 
-import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.base.utils.ScalaUtils.someUnless
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.scheduler.engine.common.configutils.Configs
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId, SupervisorUri}
+import com.sos.jobscheduler.base.generic.SecretString
+import com.sos.jobscheduler.base.utils.ScalaUtils.someUnless
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.configutils.Configs
+import com.sos.jobscheduler.common.scalautil.Collections.emptyToNone
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.sprayutils.https.KeystoreReference
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SupervisorUri}
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.typesafe.config.Config
 import java.io.File

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.playground.zschimmer.cpptoutf8
 
 import CppToUtf8._
 import com.google.common.base.Charsets.{ISO_8859_1, UTF_8}
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits.RichFile
 import java.io.{StringWriter, File}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

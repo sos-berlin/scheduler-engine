@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.HotEventBus.logger
 import com.sos.scheduler.engine.eventbus.annotated.HotMethodEventSubscriptionFactory
 import javax.annotation.Nullable

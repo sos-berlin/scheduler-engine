@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicits.ToStringFunction1
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
-import com.sos.scheduler.engine.common.scalautil.xmls.XmlSources.xmlElemToSource
-import com.sos.scheduler.engine.data.job.ReturnCode
+import com.sos.jobscheduler.base.utils.ScalaUtils.implicits.ToStringFunction1
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.XmlSources.xmlElemToSource
+import com.sos.jobscheduler.data.job.ReturnCode
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order

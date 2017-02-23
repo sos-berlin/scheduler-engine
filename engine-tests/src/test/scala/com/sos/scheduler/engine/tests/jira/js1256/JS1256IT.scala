@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1256
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.Closers._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.Closers._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

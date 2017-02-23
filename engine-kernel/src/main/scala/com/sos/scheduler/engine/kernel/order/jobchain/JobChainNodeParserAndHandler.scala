@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader._
-import com.sos.scheduler.engine.data.job.ReturnCode
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader._
+import com.sos.jobscheduler.data.job.ReturnCode
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order.OrderNodeTransition
 import com.sos.scheduler.engine.kernel.order.Order

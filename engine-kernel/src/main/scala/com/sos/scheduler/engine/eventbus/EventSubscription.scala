@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.{RichUnitPartialFunction, implicitClass}
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.base.utils.ScalaUtils.{RichUnitPartialFunction, implicitClass}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import scala.reflect.ClassTag
 
 trait EventSubscription {

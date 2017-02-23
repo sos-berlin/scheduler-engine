@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.filebased
 
-import com.sos.scheduler.engine.data.filebased.FileBasedObstacle._
+import com.sos.scheduler.engine.data.filebased.FileBasedObstacle.{BadState, MissingRequisites, Removed, Replaced}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

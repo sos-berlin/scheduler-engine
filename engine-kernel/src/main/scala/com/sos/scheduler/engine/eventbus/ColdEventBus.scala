@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.eventbus
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.ColdEventBus._
 import com.sos.scheduler.engine.eventbus.annotated.ColdMethodEventSubscriptionFactory
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}

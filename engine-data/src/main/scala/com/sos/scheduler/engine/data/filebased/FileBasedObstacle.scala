@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.filebased
 
-import com.sos.scheduler.engine.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister.TypedPathJsonFormat
 import spray.json.DefaultJsonProtocol._
 

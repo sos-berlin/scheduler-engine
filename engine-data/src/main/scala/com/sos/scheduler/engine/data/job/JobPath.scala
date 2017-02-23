@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.job
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.jobscheduler.data.filebased.TypedPath
 
 final case class JobPath(string: String)
 extends TypedPath {

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.lock
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
+import com.sos.jobscheduler.data.filebased.TypedPath
 
 final case class LockPath(string: String) extends TypedPath {
   validate()

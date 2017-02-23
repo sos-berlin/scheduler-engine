@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.async.{CallRunner, StandardCallQueue}
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelectorTest._
 import com.sos.scheduler.engine.kernel.processclass.common.selection.{FixedPriority, RoundRobin, SelectionMethod}
 import java.time.Instant
@@ -10,7 +10,7 @@ import org.mockito.Mockito._
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar.mock
+import org.scalatest.mockito.MockitoSugar.mock
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 

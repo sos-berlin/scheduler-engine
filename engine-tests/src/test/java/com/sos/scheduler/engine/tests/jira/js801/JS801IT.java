@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js801;
 
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.order.OrderId;
 import com.sos.scheduler.engine.data.order.OrderFinished;
-import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import org.junit.Test;

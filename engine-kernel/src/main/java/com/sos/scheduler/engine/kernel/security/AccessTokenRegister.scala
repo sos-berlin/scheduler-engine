@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.security
 
-import com.sos.scheduler.engine.base.generic.SecretString
-import com.sos.scheduler.engine.common.auth.SecretStringGenerator.newSecretString
-import com.sos.scheduler.engine.common.auth.UserId
+import com.sos.jobscheduler.base.generic.SecretString
+import com.sos.jobscheduler.common.auth.SecretStringGenerator.newSecretString
+import com.sos.jobscheduler.common.auth.UserId
 import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConversions._
 

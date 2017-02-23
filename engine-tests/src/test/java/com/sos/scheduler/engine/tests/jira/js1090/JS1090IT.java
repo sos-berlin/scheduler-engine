@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1090;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderFinished;

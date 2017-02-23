@@ -2,15 +2,15 @@ package com.sos.scheduler.engine.plugins.newwebservice
 
 import akka.actor.ActorSystem
 import com.google.inject.{AbstractModule, Injector, Provides}
-import com.sos.scheduler.engine.common.internet.IP._
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.SetOnce
-import com.sos.scheduler.engine.common.sprayutils.WebServerBinding
-import com.sos.scheduler.engine.common.sprayutils.https.KeystoreReference
-import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.internet.IP._
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersCloser
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.SetOnce
+import com.sos.jobscheduler.common.sprayutils.WebServerBinding
+import com.sos.jobscheduler.common.sprayutils.https.KeystoreReference
+import com.sos.jobscheduler.common.sprayutils.web.auth.{CSRF, GateKeeper}
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.toXml
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.plugin.{Plugin, Plugins, UseGuiceModule}

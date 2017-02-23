@@ -1,8 +1,10 @@
 package com.sos.scheduler.engine.data.folder
 
 import com.google.common.base.Splitter
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.lazyRootFormat
-import com.sos.scheduler.engine.data.filebased.{AbsolutePath, HasPath, TypedPath}
+import com.sos.jobscheduler.base.sprayjson.SprayJson.lazyRootFormat
+import com.sos.jobscheduler.data.filebased.{AbsolutePath, TypedPath}
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.scheduler.engine.data.filebased.HasPath
 import scala.collection.JavaConversions._
 import scala.collection.immutable
 import scala.reflect.ClassTag

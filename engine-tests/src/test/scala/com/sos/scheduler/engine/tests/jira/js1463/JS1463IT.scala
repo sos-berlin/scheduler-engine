@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1463
 
-import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.common.system.OperatingSystem.isUnix
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.job.ReturnCode
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1463.JS1463IT._

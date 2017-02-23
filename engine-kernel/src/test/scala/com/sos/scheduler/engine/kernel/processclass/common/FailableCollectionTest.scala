@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableCollectionTest._
 import com.sos.scheduler.engine.kernel.processclass.common.selection.{RoundRobin, FixedPriority}
 import java.time.{Duration, Instant}

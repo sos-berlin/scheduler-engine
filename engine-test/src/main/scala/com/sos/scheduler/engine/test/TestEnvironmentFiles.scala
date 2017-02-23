@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.filebased.{FileBasedTypes, TypedPath}
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.scheduler.engine.data.filebased.FileBasedTypes
 import com.sos.scheduler.engine.test.TestEnvironmentFiles._
 import com.sos.scheduler.engine.test.util.JavaResourceResolver._
 import java.io.File

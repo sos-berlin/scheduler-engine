@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.processclass
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.data.agent.AgentAddress
 import scala.collection.immutable
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat

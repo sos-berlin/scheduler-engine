@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.common.scalautil.DuplicateKeyException
+import com.sos.jobscheduler.common.scalautil.DuplicateKeyException
 import com.sos.scheduler.engine.kernel.order.jobchain.RangeSet._
 
 /**

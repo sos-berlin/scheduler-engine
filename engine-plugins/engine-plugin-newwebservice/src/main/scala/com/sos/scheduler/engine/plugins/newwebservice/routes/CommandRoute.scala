@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.scheduler.engine.client.api.CommandClient
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.{completeWithError, emptyParameterMap}
-import com.sos.scheduler.engine.common.sprayutils.XmlString
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.{completeWithError, emptyParameterMap}
+import com.sos.jobscheduler.common.sprayutils.XmlString
 import com.sos.scheduler.engine.kernel.DirectCommandClient._
 import scala.concurrent.ExecutionContext
 import spray.http.HttpEntity

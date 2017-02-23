@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.FrontEndRoute._
 import spray.http.CacheDirectives.`max-age`
 import spray.http.HttpHeaders.`Cache-Control`

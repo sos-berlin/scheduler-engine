@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.newkernel.schedule.oldruntime
 
 import SchedulePeriodXMLParser._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.TimeOfDay
 import com.sos.scheduler.engine.newkernel.utils.StringConverters._
 import org.joda.time.Duration.standardSeconds

@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.data.processclass
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.filebased.FileBasedState
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.JobPath
 import java.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

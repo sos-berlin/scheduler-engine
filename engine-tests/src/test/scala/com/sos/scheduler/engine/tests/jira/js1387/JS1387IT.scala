@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1387
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.time.SchedulerDateTime.{formatLocally, formatUtc}
 import com.sos.scheduler.engine.kernel.Scheduler

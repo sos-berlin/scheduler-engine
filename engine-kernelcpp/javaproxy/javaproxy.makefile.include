@@ -2,13 +2,12 @@
 
 javaproxy_objects=\
  com__google__inject__Injector.o\
+ com__sos__jobscheduler__data__event__KeyedEvent.o\
  com__sos__scheduler__engine__client__agent__CppFileOrderSourceClient.o\
  com__sos__scheduler__engine__client__command__CppHttpSchedulerCommandClient.o\
  com__sos__scheduler__engine__common__scalautil__Resources.o\
  com__sos__scheduler__engine__common__xml__CppXmlUtils.o\
- com__sos__scheduler__engine__common__xml__XmlUtils.o\
  com__sos__scheduler__engine__cplusplus__runtime__Sister.o\
- com__sos__scheduler__engine__data__event__KeyedEvent.o\
  com__sos__scheduler__engine__data__job__JobPersistentState.o\
  com__sos__scheduler__engine__data__job__TaskPersistentState.o\
  com__sos__scheduler__engine__kernel__Scheduler.o\

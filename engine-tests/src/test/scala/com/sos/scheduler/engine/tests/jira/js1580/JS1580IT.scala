@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1580
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._

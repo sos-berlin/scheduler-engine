@@ -5,28 +5,29 @@ import com.google.inject
 import com.google.inject.Guice.createInjector
 import com.google.inject.Stage.DEVELOPMENT
 import com.google.inject.{Injector, TypeLiteral}
+import com.sos.jobscheduler.common.configutils.Configs.ConvertibleConfig
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.Futures.awaitResult
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.{HasCloser, Logger, SetOnce}
+import com.sos.jobscheduler.common.soslicense.LicenseKeyString
+import com.sos.jobscheduler.common.system.SystemInformations.systemInformation
+import com.sos.jobscheduler.common.time.ScalaTime.MaxDuration
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.system.JavaInformation
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
 import com.sos.scheduler.engine.common.async.{CallQueue, CallRunner}
-import com.sos.scheduler.engine.common.configutils.Configs.ConvertibleConfig
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.log.LoggingFunctions.enableJavaUtilLoggingOverSLF4J
 import com.sos.scheduler.engine.common.maven.MavenProperties
-import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger, SetOnce}
-import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
-import com.sos.scheduler.engine.common.system.SystemInformations.systemInformation
-import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
-import com.sos.scheduler.engine.common.utils.JavaResource
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.loadXml
 import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxy, CppProxyInvalidatedException, DisposableCppProxyRegister, Sister}
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.filebased.{FileBasedEvent, TypedPath}
+import com.sos.scheduler.engine.data.filebased.FileBasedEvent
 import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerInitiated, SchedulerOverview, SchedulerState}
-import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler._

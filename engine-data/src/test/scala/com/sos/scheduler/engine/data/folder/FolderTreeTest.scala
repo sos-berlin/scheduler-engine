@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.data.folder
 
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.data.folder.FolderTreeTest._
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

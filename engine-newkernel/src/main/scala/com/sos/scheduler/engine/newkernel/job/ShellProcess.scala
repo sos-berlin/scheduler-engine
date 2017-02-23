@@ -2,9 +2,9 @@ package com.sos.scheduler.engine.newkernel.job
 
 import com.google.common.base.Preconditions.checkState
 import com.google.common.io.Files
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.async.CallQueue
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaJoda._
 import com.sos.scheduler.engine.newkernel.job.ShellProcess._
 import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}

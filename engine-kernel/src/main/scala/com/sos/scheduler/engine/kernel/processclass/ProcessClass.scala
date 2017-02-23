@@ -1,16 +1,17 @@
 package com.sos.scheduler.engine.kernel.processclass
 
-import com.sos.scheduler.engine.agent.data.commands.StartTask
+import com.sos.jobscheduler.agent.data.commands.StartTask
+import com.sos.jobscheduler.common.guice.GuiceImplicits._
+import com.sos.jobscheduler.common.scalautil.Collections._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
-import com.sos.scheduler.engine.common.guice.GuiceImplicits._
-import com.sos.scheduler.engine.common.scalautil.Collections._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.xml.DomForScala._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassObstacle, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.kernel.async.{CppCall, SchedulerThreadCallQueue}
 import com.sos.scheduler.engine.kernel.cppproxy.{Api_process_configurationC, Process_classC, SpoolerC}

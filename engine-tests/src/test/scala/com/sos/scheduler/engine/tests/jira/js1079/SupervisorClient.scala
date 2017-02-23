@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1079
 
 import com.sos.scheduler.engine.common.client.SchedulerTcpConnection
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import java.io.ByteArrayInputStream
 import java.net.{DatagramPacket, InetSocketAddress, DatagramSocket}
 import org.scalatest.Matchers._

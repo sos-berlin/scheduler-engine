@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.job
 
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
-import com.sos.scheduler.engine.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.jobscheduler.base.sprayjson.typed.{Subtype, TypedJsonFormat}
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, IsFileBasedObstacles}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassObstacle

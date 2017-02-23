@@ -1,13 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1666
 
-import com.sos.scheduler.engine.agent.data.web.AgentUris
-import com.sos.scheduler.engine.agent.views.AgentOverview
+import com.sos.jobscheduler.agent.data.web.AgentUris
+import com.sos.jobscheduler.agent.views.AgentOverview
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.event.EventId
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder._
+import com.sos.jobscheduler.data.event.EventId
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

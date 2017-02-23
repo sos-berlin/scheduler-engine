@@ -2,14 +2,14 @@ package com.sos.scheduler.engine.tests.jira.js644.continuous;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.sos.jobscheduler.data.event.Event;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.common.sync.Gate;
-import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.data.jobchain.JobChainPath;
 import com.sos.scheduler.engine.data.order.OrderNodeChanged;
-import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.data.scheduler.SchedulerTerminatedEvent;
+import com.sos.scheduler.engine.eventbus.EventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.TestEnvironment;
 import com.sos.scheduler.engine.test.junit.SlowTestRule;

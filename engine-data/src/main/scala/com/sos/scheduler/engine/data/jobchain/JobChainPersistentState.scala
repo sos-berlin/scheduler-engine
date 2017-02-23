@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.jobchain
 
-import com.sos.scheduler.engine.base.generic.HasIsDefault
-import com.sos.scheduler.engine.base.utils.HasKey
+import com.sos.jobscheduler.base.generic.HasIsDefault
+import com.sos.jobscheduler.base.utils.HasKey
 
 final case class JobChainPersistentState(jobChainPath: JobChainPath, isStopped: Boolean)
 extends HasKey with HasIsDefault {

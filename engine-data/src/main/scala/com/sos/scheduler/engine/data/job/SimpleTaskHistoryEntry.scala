@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.job
 
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, ClusterMemberId}
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import java.time.Instant
 
 final case class SimpleTaskHistoryEntry(

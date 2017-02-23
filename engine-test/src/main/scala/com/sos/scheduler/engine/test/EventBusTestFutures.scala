@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.{implicitClass, withToString1}
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.base.utils.ScalaUtils.{implicitClass, withToString1}
+import com.sos.jobscheduler.common.scalautil.Futures._
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.{EventBus, EventSubscription}
 import java.time.Duration
 import java.util.concurrent.TimeoutException

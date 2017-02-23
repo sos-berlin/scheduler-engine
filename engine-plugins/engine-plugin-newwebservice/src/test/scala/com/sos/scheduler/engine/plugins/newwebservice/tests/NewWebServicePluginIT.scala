@@ -1,14 +1,14 @@
 package com.sos.scheduler.engine.plugins.newwebservice.tests
 
 import akka.actor.ActorSystem
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.jobscheduler.common.sprayutils.XmlString
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder._
+import com.sos.jobscheduler.data.event.Snapshot
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
-import com.sos.scheduler.engine.common.sprayutils.XmlString
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

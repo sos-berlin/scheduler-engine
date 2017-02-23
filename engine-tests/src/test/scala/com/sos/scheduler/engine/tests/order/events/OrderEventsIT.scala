@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.order.events
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.InsertableMutableMap
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.jobscheduler.common.scalautil.Collections.implicits.InsertableMutableMap
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand

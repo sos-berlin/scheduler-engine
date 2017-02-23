@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected
 
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 
 sealed trait ExpectedDetail
 

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichPath
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits.RichPath
 import java.nio.file.Files
 import java.nio.file.Files.delete
 import org.junit.runner.RunWith

@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.tests.jira.js1195
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.domElementToStaxSource
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStepEnded}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand

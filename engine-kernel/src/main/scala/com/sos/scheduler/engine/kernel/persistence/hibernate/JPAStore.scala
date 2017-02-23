@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.base.utils.HasKey
+import com.sos.jobscheduler.base.utils.HasKey
 import javax.persistence.EntityManager
 
 trait JPAStore[A <: HasKey] {

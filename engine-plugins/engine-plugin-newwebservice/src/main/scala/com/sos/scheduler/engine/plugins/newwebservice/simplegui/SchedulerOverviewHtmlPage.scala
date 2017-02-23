@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.system.JavaInformation
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.data.system.JavaInformation
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected
 
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.data.job.JobState
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter.expected.Expected._
 import org.scalactic.Requirements._
 

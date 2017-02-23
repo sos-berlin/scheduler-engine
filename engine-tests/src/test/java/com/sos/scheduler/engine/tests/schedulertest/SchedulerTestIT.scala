@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.schedulertest
 
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.event.KeyedEvent.NoKey
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent.NoKey
 import com.sos.scheduler.engine.data.scheduler.{SchedulerClosed, SchedulerEvent, SchedulerInitiated, SchedulerState, SchedulerStateChanged, SchedulerTerminatedEvent}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTest

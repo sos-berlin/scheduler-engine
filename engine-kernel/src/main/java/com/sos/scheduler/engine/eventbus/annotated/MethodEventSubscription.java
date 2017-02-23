@@ -1,15 +1,13 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
-import com.sos.scheduler.engine.data.event.Event;
+import com.sos.jobscheduler.data.event.Event;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
 import static com.google.common.base.Throwables.propagate;
 
 /** Eine {@link EventSubscription} für eine mit {@link com.sos.scheduler.engine.eventbus.EventHandler} oder

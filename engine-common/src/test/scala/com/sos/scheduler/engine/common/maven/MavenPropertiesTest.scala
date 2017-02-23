@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.common.maven
 
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.maven.MavenPropertiesTest._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

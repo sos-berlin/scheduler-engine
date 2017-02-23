@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.agent
 
-import com.sos.scheduler.engine.common.system.FileUtils._
-import com.sos.scheduler.engine.common.system.OperatingSystem._
-import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
+import com.sos.jobscheduler.common.system.FileUtils._
+import com.sos.jobscheduler.common.system.OperatingSystem._
+import com.sos.jobscheduler.taskserver.dotnet.DotnetEnvironment
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 
 /**

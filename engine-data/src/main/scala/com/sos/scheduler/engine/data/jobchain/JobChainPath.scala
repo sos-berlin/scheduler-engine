@@ -1,7 +1,8 @@
 package com.sos.scheduler.engine.data.jobchain
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.order.OrderId
+import com.sos.scheduler.engine.data.order.OrderKey
 
 final case class JobChainPath(string: String)
 extends TypedPath {
@@ -18,5 +19,5 @@ extends TypedPath {
 
 object JobChainPath extends TypedPath.Companion[JobChainPath] {
 
-  override protected[engine] def isCommaAllowed = false
+  override def isCommaAllowed = false
 }

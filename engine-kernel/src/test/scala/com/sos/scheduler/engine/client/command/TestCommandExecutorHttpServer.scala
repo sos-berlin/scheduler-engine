@@ -2,10 +2,10 @@ package com.sos.scheduler.engine.client.command
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
+import com.sos.jobscheduler.common.sprayutils.XmlString
 import com.sos.scheduler.engine.client.command.TestCommandExecutorHttpServer._
-import com.sos.scheduler.engine.common.sprayutils.XmlString
 import java.net.URI
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.control.NonFatal

@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.client.web
 
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable.toPathAndParameters
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable.toPathAndParameters
+import com.sos.jobscheduler.common.scalautil.Collections._
+import com.sos.jobscheduler.data.event.{Event, EventId, SomeEventRequest}
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.web.SchedulerUris._
-import com.sos.scheduler.engine.common.scalautil.Collections._
-import com.sos.scheduler.engine.data.event.{Event, EventId, SomeEventRequest}
-import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}

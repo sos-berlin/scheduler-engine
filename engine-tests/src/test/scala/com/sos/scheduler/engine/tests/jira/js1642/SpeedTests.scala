@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.tests.jira.js1642
 
 import akka.util.Switch
-import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
+import com.sos.jobscheduler.base.convert.ConvertiblePartialFunctions.ImplicitConvertablePF
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.data.event.Snapshot
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand

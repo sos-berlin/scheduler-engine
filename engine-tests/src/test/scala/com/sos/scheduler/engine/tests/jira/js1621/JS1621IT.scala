@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.jira.js1621
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch.itemsPerSecondString
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.Stopwatch.itemsPerSecondString
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.test.ImplicitTimeout
 import com.sos.scheduler.engine.test.SchedulerTestUtils._

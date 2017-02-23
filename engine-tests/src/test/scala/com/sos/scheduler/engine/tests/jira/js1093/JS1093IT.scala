@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1093
 
-import com.sos.scheduler.engine.common.system.OperatingSystem.isUnix
+import com.sos.jobscheduler.common.system.OperatingSystem.isUnix
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith

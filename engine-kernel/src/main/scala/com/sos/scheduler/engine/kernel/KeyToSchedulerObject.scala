@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel
 
-import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.lock.LockPath

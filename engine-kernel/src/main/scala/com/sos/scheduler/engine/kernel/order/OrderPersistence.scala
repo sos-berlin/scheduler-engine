@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.jobscheduler.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.order.OrderPersistentState
 import com.sos.scheduler.engine.kernel.cppproxy.OrderC

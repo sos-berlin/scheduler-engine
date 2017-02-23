@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.base.utils.HasKey
+import com.sos.jobscheduler.base.utils.HasKey
+import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.OrderPersistentState._
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId

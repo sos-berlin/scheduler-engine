@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.tests.jira.js1187
 
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId, TaskState}
+import com.sos.jobscheduler.agent.Agent
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.Futures._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskState}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{awaitSuccess, job, startJob, taskOverview}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

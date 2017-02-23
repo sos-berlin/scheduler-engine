@@ -1,19 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js1188
 
 import com.google.common.io.Closer
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.event.KeyedEvent
-import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskObstacle, TaskState}
+import com.sos.jobscheduler.agent.Agent
+import com.sos.jobscheduler.agent.configuration.AgentConfiguration
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.event.KeyedEvent
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskObstacle, TaskState}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderFinished, OrderWaitingInTask}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}

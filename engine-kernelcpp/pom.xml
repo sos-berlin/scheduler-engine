@@ -91,8 +91,7 @@
                                 <argument>-exclude=com.sos.scheduler.engine.kernel.persistence.hibernate</argument>
                                 <argument>${scheduler.javaCppProxyPackage}</argument>
                                 <argument>com.google.inject.Injector</argument>
-                                <argument>com.sos.scheduler.engine.common.xml.XmlUtils</argument>
-                                <argument>com.sos.scheduler.engine.data.event.KeyedEvent</argument>
+                                <argument>com.sos.jobscheduler.data.event.KeyedEvent</argument>
                                 <argument>java.lang.Boolean</argument>
                                 <argument>java.lang.Class</argument>
                                 <argument>java.io.File</argument>

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1582
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

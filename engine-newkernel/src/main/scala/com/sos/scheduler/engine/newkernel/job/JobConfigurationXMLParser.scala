@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.newkernel.schedule.oldruntime.OldScheduleXMLParser
 import javax.xml.transform.Source
 import org.joda.time.DateTimeZone

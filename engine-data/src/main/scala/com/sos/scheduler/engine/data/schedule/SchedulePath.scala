@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.schedule
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedType, TypedPath}
+import com.sos.jobscheduler.data.filebased.TypedPath
 
 final case class SchedulePath(string: String) extends TypedPath {
   validate()

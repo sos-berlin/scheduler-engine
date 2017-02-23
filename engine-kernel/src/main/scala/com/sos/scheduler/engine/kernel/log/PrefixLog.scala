@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.kernel.log
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
-import com.sos.scheduler.engine.common.scalautil.{Logger, ScalaConcurrentHashSet, SetOnce}
+import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
+import com.sos.jobscheduler.common.scalautil.{Logger, ScalaConcurrentHashSet, SetOnce}
+import com.sos.jobscheduler.data.log.{SchedulerLogLevel, SchedulerLogger}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.log.{SchedulerLogLevel, SchedulerLogger}
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.data.compounds
 
-import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.JobNodeOverview
 import com.sos.scheduler.engine.data.order.OrderView

@@ -1,13 +1,12 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
-import com.sos.scheduler.engine.base.utils.ScalaUtils.functionWithToString
+import com.sos.jobscheduler.base.utils.ScalaUtils.functionWithToString
+import com.sos.jobscheduler.common.scalautil.Futures.catchInFuture
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
-import com.sos.scheduler.engine.common.scalautil.Futures.catchInFuture
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import java.time.{Duration, Instant}
 import scala.concurrent.{Future, Promise}

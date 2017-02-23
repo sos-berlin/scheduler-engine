@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.data.job.{JobPath, JobPersistentState}
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.kernel.persistence.hibernate.RichEntityManager.toRichEntityManager
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.schedulerIdToDatabase
-import com.sos.scheduler.engine.persistence.entities.{JobEntityConverter, JobEntity}
+import com.sos.scheduler.engine.persistence.entities.{JobEntity, JobEntityConverter}
+import java.time.Duration
 import javax.inject.{Inject, Singleton}
 import javax.persistence.{EntityManager, EntityManagerFactory}
-import java.time.Duration
 
 @Singleton
 final class HibernateJobStore @Inject()(

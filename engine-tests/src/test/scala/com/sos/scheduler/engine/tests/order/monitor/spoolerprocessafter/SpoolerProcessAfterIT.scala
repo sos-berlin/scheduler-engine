@@ -1,17 +1,19 @@
 package com.sos.scheduler.engine.tests.order.monitor.spoolerprocessafter
 
-import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.TimeoutWithSteps
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{JobOverview, TaskClosed, TaskId, TaskKey}
+import com.sos.jobscheduler.agent.Agent
+import com.sos.jobscheduler.agent.configuration.AgentConfiguration
+import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.jobscheduler.common.scalautil.Futures._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.TimeoutWithSteps
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
+import com.sos.scheduler.engine.data.job.{JobOverview, TaskClosed, TaskKey}
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.log.{Logged, SchedulerLogLevel}
+import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient

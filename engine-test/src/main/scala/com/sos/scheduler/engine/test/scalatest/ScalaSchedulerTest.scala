@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.scalatest
 
 import com.google.inject.Injector
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.eventbus.{EventHandlerAnnotated, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

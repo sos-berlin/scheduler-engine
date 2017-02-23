@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.processclass.agent
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.http.client.heartbeat.HttpHeartbeatTiming
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.http.client.heartbeat.HttpHeartbeatTiming
 
 /**
  * @author Joacim Zschimmer

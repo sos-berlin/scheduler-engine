@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState, TaskId}
-import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.scheduler.engine.data.job.{JobPath, TaskPersistentState}
+import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 import com.sos.scheduler.engine.persistence.entities.TaskEntityConverter.toDBString
-import com.sos.scheduler.engine.persistence.entities.{TaskEntityConverter, TaskEntity}
+import com.sos.scheduler.engine.persistence.entities.{TaskEntity, TaskEntityConverter}
 import javax.inject.Inject
 import javax.persistence.{EntityManager, EntityManagerFactory}
 import scala.collection.JavaConversions._

@@ -2,35 +2,37 @@ package com.sos.scheduler.engine.tests.jira.js1642
 
 import akka.util.ByteString
 import com.google.common.io.Files.touch
-import com.sos.scheduler.engine.base.sprayjson.JsonRegexMatcher._
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits._
-import com.sos.scheduler.engine.base.system.SystemInformation
+import com.sos.jobscheduler.base.sprayjson.JsonRegexMatcher._
+import com.sos.jobscheduler.base.sprayjson.SprayJson.implicits._
+import com.sos.jobscheduler.base.system.SystemInformation
+import com.sos.jobscheduler.common.event.EventIdGenerator
+import com.sos.jobscheduler.common.event.collector.EventCollector
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.jobscheduler.common.sprayutils.JsObjectMarshallers._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
+import com.sos.jobscheduler.common.utils.IntelliJUtils.intelliJuseImports
+import com.sos.jobscheduler.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.jobscheduler.data.scheduler.SchedulerId
+import com.sos.jobscheduler.data.system.JavaInformation
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
-import com.sos.scheduler.engine.common.event.EventIdGenerator
-import com.sos.scheduler.engine.common.event.collector.EventCollector
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
-import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
-import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
-import com.sos.scheduler.engine.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState}
-import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
-import com.sos.scheduler.engine.data.scheduler.{SchedulerId, SchedulerInitiated, SchedulerOverview, SchedulerState}
-import com.sos.scheduler.engine.data.system.JavaInformation
+import com.sos.scheduler.engine.data.scheduler.{SchedulerInitiated, SchedulerOverview, SchedulerState}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

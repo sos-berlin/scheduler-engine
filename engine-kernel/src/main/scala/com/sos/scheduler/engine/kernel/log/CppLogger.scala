@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.log
 
 import com.google.common.base.Splitter
-import com.sos.scheduler.engine.common.log.LogLevel
-import com.sos.scheduler.engine.common.log.LogLevel.LevelLogger
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.common.log.LogLevel
+import com.sos.jobscheduler.common.log.LogLevel.LevelLogger
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 

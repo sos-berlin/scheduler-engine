@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.event
 
 import com.google.inject.ImplementedBy
-import com.sos.scheduler.engine.common.event.collector.EventCollector
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.data.event._
+import com.sos.jobscheduler.common.event.collector.EventCollector
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.data.event._
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderEvent, OrderKey}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.event.JocOrderStatisticsChangedSource._

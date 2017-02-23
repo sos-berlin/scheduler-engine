@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1048
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.jobscheduler.common.scalautil.AutoClosing._
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore

@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.data.filebaseds
 
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits.RichJsValue
-import com.sos.scheduler.engine.data.filebased.TypedPath._
-import com.sos.scheduler.engine.data.filebased.{FileBasedType, TypedPath}
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.base.sprayjson.SprayJson.implicits.RichJsValue
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.filebased.TypedPath._
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.lock.LockPath

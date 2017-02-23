@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.client.common
 
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.XmlSources.stringToSource
 import com.sos.scheduler.engine.client.common.RemoteSchedulers._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
-import com.sos.scheduler.engine.common.scalautil.xmls.XmlSources.stringToSource
 import javax.xml.stream.events.StartElement
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

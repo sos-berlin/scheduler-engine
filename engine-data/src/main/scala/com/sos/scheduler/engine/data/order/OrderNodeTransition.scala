@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.base.sprayjson.typed.{Subtype, TypedJsonFormat}
-import com.sos.scheduler.engine.data.job.ReturnCode
+import com.sos.jobscheduler.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.data.job.ReturnCode
 import spray.json.DefaultJsonProtocol._
 
 /**

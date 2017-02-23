@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.api.{ProcessClassClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.HasViewCompanionDirectives.viewReturnParameter
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._

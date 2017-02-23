@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.kernel.job
 
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.job.{TaskId, TaskPersistentState, JobPersistentState}
+import com.sos.scheduler.engine.data.job.{JobPersistentState, TaskPersistentState}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
-import javax.annotation.Nullable
 import java.time.{Duration, Instant}
-import com.sos.scheduler.engine.common.time.JodaJavaTimeConversions.implicits._
+import javax.annotation.Nullable
 
 private[job] trait JobPersistence {
   this: Job =>

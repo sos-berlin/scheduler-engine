@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js606;
 
 import com.google.common.io.Files;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.order.OrderFinished;
 import com.sos.scheduler.engine.eventbus.HotEventHandler;
 import com.sos.scheduler.engine.test.SchedulerTest;

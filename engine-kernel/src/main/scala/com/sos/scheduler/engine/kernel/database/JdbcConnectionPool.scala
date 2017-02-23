@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.common.concurrent.ThrottledExecutionContext
-import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.concurrent.ThrottledExecutionContext
+import com.sos.jobscheduler.common.scalautil.HasCloser
 import com.sos.scheduler.engine.kernel.database.JdbcConnectionPool._
 import com.typesafe.config.Config
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}

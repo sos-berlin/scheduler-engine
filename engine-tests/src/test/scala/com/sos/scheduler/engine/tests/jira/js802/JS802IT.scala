@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js802
 
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.job.{TaskEnded, TaskKey}
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderStarted}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

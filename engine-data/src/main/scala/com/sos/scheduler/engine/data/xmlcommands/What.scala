@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.xmlcommands
 
-import com.sos.scheduler.engine.base.generic.IsString
+import com.sos.jobscheduler.base.generic.IsString
 
 sealed trait What extends IsString
 

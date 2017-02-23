@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.kernel.database
 
-import com.sos.scheduler.engine.common.concurrent.ParallelismCounter
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.concurrent.ParallelismCounter
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.typesafe.config.ConfigFactory
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

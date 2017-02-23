@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.eventbus.annotated;
 
-import com.sos.scheduler.engine.data.event.Event;
-import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.jobscheduler.data.event.Event;
+import com.sos.jobscheduler.data.event.KeyedEvent;
 import com.sos.scheduler.engine.eventbus.EventHandlerAnnotated;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import java.lang.reflect.InvocationTargetException;

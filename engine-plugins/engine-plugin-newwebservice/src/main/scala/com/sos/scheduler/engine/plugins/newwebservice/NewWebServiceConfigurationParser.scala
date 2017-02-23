@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.plugins.newwebservice.configuration.NewWebServicePluginConfiguration
 import javax.xml.transform.Source
 

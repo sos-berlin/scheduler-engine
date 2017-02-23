@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.scheduler.job.stdout_text
 
-import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
+import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.data.job.{JobPath, TaskClosed}
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

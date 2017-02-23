@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.tests.jira.js1395
 
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEnded, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus

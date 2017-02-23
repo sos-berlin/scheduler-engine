@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1103
 
-import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
+import com.sos.jobscheduler.common.scalautil.SideEffect.ImplicitSideEffect
 
 final class ExtraOrderGeneratorJob extends sos.spooler.Job_impl {
 

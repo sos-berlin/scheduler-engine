@@ -1,17 +1,19 @@
 package com.sos.scheduler.engine.tests.jira.js973
 
-import com.sos.scheduler.engine.base.generic.IsString
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder._
-import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskStarted}
+import com.sos.jobscheduler.base.generic.IsString
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.Futures._
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.utils.FreeTcpPortFinder._
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent}
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.jobscheduler.data.order.OrderId
+import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.kernel.job.JobSubsystemClient

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.scheduler.engine.base.convert.ConvertiblePartialFunctions._
-import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
+import com.sos.jobscheduler.base.convert.ConvertiblePartialFunctions._
+import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import scala.language.implicitConversions
 import spray.json._

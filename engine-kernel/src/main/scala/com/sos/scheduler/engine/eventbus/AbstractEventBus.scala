@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.eventbus
 
 import com.google.common.collect.{HashMultimap, Multimap}
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.eventbus.AbstractEventBus.{logger, matches}
 import com.sos.scheduler.engine.eventbus.annotated.MethodEventSubscriptionFactory
 import scala.collection.JavaConversions._

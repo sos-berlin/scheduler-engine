@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.scheduler.engine.data.folder.FolderPath
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.OrderProcessingState.{NotPlanned, Setback}
-import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner

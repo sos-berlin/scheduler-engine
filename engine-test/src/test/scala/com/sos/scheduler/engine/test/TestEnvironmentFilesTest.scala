@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.utils.JavaResource
 import java.nio.file.Files.{createTempDirectory, delete, exists}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

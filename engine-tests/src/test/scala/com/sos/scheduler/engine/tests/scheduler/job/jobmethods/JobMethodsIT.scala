@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.tests.scheduler.job.jobmethods
 
-import com.sos.scheduler.engine.base.utils.ScalazStyle._
+import com.sos.jobscheduler.base.utils.ScalazStyle._
 import com.sos.scheduler.engine.data.job.JobPath
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

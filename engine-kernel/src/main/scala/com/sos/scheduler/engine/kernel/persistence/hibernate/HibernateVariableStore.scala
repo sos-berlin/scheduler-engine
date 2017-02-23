@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.data.job.TaskId
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.scheduler.VariablePersistentState
 import com.sos.scheduler.engine.persistence.entities.{VariableEntity, VariableEntityConverter}
 import javax.inject.{Inject, Singleton}

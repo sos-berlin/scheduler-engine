@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.log
 
-import com.sos.scheduler.engine.base.generic.IsString
+import com.sos.jobscheduler.base.generic.IsString
 
 /**
   * @author Joacim Zschimmer

@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1322;
 
-import com.sos.scheduler.engine.data.filebased.AbsolutePath;
+import com.sos.jobscheduler.data.filebased.AbsolutePath;
 import com.sos.scheduler.engine.data.filebased.FileBasedType;
 import com.sos.scheduler.engine.data.job.JobPath;
 import com.sos.scheduler.engine.kernel.plugin.AbstractPlugin;

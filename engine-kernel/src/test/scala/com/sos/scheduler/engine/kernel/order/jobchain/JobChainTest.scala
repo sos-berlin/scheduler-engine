@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.order.jobchain
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain.allPredecessors
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChainTest._

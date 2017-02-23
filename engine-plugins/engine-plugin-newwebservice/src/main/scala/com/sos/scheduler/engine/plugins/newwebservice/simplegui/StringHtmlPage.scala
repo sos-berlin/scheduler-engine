@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.jobscheduler.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.client.web.SchedulerUris
-import com.sos.scheduler.engine.data.event.{EventId, Snapshot}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import scalatags.Text.all._
 import spray.http.Uri

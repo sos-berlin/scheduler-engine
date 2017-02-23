@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test.binary
 
-import com.sos.scheduler.engine.data.log.SchedulerLogLevel
-import com.sos.scheduler.engine.data.scheduler.SchedulerId
+import com.sos.jobscheduler.data.log.SchedulerLogLevel
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.main.CppBinaries
 import java.io.File
 

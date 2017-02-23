@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.scheduler.comapi.javascript
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.common.scalautil.Futures.implicits._
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.test.SchedulerTestUtils._

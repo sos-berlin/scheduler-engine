@@ -1,10 +1,11 @@
 package com.sos.scheduler.engine.client.web
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.event.{Event, EventId, EventRequest, ReverseEventRequest}
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.filebased.FileBasedEvent
-import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobDescription, JobEvent, JobOverview, JobPath, TaskEvent, TaskId}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobEvent, JobOverview, JobPath, TaskEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{JobChainEvent, OrderDetailed, OrderOverview, OrderSourceType}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath}

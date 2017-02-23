@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1026
 
 import com.google.common.collect.ImmutableList
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.job.{TaskDetailed, TaskEnded, TaskKey}
 import com.sos.scheduler.engine.test.SchedulerTestUtils.taskDetailed
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest

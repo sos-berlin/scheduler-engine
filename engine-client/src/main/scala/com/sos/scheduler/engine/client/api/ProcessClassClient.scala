@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.event.Snapshot
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.event.Snapshot
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import scala.collection.immutable

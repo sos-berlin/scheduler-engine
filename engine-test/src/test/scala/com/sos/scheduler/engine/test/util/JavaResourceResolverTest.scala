@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.util
 
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.test.util.JavaResourceResolver.resourcePatternToUrls
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

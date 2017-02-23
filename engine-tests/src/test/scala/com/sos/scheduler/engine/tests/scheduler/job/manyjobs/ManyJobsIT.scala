@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.scheduler.job.manyjobs
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.data.event.KeyedEvent
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.job.{JobPath, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode

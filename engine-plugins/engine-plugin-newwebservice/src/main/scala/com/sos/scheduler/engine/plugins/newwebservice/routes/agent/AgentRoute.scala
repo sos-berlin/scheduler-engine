@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.agent
 
 import akka.actor.ActorRefFactory
-import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.jobscheduler.agent.client.AgentClient
+import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.completeWithError
+import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.client.api.ProcessClassClient
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.completeWithError
-import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._

@@ -3,7 +3,7 @@
 #include "spooler.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__cppproxy__SpoolerC.h"
 #include "../javaproxy/com__sos__scheduler__engine__kernel__event__EventSubsystem.h"
-#include "../javaproxy/com__sos__scheduler__engine__data__event__KeyedEvent.h"
+#include "../javaproxy/com__sos__jobscheduler__data__event__KeyedEvent.h"
 #include "../javaproxy/java__lang__String.h"
 
 using namespace std;
@@ -11,7 +11,7 @@ using namespace std;
 namespace sos {
 namespace scheduler {
 
-typedef javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent KeyedEventJ;
+typedef javaproxy::com::sos::jobscheduler::data::event::KeyedEvent KeyedEventJ;
 typedef javaproxy::com::sos::scheduler::engine::kernel::event::EventSubsystem EventSubsystemJ;
 
 //-------------------------------------------------------------------------------------------static

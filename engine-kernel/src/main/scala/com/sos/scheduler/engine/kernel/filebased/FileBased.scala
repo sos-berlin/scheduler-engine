@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
-import com.sos.scheduler.engine.common.scalautil.SetOnce
-import com.sos.scheduler.engine.common.xml.XmlUtils.xmlBytesToString
+import com.sos.jobscheduler.common.scalautil.Collections.emptyToNone
+import com.sos.jobscheduler.common.scalautil.SetOnce
+import com.sos.jobscheduler.common.xml.XmlUtils.xmlBytesToString
+import com.sos.jobscheduler.data.filebased._
 import com.sos.scheduler.engine.cplusplus.runtime.Sister
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.filebased._
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedObstacle, FileBasedOverview, FileBasedState, FileBasedView}
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue

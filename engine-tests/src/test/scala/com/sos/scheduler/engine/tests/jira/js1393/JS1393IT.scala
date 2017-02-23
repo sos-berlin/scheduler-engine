@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1393
 
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.jobscheduler.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration

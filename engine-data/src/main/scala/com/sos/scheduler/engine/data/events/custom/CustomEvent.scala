@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.data.events.custom
 
-import com.sos.scheduler.engine.base.generic.IsString
-import com.sos.scheduler.engine.base.sprayjson.typed.{Subtype, TypedJsonFormat}
-import com.sos.scheduler.engine.data.event.Event
+import com.sos.jobscheduler.base.generic.IsString
+import com.sos.jobscheduler.base.sprayjson.typed.{Subtype, TypedJsonFormat}
+import com.sos.jobscheduler.data.event.Event
 
 /**
   * @author Joacim Zschimmer

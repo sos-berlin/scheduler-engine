@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.tests.jira.js1483
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.soslicense.LicenseKeyParameterIsMissingException
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
+import com.sos.jobscheduler.common.scalautil.Futures.implicits.RichFutures
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.soslicense.LicenseKeyParameterIsMissingException
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.Stopwatch
+import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest

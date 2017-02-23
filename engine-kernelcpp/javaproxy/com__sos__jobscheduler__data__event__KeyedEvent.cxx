@@ -2,12 +2,12 @@
 
 #include "_precompiled.h"
 
-#include "com__sos__scheduler__engine__data__event__KeyedEvent.h"
+#include "com__sos__jobscheduler__data__event__KeyedEvent.h"
 #include "java__lang__Object.h"
 #include "java__lang__String.h"
 #include "scala__Option.h"
 
-namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace data { namespace event { 
+namespace javaproxy { namespace com { namespace sos { namespace jobscheduler { namespace data { namespace event { 
 
 struct KeyedEvent__class : ::zschimmer::javabridge::Class
 {
@@ -23,12 +23,12 @@ struct KeyedEvent__class : ::zschimmer::javabridge::Class
     ::zschimmer::javabridge::Method const _productElement__I__method;
     ::zschimmer::javabridge::Method const _productPrefix____method;
     ::zschimmer::javabridge::Method const _toString____method;
-    ::zschimmer::javabridge::Static_method const _unapply__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method;
+    ::zschimmer::javabridge::Static_method const _unapply__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method;
 
     static const ::zschimmer::javabridge::class_factory< KeyedEvent__class > class_factory;
 };
 
-const ::zschimmer::javabridge::class_factory< KeyedEvent__class > KeyedEvent__class::class_factory ("com.sos.scheduler.engine.data.event.KeyedEvent");
+const ::zschimmer::javabridge::class_factory< KeyedEvent__class > KeyedEvent__class::class_factory ("com.sos.jobscheduler.data.event.KeyedEvent");
 
 KeyedEvent__class::KeyedEvent__class(const string& class_name) :
     ::zschimmer::javabridge::Class(class_name)
@@ -41,7 +41,7 @@ KeyedEvent__class::KeyedEvent__class(const string& class_name) :
     ,_productElement__I__method(this, "productElement", "(I)Ljava/lang/Object;")
     ,_productPrefix____method(this, "productPrefix", "()Ljava/lang/String;")
     ,_toString____method(this, "toString", "()Ljava/lang/String;")
-    ,_unapply__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method(this, "unapply", "(Lcom/sos/scheduler/engine/data/event/KeyedEvent;)Lscala/Option;"){}
+    ,_unapply__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method(this, "unapply", "(Lcom/sos/jobscheduler/data/event/KeyedEvent;)Lscala/Option;"){}
 
 KeyedEvent__class::~KeyedEvent__class() {}
 
@@ -128,12 +128,12 @@ jint KeyedEvent::productArity() const {
     return result;
 }
 
-::javaproxy::scala::Option KeyedEvent::unapply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::scheduler::engine::data::event::KeyedEvent >& p0) {
+::javaproxy::scala::Option KeyedEvent::unapply(const ::zschimmer::javabridge::proxy_jobject< ::javaproxy::com::sos::jobscheduler::data::event::KeyedEvent >& p0) {
     ::zschimmer::javabridge::raw_parameter_list<1> parameter_list;
     parameter_list._jvalues[0].l = p0.get_jobject();
     KeyedEvent__class* cls = KeyedEvent__class::class_factory.clas();
     ::javaproxy::scala::Option result;
-    result.steal_local_ref(cls->_unapply__Lcom_sos_scheduler_engine_data_event_KeyedEvent_2__method.jobject_call(cls->get_jclass(), parameter_list));
+    result.steal_local_ref(cls->_unapply__Lcom_sos_jobscheduler_data_event_KeyedEvent_2__method.jobject_call(cls->get_jclass(), parameter_list));
     return result;
 }
 
@@ -148,4 +148,4 @@ void KeyedEvent::Lazy_class::initialize() const {
 }
 
 
-}}}}}}}
+}}}}}}

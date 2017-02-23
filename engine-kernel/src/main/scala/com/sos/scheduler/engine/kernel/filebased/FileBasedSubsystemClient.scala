@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.filebased
 
-import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, TypedPath}
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._

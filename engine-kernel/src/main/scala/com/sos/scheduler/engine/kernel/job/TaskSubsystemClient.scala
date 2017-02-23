@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.job
 
-import com.sos.scheduler.engine.data.job.{TaskDetailed, TaskId, TaskOverview}
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.{TaskDetailed, TaskOverview}
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{directOrSchedulerThreadFuture, inSchedulerThread}
 import javax.inject.{Inject, Singleton}

@@ -1,12 +1,13 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.folder.FolderPath
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.{ProcessClassClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.common.sprayutils.SprayUtils.pathSegments
-import com.sos.scheduler.engine.data.agent.AgentAddress
-import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.FileBasedState
-import com.sos.scheduler.engine.data.folder.FolderPath
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext

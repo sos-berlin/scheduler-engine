@@ -1,13 +1,14 @@
 package com.sos.scheduler.engine.tests.jira.js1523
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.job.ReturnCode
+import com.sos.jobscheduler.data.message.MessageCode
+import com.sos.jobscheduler.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
+import com.sos.jobscheduler.http.server.heartbeat.HeartbeatService
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.log.ErrorLogged
-import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.http.client.heartbeat.{HeartbeatRequestor, HttpHeartbeatTiming}
-import com.sos.scheduler.engine.http.server.heartbeat.HeartbeatService
 import com.sos.scheduler.engine.test.ImplicitTimeout
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest

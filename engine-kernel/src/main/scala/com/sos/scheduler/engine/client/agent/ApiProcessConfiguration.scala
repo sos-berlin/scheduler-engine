@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.agent
 
-import com.sos.scheduler.engine.agent.data.commands.{StartApiTask, StartNonApiTask, StartTask}
+import com.sos.jobscheduler.agent.data.commands.{StartApiTask, StartNonApiTask, StartTask}
 
 /**
  * @author Joacim Zschimmer

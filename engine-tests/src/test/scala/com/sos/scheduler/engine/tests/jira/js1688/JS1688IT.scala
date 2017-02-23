@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1688
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.time.ScalaTime._
+import com.sos.jobscheduler.data.job.TaskId
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.ModifyJobCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -15,7 +16,7 @@ import org.scalatest.junit.JUnitRunner
 /**
   * @author Joacim Zschimmer
   */
-@RunWith(classOf[JUnitRunner])
+@org.junit.runner.RunWith(classOf[JUnitRunner])
 final class JS1688IT extends FreeSpec with ScalaSchedulerTest {
 
   "JS-1688" in {

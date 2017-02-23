@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.utils
 
-import com.sos.scheduler.engine.common.utils.BeanAccessor._
+import com.sos.scheduler.engine.common.utils.BeanAccessor.BeanClassAccessor
 import java.beans.Introspector.getBeanInfo
 import java.lang.reflect.Method
 

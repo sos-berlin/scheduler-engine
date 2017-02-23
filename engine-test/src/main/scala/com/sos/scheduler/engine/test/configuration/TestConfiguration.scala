@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.test.configuration
 
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.log.ErrorLogged
-import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.kernel.settings.{CppSettings, CppSettingName}
+import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.ResourceToFileTransformer
 import com.sos.scheduler.engine.test.binary.CppBinariesDebugMode
 import scala.language.existentials

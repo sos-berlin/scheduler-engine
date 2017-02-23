@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.common.async
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
+import com.sos.jobscheduler.base.utils.ScalaUtils.SwitchStatement
+import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.scheduler.engine.common.async.TimedCall._
-import com.sos.scheduler.engine.common.scalautil.Logger
 import java.time.Instant
 import java.util.concurrent.Callable
 import scala.util.control.NonFatal

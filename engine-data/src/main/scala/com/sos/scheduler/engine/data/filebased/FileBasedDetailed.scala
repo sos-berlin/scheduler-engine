@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.data.filebased
 
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
-import com.sos.scheduler.engine.base.sprayjson.SprayJson.JsonFormats._
+import com.sos.jobscheduler.base.sprayjson.JavaTimeJsonFormats.implicits._
+import com.sos.jobscheduler.base.sprayjson.SprayJson.JsonFormats._
 import java.nio.file.Path
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._

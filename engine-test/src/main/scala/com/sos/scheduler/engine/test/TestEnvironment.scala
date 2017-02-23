@@ -2,18 +2,18 @@ package com.sos.scheduler.engine.test
 
 import com.google.common.base.Strings.nullToEmpty
 import com.google.common.io.{Files ⇒ GuavaFiles}
-import com.sos.scheduler.engine.common.scalautil.FileUtils.createShortNamedDirectory
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.common.scalautil.SideEffect._
+import com.sos.jobscheduler.common.scalautil.FileUtils.createShortNamedDirectory
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.common.scalautil.SideEffect._
+import com.sos.jobscheduler.common.system.OperatingSystem
+import com.sos.jobscheduler.common.system.OperatingSystem.operatingSystem
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.jobscheduler.data.filebased.TypedPath
+import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.common.system.Files.{makeDirectories, makeDirectory, removeDirectoryContentRecursivly, removeDirectoryRecursivly}
-import com.sos.scheduler.engine.common.system.OperatingSystem
-import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
-import com.sos.scheduler.engine.common.utils.JavaResource
-import com.sos.scheduler.engine.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.order.OrderKey
-import com.sos.scheduler.engine.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.main.{CppBinaries, CppBinary}
 import com.sos.scheduler.engine.test.TestEnvironment._

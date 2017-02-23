@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.client.web
 
 import akka.actor.ActorRefFactory
 import akka.util.ByteString
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.sprayutils.{XmlBytes, XmlString}
 import com.sos.scheduler.engine.client.api.CommandClient
 import com.sos.scheduler.engine.client.web.WebCommandClient._
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.sprayutils.{XmlBytes, XmlString}
 import java.io.ByteArrayInputStream
 import scala.concurrent.Future
 import scala.concurrent.duration._

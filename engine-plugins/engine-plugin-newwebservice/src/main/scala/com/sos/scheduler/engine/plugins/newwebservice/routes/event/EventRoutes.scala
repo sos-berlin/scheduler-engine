@@ -1,11 +1,10 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
+import com.sos.jobscheduler.common.event.collector.EventDirectives._
+import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.utils.IntelliJUtils.intelliJuseImports
+import com.sos.jobscheduler.data.event._
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
-import com.sos.scheduler.engine.common.event.collector.EventDirectives._
-import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
-import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.scheduler.engine.data.event._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.event.DirectEventClient

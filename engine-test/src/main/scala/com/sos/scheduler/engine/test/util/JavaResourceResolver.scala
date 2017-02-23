@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.test.util
 
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits.RichArray
+import com.sos.jobscheduler.common.scalautil.Collections.implicits.RichArray
 import java.net.URL
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import scala.collection.immutable

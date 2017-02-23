@@ -15,7 +15,7 @@ import java.io.IOException;
 public class JS868GlobalParamsIT extends JS868Base {
 
     private final static String orderName = "test_chain_" + (OperatingSystemJava.isWindows ? "windows" : "unix");
-    
+
     @Test
 	public void test() throws InterruptedException, IOException {
         CommandBuilder util = new CommandBuilder();

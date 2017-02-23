@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.job.internal
 
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.kernel.messagecode.MessageCodeHandler
 import com.sos.scheduler.engine.kernel.order.Order
 import scala.concurrent.Future

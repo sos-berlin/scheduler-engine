@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.client.common
 
-import com.sos.scheduler.engine.base.convert.As
-import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.base.convert.As
+import com.sos.jobscheduler.common.scalautil.Collections.implicits._
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXMLEventReader
+import com.sos.jobscheduler.data.message.MessageCode
 import javax.xml.transform.Source
 import scala.collection.immutable
 

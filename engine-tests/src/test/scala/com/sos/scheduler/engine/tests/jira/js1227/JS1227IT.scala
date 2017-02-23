@@ -1,9 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1227
 
-import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
+import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.jobscheduler.data.message.MessageCode
 import com.sos.scheduler.engine.data.order.{OrderStarted, OrderStepEnded, OrderSuspended}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.HibernateOrderStore

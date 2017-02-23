@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.common.xml
 
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaStax.getCommonXMLInputFactory
 import com.sos.scheduler.engine.common.xml.CppXmlUtils.{domElementToStaxSource, _}
 import com.sos.scheduler.engine.common.xml.CppXmlUtilsTest._
 import java.nio.charset.StandardCharsets.{ISO_8859_1, US_ASCII, UTF_16BE, UTF_8}

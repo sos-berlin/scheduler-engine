@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.persistence;
 
-import com.sos.scheduler.engine.data.scheduler.SchedulerId;
+import com.sos.jobscheduler.data.scheduler.SchedulerId;
 import java.time.Instant;
-
 import java.util.Date;
 
 public final class SchedulerDatabases {

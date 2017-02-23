@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.newkernel.job
 
-import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.scheduler.engine.newkernel.job.JobConfigurationXMLParserTest._
 import org.joda.time.DateTimeZone
 import org.junit.runner.RunWith

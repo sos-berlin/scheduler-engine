@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.test
 
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.client.command.SchedulerClientFactory
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.xmlcommands.XmlCommand
 import com.sos.scheduler.engine.kernel.extrascheduler.ExtraScheduler
 import com.sos.scheduler.engine.main.CppBinary

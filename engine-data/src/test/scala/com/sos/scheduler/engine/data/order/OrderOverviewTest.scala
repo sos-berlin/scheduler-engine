@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.data.order
 
-import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.jobscheduler.data.agent.AgentAddress
+import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
-import com.sos.scheduler.engine.data.job.TaskId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order.OrderObstacle.FileBasedObstacles
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath

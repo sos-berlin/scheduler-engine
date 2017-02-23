@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.data.job;
 
-import com.sos.scheduler.engine.base.sprayjson.JavaEnumJsonFormat;
+import com.sos.jobscheduler.base.sprayjson.JavaEnumJsonFormat;
 import spray.json.JsonFormat;
 
 public enum JobState {

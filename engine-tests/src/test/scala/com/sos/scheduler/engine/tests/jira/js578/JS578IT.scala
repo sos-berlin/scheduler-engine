@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js578
 
-import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient

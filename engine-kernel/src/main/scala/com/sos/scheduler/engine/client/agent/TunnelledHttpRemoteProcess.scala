@@ -1,10 +1,10 @@
 package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
-import com.sos.scheduler.engine.agent.client.AgentClient
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
-import com.sos.scheduler.engine.common.scalautil.HasCloser
-import com.sos.scheduler.engine.tunnel.client.{TcpToHttpBridge, WebTunnelClient}
+import com.sos.jobscheduler.agent.client.AgentClient
+import com.sos.jobscheduler.common.scalautil.Closers.implicits._
+import com.sos.jobscheduler.common.scalautil.HasCloser
+import com.sos.jobscheduler.tunnel.client.{TcpToHttpBridge, WebTunnelClient}
 import java.net.InetSocketAddress
 
 /**

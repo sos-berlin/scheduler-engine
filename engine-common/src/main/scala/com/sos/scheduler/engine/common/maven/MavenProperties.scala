@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.common.maven
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
-import com.sos.scheduler.engine.common.utils.JavaResource
+import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
+import com.sos.jobscheduler.common.utils.JavaResource
+import com.sos.scheduler.engine.common.maven.MavenProperties._
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import scala.collection.JavaConversions._
-import MavenProperties._
 
 final class MavenProperties(resourcePath: JavaResource) {
 

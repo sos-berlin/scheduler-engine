@@ -1,9 +1,10 @@
 package com.sos.scheduler.engine.kernel.event
 
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, KeyedEvent}
+import com.sos.jobscheduler.data.job.{ReturnCode, TaskId}
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
-import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
-import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, TaskClosed, TaskEnded, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.{SchedulerState, SchedulerStateChanged}

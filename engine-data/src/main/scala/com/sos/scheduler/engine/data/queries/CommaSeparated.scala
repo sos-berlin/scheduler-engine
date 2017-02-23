@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.data.queries
 
 import com.google.common.base.Splitter
-import com.sos.scheduler.engine.base.convert.As
-import com.sos.scheduler.engine.base.utils.ScalaUtils._
+import com.sos.jobscheduler.base.convert.As
+import com.sos.jobscheduler.base.utils.ScalaUtils._
 import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
