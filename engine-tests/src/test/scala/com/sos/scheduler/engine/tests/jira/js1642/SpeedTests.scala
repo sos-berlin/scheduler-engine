@@ -76,7 +76,7 @@ private[js1642] trait SpeedTests {
           val stopwatch = new Stopwatch
           for (orderKey ← 1 to n map { i ⇒ aJobChainPath orderKey s"adhoc-$i" })
             controller.scheduler executeXml OrderCommand(orderKey)
-          logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
+          logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "orders"))
         }
 
         "OrdersComplemented/OrdersOverview" in {
@@ -86,7 +86,7 @@ private[js1642] trait SpeedTests {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
             }
             webSchedulerClient.get[HttpData](_.order.complemented[OrderOverview](OrderQuery(JobChainQuery(isDistributed = Some(false))))) await TestTimeout
-            val s = stopwatch.itemsPerSecondString(n, "order")
+            val s = stopwatch.itemsPerSecondString(n, "orders")
             logger.info(s"OrdersComplemented/OrderOverview $testName: $s")
           }
         }
@@ -98,7 +98,7 @@ private[js1642] trait SpeedTests {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
             }
             webSchedulerClient.get[HttpData](_.order.complemented[OrderDetailed](OrderQuery(JobChainQuery(isDistributed = Some(false))))) await TestTimeout
-            val s = stopwatch.itemsPerSecondString(n, "order")
+            val s = stopwatch.itemsPerSecondString(n, "orders")
             logger.info(s"OrdersComplemented/OrderDetailed $testName: $s")
           }
         }
@@ -110,7 +110,7 @@ private[js1642] trait SpeedTests {
               case HttpEntity.NonEmpty(contentType, entity) ⇒ entity
             }
             webSchedulerClient.get[HttpData](_.uriString(Uri.Path("api/order/"), "isDistributed" → "false"), accept = `text/html`) await TestTimeout
-            val s = stopwatch.itemsPerSecondString(n, "order")
+            val s = stopwatch.itemsPerSecondString(n, "orders")
             logger.info(s"OrderHtmlPage $testName: $s")
           }
         }
@@ -119,7 +119,7 @@ private[js1642] trait SpeedTests {
           for (_ ← 1 to 5) {
             val stopwatch = new Stopwatch
             val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
-            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
+            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "orders"))
             assert(orderStatistics == JocOrderStatistics(
               total = n + 8,
               notPlanned = 0,
@@ -142,7 +142,7 @@ private[js1642] trait SpeedTests {
           for (_ ← 1 to 5) {
             val stopwatch = new Stopwatch
             webSchedulerClient.uncheckedExecute(<s/>) await TestTimeout
-            val s = stopwatch.itemsPerSecondString(n, "order")
+            val s = stopwatch.itemsPerSecondString(n, "orders")
             logger.info(s"<s/> $testName: $s")
           }
         }
@@ -153,14 +153,14 @@ private[js1642] trait SpeedTests {
           val stopwatch = new Stopwatch
           for (orderKey ← 1 to n map { i ⇒ xbJobChainPath orderKey s"distributed-adhoc-$i" })
             controller.scheduler executeXml OrderCommand(orderKey)
-          logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "order"))
+          logger.info("Adding orders: " + stopwatch.itemsPerSecondString(n, "orders"))
         }
 
         "JocOrderStatistics" in {
           for (_ ← 1 to 20) {
             val stopwatch = new Stopwatch
             val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
-            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "order"))
+            logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "orders"))
             assert(orderStatistics == JocOrderStatistics(
               total = 2*n + 8,
               notPlanned = 0,

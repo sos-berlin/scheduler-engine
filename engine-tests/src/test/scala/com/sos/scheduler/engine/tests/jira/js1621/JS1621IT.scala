@@ -26,7 +26,7 @@ final class JS1621IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     runJob(JobPath("/test"), variables = Map("n" → 1.toString))  // warm-up
 
     val result = runJob(JobPath("/test"), variables = Map("n" → n.toString))
-    logger.info(itemsPerSecondString(result.duration, n, "line"))
+    logger.info(itemsPerSecondString(result.duration, n, "lines"))
 
     val stdoutIterator = result.logString.lines collect { case StdoutRegex(line) ⇒ line }
     for (i ← 1 to n) assert(stdoutIterator.next() == stdoutLine(i))
