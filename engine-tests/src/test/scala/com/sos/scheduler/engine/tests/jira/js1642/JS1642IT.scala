@@ -391,7 +391,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     s"$parallelFactor simultaneously requests" in {
       val stopwatch = new Stopwatch
       (for (_ ← 1 to parallelFactor) yield testAllJocOrderStatisticsFuture(webSchedulerClient)) await TestTimeout
-      logger.info(stopwatch.itemsPerSecondString(parallelFactor, "testAllOrderStatistics", "testAllOrderStatistics"))
+      logger.info(stopwatch.itemsPerSecondString(parallelFactor, "testAllOrderStatistics"))
     }
 
     s"$xFolderPath" in {

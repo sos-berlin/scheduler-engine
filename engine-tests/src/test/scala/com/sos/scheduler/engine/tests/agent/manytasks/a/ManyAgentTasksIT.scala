@@ -30,7 +30,7 @@ final class ManyAgentTasksIT extends FreeSpec with ScalaSchedulerTest with Agent
     (for (orderId ← orderIds) yield
       startOrder(OrderCommand(TestJobChainPath orderKey orderId)).result
     ) await 600.s
-    logger.info(stopwatch.itemsPerSecondString(n, "order"))
+    logger.info(stopwatch.itemsPerSecondString(n, "orders"))
   }
 }
 

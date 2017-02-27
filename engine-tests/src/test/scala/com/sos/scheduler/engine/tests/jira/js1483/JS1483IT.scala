@@ -32,7 +32,7 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val n = 1000
     val stopwatch = new Stopwatch
     (for (_ ← 1 to n) yield startJob(TestJobPath).result) await (n / 1000 + 1) * TestTimeout
-    logger.info(stopwatch.itemsPerSecondString(n, "job"))
+    logger.info(stopwatch.itemsPerSecondString(n, "jobs"))
   }
 
   "Task start failure due to missing license key is stated in Job.state_text" in {
