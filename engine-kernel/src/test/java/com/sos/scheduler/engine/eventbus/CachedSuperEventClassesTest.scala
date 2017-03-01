@@ -29,6 +29,6 @@ object CachedSuperEventClassesTest {
   private case object XObject extends A with BEvent with CEvent with D with NoKeyEvent
 
   private case object YObject extends BEvent {
-    type Key = NoKey.type
+    type Key = NoKey
   }
 }
