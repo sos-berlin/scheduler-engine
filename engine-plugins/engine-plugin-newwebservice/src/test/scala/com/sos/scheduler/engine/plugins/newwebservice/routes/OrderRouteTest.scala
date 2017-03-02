@@ -67,13 +67,13 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     protected val eventCollector = new SchedulerEventCollector(EventCollector.Configuration.ForTest, eventIdGenerator)
     protected def executionContext = OrderRouteTest.this.executionContext
 
-    def fileBasedDetailed[P <: TypedPath](path: P): Future[Snapshot[FileBasedDetailed]] =
+    def fileBasedDetailed[P <: TypedPath](path: P): Future[Stamped[FileBasedDetailed]] =
       respondWith {
         assert(path == A1OrderKey)
         A1FileBasedDetailed
       }
 
-    def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]] =
+    def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Stamped[V]] =
       respondWith(
         implicitly[OrderView.Companion[V]] match {
           case OrderOverview ⇒ A1OrderOverview
@@ -89,14 +89,14 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
         })
     }
 
-    def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrderTreeComplemented[V]]] = {
+    def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[OrderTreeComplemented[V]]] = {
       assert(query == TestOrderQuery)
       for (snapshot ← ordersComplementedBy[V](query)) yield
         for (flat ← snapshot) yield
           OrderTreeComplemented.fromOrderComplemented(FolderPath.Root, flat)
     }
 
-    def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrdersComplemented[V]]] = {
+    def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[OrdersComplemented[V]]] = {
       assert(query == TestOrderQuery)
       respondWith(
         implicitly[OrderView.Companion[V]] match {
@@ -105,14 +105,14 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
         })
     }
 
-    def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]] = {
+    def jocOrderStatistics(query: JobChainNodeQuery): Future[Stamped[JocOrderStatistics]] = {
       assert(query.matchesAll)
       respondWith(TestOrderStatistics)
     }
 
     def overview = throw new NotImplementedError
 
-    private def respondWith[A](a: A) = Future.successful(Snapshot(TestEventId, a))
+    private def respondWith[A](a: A) = Future.successful(Stamped(TestEventId, a))
   }
 
   override protected def afterAll() = {
@@ -136,8 +136,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
-        assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
+        val snapshot = responseAs[Stamped[Orders[OrderOverview]]]
+        assert(snapshot == Stamped(TestEventId, Orders(TestOrderOverviews)))
       }
     }
   }
@@ -146,7 +146,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert(responseAs[Snapshot[Orders[OrderDetailed]]] == Snapshot(TestEventId, Orders(TestOrderDetaileds)))
+        assert(responseAs[Stamped[Orders[OrderDetailed]]] == Stamped(TestEventId, Orders(TestOrderDetaileds)))
       }
     }
   }
@@ -196,7 +196,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/aJobChain,1?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert(responseAs[Snapshot[OrderOverview]].value == A1OrderOverview)
+        assert(responseAs[Stamped[OrderOverview]].value == A1OrderOverview)
       }
     }
   }
@@ -206,7 +206,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/aJobChain,1?return=OrderDetailed&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert(responseAs[Snapshot[OrderDetailed]].value == A1OrderDetailed)
+        assert(responseAs[Stamped[OrderDetailed]].value == A1OrderDetailed)
       }
     }
   }
@@ -216,8 +216,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       "isSuspended" → JsFalse,
       "isOrderSourceType" → JsArray(JsString("Permanent")))
     Post("/api/order?return=OrderOverview", queryJson) ~> Accept(`application/json`) ~> route ~> check {
-      val snapshot = responseAs[Snapshot[Orders[OrderOverview]]]
-      assert(snapshot == Snapshot(TestEventId, Orders(TestOrderOverviews)))
+      val snapshot = responseAs[Stamped[Orders[OrderOverview]]]
+      assert(snapshot == Stamped(TestEventId, Orders(TestOrderOverviews)))
     }
   }
 
@@ -252,7 +252,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/?return=JocOrderStatistics&timeout=60s")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        assert(responseAs[Snapshot[JocOrderStatistics]].value == TestOrderStatistics)
+        assert(responseAs[Stamped[JocOrderStatistics]].value == TestOrderStatistics)
       }
     }
   }

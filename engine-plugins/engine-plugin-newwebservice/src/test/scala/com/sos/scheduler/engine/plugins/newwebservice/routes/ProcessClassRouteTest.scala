@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
 import com.sos.jobscheduler.data.agent.AgentAddress
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.{ProcessClassClient, SchedulerOverviewClient}
@@ -35,13 +35,13 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
 
   protected implicit def client = new ProcessClassClient with SchedulerOverviewClient {
 
-    def agentUris = Future.successful(Snapshot(1,
+    def agentUris = Future.successful(Stamped(1,
       Set(AgentAddress("http://agent-1.example.com"), AgentAddress("http://agent-2.example.com"))))
 
     def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery) =
       implicitly[ProcessClassView.Companion[V]] match {
 
-        case ProcessClassOverview ⇒ Future.successful(Snapshot(1,
+        case ProcessClassOverview ⇒ Future.successful(Stamped(1,
           query match {
             case PathQuery.All ⇒ List(
               AProcessClassOverview.asInstanceOf[V],
@@ -57,10 +57,10 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
       implicitly[ProcessClassView.Companion[V]] match {
         case ProcessClassOverview ⇒
           assert(processClassPath == AProcessClassOverview.path)
-          Future.successful(Snapshot(2, AProcessClassOverview.asInstanceOf[V]))
+          Future.successful(Stamped(2, AProcessClassOverview.asInstanceOf[V]))
         case ProcessClassDetailed ⇒
           assert(processClassPath == AProcessClassOverview.path)
-          Future.successful(Snapshot(2, AProcessClassDetailed.asInstanceOf[V]))
+          Future.successful(Stamped(2, AProcessClassDetailed.asInstanceOf[V]))
       }
 
     def overview = throw new NotImplementedError
@@ -79,8 +79,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
     for (uri ← List(s"$ProcessClassUri/?return=ProcessClassOverview")) {
       s"$uri" in {
         Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-          val snapshot = responseAs[Snapshot[List[ProcessClassOverview]]]
-          assert(snapshot == Snapshot(1, List(AProcessClassOverview, BProcessClassOverview)))
+          val snapshot = responseAs[Stamped[List[ProcessClassOverview]]]
+          assert(snapshot == Stamped(1, List(AProcessClassOverview, BProcessClassOverview)))
         }
       }
     }
@@ -88,8 +88,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
     for (uri ← List(s"$ProcessClassUri/A/?return=ProcessClassOverview")) {
       s"$uri" in {
         Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-          val snapshot = responseAs[Snapshot[List[ProcessClassOverview]]]
-          assert(snapshot == Snapshot(1, List(AProcessClassOverview)))
+          val snapshot = responseAs[Stamped[List[ProcessClassOverview]]]
+          assert(snapshot == Stamped(1, List(AProcessClassOverview)))
         }
       }
     }
@@ -97,8 +97,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
     for (uri ← List(s"$ProcessClassUri/A/PROCESS-CLASS?return=ProcessClassDetailed")) {
       s"$uri" in {
         Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-          val snapshot = responseAs[Snapshot[ProcessClassDetailed]]
-          assert(snapshot == Snapshot(2, AProcessClassDetailed))
+          val snapshot = responseAs[Stamped[ProcessClassDetailed]]
+          assert(snapshot == Stamped(2, AProcessClassDetailed))
         }
       }
     }
@@ -107,8 +107,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
   s"POST $ProcessClassUri" - {
     "All implicit" in {
       postJson(s"$ProcessClassUri?return=ProcessClassOverview", "{}") ~> route ~> check {
-        val snapshot = responseAs[Snapshot[List[ProcessClassOverview]]]
-        assert(snapshot == Snapshot(1, List(AProcessClassOverview, BProcessClassOverview)))
+        val snapshot = responseAs[Stamped[List[ProcessClassOverview]]]
+        assert(snapshot == Stamped(1, List(AProcessClassOverview, BProcessClassOverview)))
       }
     }
 
@@ -117,8 +117,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
           "path": "/"
         }"""
       postJson(s"$ProcessClassUri?return=ProcessClassOverview", query) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[List[ProcessClassOverview]]]
-        assert(snapshot == Snapshot(1, List(AProcessClassOverview, BProcessClassOverview)))
+        val snapshot = responseAs[Stamped[List[ProcessClassOverview]]]
+        assert(snapshot == Stamped(1, List(AProcessClassOverview, BProcessClassOverview)))
       }
     }
 
@@ -127,8 +127,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
           "path": "/A/"
         }"""
       postJson(s"$ProcessClassUri?return=ProcessClassOverview", query) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[List[ProcessClassOverview]]]
-        assert(snapshot == Snapshot(1, List(AProcessClassOverview)))
+        val snapshot = responseAs[Stamped[List[ProcessClassOverview]]]
+        assert(snapshot == Stamped(1, List(AProcessClassOverview)))
       }
     }
 
@@ -137,8 +137,8 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
           "path": "/A/PROCESS-CLASS"
         }"""
       postJson(s"$ProcessClassUri?return=ProcessClassOverview", query) ~> route ~> check {
-        val snapshot = responseAs[Snapshot[ProcessClassOverview]]
-        assert(snapshot == Snapshot(2, AProcessClassOverview))
+        val snapshot = responseAs[Stamped[ProcessClassOverview]]
+        assert(snapshot == Stamped(2, AProcessClassOverview))
       }
     }
 

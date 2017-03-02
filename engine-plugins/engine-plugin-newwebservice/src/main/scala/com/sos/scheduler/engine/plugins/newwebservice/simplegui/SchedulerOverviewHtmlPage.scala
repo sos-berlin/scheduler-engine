@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.jobscheduler.common.utils.JavaResource
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.system.JavaInformation
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.queries.OrderQuery
@@ -23,7 +23,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class SchedulerOverviewHtmlPage private(
-  protected val snapshot: Snapshot[SchedulerOverview],
+  protected val snapshot: Stamped[SchedulerOverview],
   protected val pageUri: Uri,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
@@ -148,7 +148,7 @@ object SchedulerOverviewHtmlPage {
     import scala.language.implicitConversions
 
     implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
-      ToHtmlPage[Snapshot[SchedulerOverview]] { (snapshot, pageUri) ⇒
+      ToHtmlPage[Stamped[SchedulerOverview]] { (snapshot, pageUri) ⇒
         Future.successful(new SchedulerOverviewHtmlPage(snapshot, pageUri, webServiceContext.uris))
       }
   }

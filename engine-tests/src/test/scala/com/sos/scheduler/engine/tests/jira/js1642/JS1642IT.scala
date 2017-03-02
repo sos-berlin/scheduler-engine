@@ -18,7 +18,7 @@ import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.jobscheduler.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.jobscheduler.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Stamped}
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.jobscheduler.data.scheduler.SchedulerId
@@ -175,7 +175,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-bJobChain", "1")),
           KeyedEvent(FileBasedAdded)(JobPath("/xFolder/test-b"))))
         {
-          nonEmpty.eventSnapshots
+          nonEmpty.stampeds
             .map { _.value }
             .filterNot { _ == KeyedEvent(FileBasedAdded)(FolderPath("/xFolder")) }  // For some reason, this event does not occur always under Linux
             .toSet
@@ -345,7 +345,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
       "ordersComplemented" in {
         val ordersComplemented = webSchedulerClient.get[JsObject](_.order.complemented[OrderOverview]()) await TestTimeout
-        val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Snapshot.EventIdJsonName) ++ Map(
+        val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Stamped.EventIdJsonName) ++ Map(
           "orders" → (ordersComplemented("orders").asJsArray map normalizeOrderOverviewJson),
           "usedTasks" → ordersComplemented("usedTasks").asJsArray,
           "usedJobs" → ordersComplemented("usedJobs").asJsArray))
@@ -354,7 +354,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
       "orderTreeComplemented" in {
         val tree = webSchedulerClient.get[JsObject](_.order.treeComplemented[OrderOverview]) await TestTimeout
-        val normalized = JsObject(tree.fields - Snapshot.EventIdJsonName) deepMapJsObjects normalizeOrderOverviewJson
+        val normalized = JsObject(tree.fields - Stamped.EventIdJsonName) deepMapJsObjects normalizeOrderOverviewJson
         assert(normalized == ExpectedOrderTreeComplementedJsObject)
       }
     }
@@ -362,7 +362,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "jocOrderStatistics" - {
     def testAllJocOrderStatisticsFuture(client: SchedulerClient): Future[JocOrderStatistics] =
-      for (Snapshot(_, orderStatistics: JocOrderStatistics) ← client.jocOrderStatistics(JobChainQuery.All)) yield {
+      for (Stamped(_, orderStatistics: JocOrderStatistics) ← client.jocOrderStatistics(JobChainQuery.All)) yield {
         assert(orderStatistics == JocOrderStatistics(
           total = 9,
           notPlanned = 0,
@@ -611,10 +611,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
   }
 
-  private def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Snapshot[A]]): A =
+  private def fetchWebAndDirect[A](body: SchedulerClient ⇒ Future[Stamped[A]]): A =
     fetchWebAndDirectEqualized[A](body, identity)
 
-  private def fetchWebAndDirectEqualized[A](body: SchedulerClient ⇒ Future[Snapshot[A]], equalize: A ⇒ A): A = {
+  private def fetchWebAndDirectEqualized[A](body: SchedulerClient ⇒ Future[Stamped[A]], equalize: A ⇒ A): A = {
     val a: A = awaitContent(body(webSchedulerClient))
     assert(equalize(a) == equalize(awaitContent(body(directSchedulerClient))))
     a
@@ -727,7 +727,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "WebSchedulerClient.getByUri" in {
     val jsObject = webSchedulerClient.getByUri[JsObject]("api") await TestTimeout
-    val Snapshot(_, directOverview) = directSchedulerClient.overview await TestTimeout
+    val Stamped(_, directOverview) = directSchedulerClient.overview await TestTimeout
     assert(jsObject.fields("version") == JsString(directOverview.version))
   }
 
@@ -749,23 +749,23 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   "Events" - {
     "JocOrderStatisticsChanged" in {
-      val Snapshot(aResponseEventId, EventSeq.NonEmpty(aKeyedEventSnapshots)) =
+      val Stamped(aResponseEventId, EventSeq.NonEmpty(aStampedKeyedEvents)) =
         webSchedulerClient.orderEvents[JocOrderStatisticsChanged](OrderQuery.All, after = EventId.BeforeFirst, TestTimeout) await TestTimeout
-      assert(aResponseEventId >= aKeyedEventSnapshots.last.eventId)
-      val aStatistics = aKeyedEventSnapshots.head.value.event.orderStatistics
+      assert(aResponseEventId >= aStampedKeyedEvents.last.eventId)
+      val aStatistics = aStampedKeyedEvents.head.value.event.orderStatistics
 
-      val bFuture = webSchedulerClient.orderEvents[JocOrderStatisticsChanged](OrderQuery.All, after = aKeyedEventSnapshots.last.eventId, TestTimeout)
+      val bFuture = webSchedulerClient.orderEvents[JocOrderStatisticsChanged](OrderQuery.All, after = aStampedKeyedEvents.last.eventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(false))
-      val Snapshot(bResponseEventId, EventSeq.NonEmpty(bKeyedEventSnapshots)) = bFuture await TestTimeout
-      assert(bResponseEventId >= bKeyedEventSnapshots.last.eventId)
-      val bStatistics = bKeyedEventSnapshots.head.value.event.orderStatistics
+      val Stamped(bResponseEventId, EventSeq.NonEmpty(bStampedKeyedEvents)) = bFuture await TestTimeout
+      assert(bResponseEventId >= bStampedKeyedEvents.last.eventId)
+      val bStatistics = bStampedKeyedEvents.head.value.event.orderStatistics
       assert(bStatistics == aStatistics.copy(suspended = aStatistics.suspended - 1, planned = aStatistics.planned + 1))
 
-      val cFuture = webSchedulerClient.orderEvents[JocOrderStatisticsChanged](OrderQuery.All, after = bKeyedEventSnapshots.last.eventId, TestTimeout)
+      val cFuture = webSchedulerClient.orderEvents[JocOrderStatisticsChanged](OrderQuery.All, after = bStampedKeyedEvents.last.eventId, TestTimeout)
       scheduler executeXml ModifyOrderCommand(aAdHocOrderKey, suspended = Some(true))
-      val Snapshot(cResponseEventId, EventSeq.NonEmpty(cKeyedEventSnapshots)) = cFuture await TestTimeout
-      assert(cResponseEventId >= cKeyedEventSnapshots.last.eventId)
-      val cStatistics = cKeyedEventSnapshots.head.value.event.orderStatistics
+      val Stamped(cResponseEventId, EventSeq.NonEmpty(cStampedKeyedEvents)) = cFuture await TestTimeout
+      assert(cResponseEventId >= cStampedKeyedEvents.last.eventId)
+      val cStatistics = cStampedKeyedEvents.head.value.event.orderStatistics
       assert(cStatistics == aStatistics)
     }
 
@@ -778,7 +778,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     addOptionalSpeedTests()
   }
 
-  private def awaitContent[A](future: Future[Snapshot[A]]): A =
+  private def awaitContent[A](future: Future[Stamped[A]]): A =
     (future await TestTimeout).value
 }
 

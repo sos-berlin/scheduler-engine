@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.html
 
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.passIf
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
@@ -132,10 +132,10 @@ object HtmlDirectives {
       }
   }
 
-  def completeTryHtml[A](snapshotFuture: ⇒ Future[Snapshot[A]])(
+  def completeTryHtml[A](snapshotFuture: ⇒ Future[Stamped[A]])(
     implicit
-      toHtmlPage: ToHtmlPage[Snapshot[A]],
-      toResponseMarshaller: ToResponseMarshaller[Snapshot[A]],
+      toHtmlPage: ToHtmlPage[Stamped[A]],
+      toResponseMarshaller: ToResponseMarshaller[Stamped[A]],
       webServiceContext: WebServiceContext,
       executionContext: ExecutionContext): Route
   =

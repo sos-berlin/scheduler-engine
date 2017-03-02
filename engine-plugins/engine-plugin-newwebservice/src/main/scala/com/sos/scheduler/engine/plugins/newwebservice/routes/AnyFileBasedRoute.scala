@@ -5,7 +5,7 @@ import com.sos.jobscheduler.common.event.collector.EventDirectives._
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
 import com.sos.jobscheduler.common.sprayutils.XmlString
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.client.api.{FileBasedClient, SchedulerOverviewClient}
@@ -89,7 +89,7 @@ trait AnyFileBasedRoute {
                 for (xml ← detailed.sourceXml) yield
                   XmlString(xml)
           onSuccess(future) {
-            case Snapshot(_, Some(xmlString)) ⇒
+            case Stamped(_, Some(xmlString)) ⇒
               complete(xmlString)
             case _ ⇒
               completeWithError(BadRequest, "Object has no XML source")

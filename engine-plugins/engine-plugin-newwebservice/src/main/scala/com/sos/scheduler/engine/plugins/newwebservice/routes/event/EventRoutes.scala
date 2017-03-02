@@ -24,11 +24,11 @@ import spray.routing._
 private[routes] object EventRoutes {
   intelliJuseImports(anyEventJsonFormat)
 
-  // Nests a simple Snapshot[NoKeyEvent] into the expected nested type for the event web service.
-  def nestIntoSeqSnapshot[E <: NoKeyEvent](snapshot: Snapshot[E]): Snapshot[EventSeq[Seq, AnyKeyedEvent]] = {
+  // Nests a simple Stamped[NoKeyEvent] into the expected nested type for the event web service.
+  def nestIntoSeqStamped[E <: NoKeyEvent](snapshot: Stamped[E]): Stamped[EventSeq[Seq, AnyKeyedEvent]] = {
     val eventId = snapshot.eventId
     val anyKeyedEvent = KeyedEvent(snapshot.value).asInstanceOf[AnyKeyedEvent]
-    Snapshot(eventId, EventSeq.NonEmpty(List(Snapshot(eventId, anyKeyedEvent))))
+    Stamped(eventId, EventSeq.NonEmpty(List(Stamped(eventId, anyKeyedEvent))))
   }
 
   def singleKeyEvents[E <: Event: ClassTag](key: E#Key, defaultReturnType: Option[String] = None)
@@ -41,8 +41,8 @@ private[routes] object EventRoutes {
           case request: EventRequest[_] ⇒
             client.eventsForKey[AnyEvent](request.asInstanceOf[EventRequest[AnyEvent]], key)
           case request: ReverseEventRequest[_] ⇒
-            for (responseSnapshot ← client.eventsReverseForKey[AnyEvent](request.asInstanceOf[ReverseEventRequest[AnyEvent]], key)) yield
-              for (events ← responseSnapshot) yield
+            for (stamped ← client.eventsReverseForKey[AnyEvent](request.asInstanceOf[ReverseEventRequest[AnyEvent]], key)) yield
+              for (events ← stamped) yield
                 EventSeq.NonEmpty(events)
         }
       }

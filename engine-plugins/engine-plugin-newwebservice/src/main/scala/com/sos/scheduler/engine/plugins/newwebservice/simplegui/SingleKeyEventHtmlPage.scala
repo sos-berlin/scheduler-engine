@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.jobscheduler.data.event.{Event, EventId, EventSeq, Snapshot}
+import com.sos.jobscheduler.data.event.{Event, EventId, EventSeq, Stamped}
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
@@ -23,7 +23,7 @@ import spray.http.Uri
   */
 final class SingleKeyEventHtmlPage private(
   key: Any,
-  protected val snapshot: Snapshot[EventSeq[immutable.Seq, Event]],
+  protected val snapshot: Stamped[EventSeq[immutable.Seq, Event]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -45,7 +45,7 @@ extends SchedulerHtmlPage {
       eventSeq match {
         case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", snapshot.eventId, ")")
         case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
-        case EventSeq.NonEmpty(eventSnapshots) ⇒
+        case EventSeq.NonEmpty(eventStampeds) ⇒
           table(cls := "SimpleTable")(
             thead(
               tr(
@@ -55,14 +55,14 @@ extends SchedulerHtmlPage {
                 th,
                 th)),
             tbody(
-              eventSnapshots map eventToTr))
+              eventStampeds map eventToTr))
       }))
 
-  private def eventToTr(eventSnapshot: Snapshot[Event]): Frag =
+  private def eventToTr(eventStamped: Stamped[Event]): Frag =
     tr(
       td(whiteSpace.nowrap)(
-        eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
-      eventToTds(eventSnapshot.value))
+        eventIdToLocalHtml(eventStamped.eventId, withDateBefore = midnightInstant)),
+      eventToTds(eventStamped.value))
 
   private def eventToTds(event: Event): Frag = {
     val eventName = event.getClass.getSimpleName stripSuffix "$"
@@ -99,8 +99,8 @@ object SingleKeyEventHtmlPage {
   import scala.language.implicitConversions
 
   def singleKeyEventToHtmlPage[E <: Event](key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-    ToHtmlPage[Snapshot[EventSeq[immutable.Seq, E]]] { (snapshot, pageUri) ⇒
-      for (schedulerOverviewSnapshot ← client.overview) yield
-        new SingleKeyEventHtmlPage(key, snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
+    ToHtmlPage[Stamped[EventSeq[immutable.Seq, E]]] { (snapshot, pageUri) ⇒
+      for (stamped ← client.overview) yield
+        new SingleKeyEventHtmlPage(key, snapshot, pageUri, webServiceContext.uris, stamped.value)
     }
 }

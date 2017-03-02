@@ -99,11 +99,11 @@ var jocOrderStatisticsWidget = (function() {
     showNewEvent(eventSeq.eventId);
     switch (eventSeq.TYPE) {
       case "NonEmpty":
-        var eventSnapshot = eventSeq.eventSnapshots[0];
-        var orderStatistics = eventSnapshot.orderStatistics;
+        var event = eventSeq.eventSnapshots[0];
+        var orderStatistics = event.orderStatistics;
         showOrderStatistics(orderStatistics);
         current = orderStatistics;
-        return eventSnapshot.eventId;
+        return event.eventId;
       case "Empty":  // Timed-out
         return eventSeq.lastEventId;
       case "Torn":

@@ -6,7 +6,7 @@ import com.sos.jobscheduler.common.auth.{UserAndPassword, UserId}
 import com.sos.jobscheduler.common.scalautil.AutoClosing.autoClosing
 import com.sos.jobscheduler.common.scalautil.Futures.implicits._
 import com.sos.jobscheduler.common.time.ScalaTime._
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.scheduler.engine.test.TestEnvironment
 import com.sos.scheduler.engine.tests.jira.js1671.WithAccessTokenJob._
 
@@ -18,7 +18,7 @@ private[js1671] final class WithAccessTokenJob extends sos.spooler.Job_impl {
   override def spooler_process() = {
     val credentials = UserAndPassword(UserId.Empty, SecretString(spooler_task.web_service_access_token))
     autoClosing(new StandardWebSchedulerClient(spooler.uri, credentials = Some(credentials))) { client ⇒
-      val Snapshot(_, overview) = client.overview await 10.s
+      val Stamped(_, overview) = client.overview await 10.s
       assert(overview.schedulerId == TestEnvironment.TestSchedulerId)
     }
 

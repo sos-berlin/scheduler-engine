@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.data.filebased.FileBasedView
 import com.sos.scheduler.engine.data.queries.PathQuery
@@ -12,9 +12,9 @@ import scala.concurrent.Future
   */
 trait FileBasedClient {
 
-  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]]
+  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Stamped[V]]
 
-  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]]
+  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Stamped[immutable.Seq[V]]]
 
-  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]]
+  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Stamped[immutable.Seq[V]]]
 }

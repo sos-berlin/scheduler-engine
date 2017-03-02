@@ -7,7 +7,7 @@ import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
 import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.jobscheduler.common.sprayutils.XmlString
 import com.sos.jobscheduler.common.utils.FreeTcpPortFinder._
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
@@ -112,22 +112,22 @@ final class NewWebServicePluginIT extends FreeSpec with ScalaSchedulerTest {
   }
 
   "FileBasedOverview" in {
-    val Snapshot(_, overview) = client.fileBased[ProcessClassPath, FileBasedOverview](ProcessClassPath.Default) await TestTimeout
+    val Stamped(_, overview) = client.fileBased[ProcessClassPath, FileBasedOverview](ProcessClassPath.Default) await TestTimeout
     assert(overview == FileBasedOverview(ProcessClassPath.Default, FileBasedState.active))
   }
 
   "FileBasedOverviews" in {
-    val Snapshot(_, overviews) = client.fileBaseds[ProcessClassPath, FileBasedOverview](PathQuery.All) await TestTimeout
+    val Stamped(_, overviews) = client.fileBaseds[ProcessClassPath, FileBasedOverview](PathQuery.All) await TestTimeout
     assert(overviews == Vector(FileBasedOverview(ProcessClassPath.Default, FileBasedState.active)))
   }
 
   "FileBasedDetailed" in {
-    val Snapshot(_, detailed) = client.fileBased[ProcessClassPath, FileBasedDetailed](ProcessClassPath.Default) await TestTimeout
+    val Stamped(_, detailed) = client.fileBased[ProcessClassPath, FileBasedDetailed](ProcessClassPath.Default) await TestTimeout
     assert(detailed.overview == FileBasedOverview(ProcessClassPath.Default, FileBasedState.active))
   }
 
   "FileBasedDetaileds" in {
-    val Snapshot(_, detaileds) = client.fileBaseds[ProcessClassPath, FileBasedDetailed](PathQuery.All) await TestTimeout
+    val Stamped(_, detaileds) = client.fileBaseds[ProcessClassPath, FileBasedDetailed](PathQuery.All) await TestTimeout
     assert((detaileds map { _.overview }) == Vector(FileBasedOverview(ProcessClassPath.Default, FileBasedState.active)))
   }
 

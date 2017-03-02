@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.jobscheduler.common.scalautil.Collections.implicits.RichTraversable
 import com.sos.jobscheduler.common.utils.JavaResource
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
@@ -31,7 +31,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class OrdersHtmlPage private(
-  protected val snapshot: Snapshot[OrdersComplemented[OrderOverview]],
+  protected val snapshot: Stamped[OrdersComplemented[OrderOverview]],
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
@@ -221,7 +221,7 @@ object OrdersHtmlPage {
     toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.js")))
 
   def toHtmlPage(
-    snapshot: Snapshot[OrdersComplemented[OrderOverview]],
+    snapshot: Stamped[OrdersComplemented[OrderOverview]],
     pageUri: Uri,
     query: OrderQuery,
     client: SchedulerOverviewClient,

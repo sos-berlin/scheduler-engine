@@ -9,7 +9,7 @@ import com.sos.jobscheduler.common.scalautil.HasCloser
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.data.agent.AgentAddress
-import com.sos.jobscheduler.data.event.{EventId, Snapshot}
+import com.sos.jobscheduler.data.event.{EventId, Stamped}
 import com.sos.scheduler.engine.client.api.ProcessClassClient
 import com.sos.scheduler.engine.data.processclass.ProcessClassView.Companion
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -45,7 +45,7 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
   protected val toAgentClient = (uri: AgentAddress) ⇒ AgentClient(uri.string)
 
   protected val client = new ProcessClassClient {
-    def agentUris = Future.successful(Snapshot(EventId(1), Set(agent.localUri)))
+    def agentUris = Future.successful(Stamped(EventId(1), Set(agent.localUri)))
 
     def processClasses[V <: ProcessClassView: Companion](q: PathQuery) = throw new NotImplementedError
 
@@ -81,7 +81,7 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
   "List of Agents" in {
     Get(s"/api/agent/") ~> Accept(`application/json`) ~> route ~> check {
       assert(status == OK)
-      assert(responseAs[Snapshot[Set[AgentAddress]]] == (client.agentUris await 10.s))
+      assert(responseAs[Stamped[Set[AgentAddress]]] == (client.agentUris await 10.s))
     }
   }
 

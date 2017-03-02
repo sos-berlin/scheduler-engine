@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
@@ -13,16 +13,16 @@ import scala.concurrent.Future
   */
 trait OrderClient {
 
-  def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Snapshot[V]]
+  def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey): Future[Stamped[V]]
 
-  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]]
+  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[immutable.Seq[V]]]
 
-  def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrdersComplemented[V]]]
+  def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[OrdersComplemented[V]]]
 
-  def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[OrderTreeComplemented[V]]]
+  def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[OrderTreeComplemented[V]]]
 
-  final def orders[V <: OrderView: OrderView.Companion]: Future[Snapshot[Seq[V]]] =
+  final def orders[V <: OrderView: OrderView.Companion]: Future[Stamped[Seq[V]]] =
     ordersBy(OrderQuery.All)
 
-  def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]]
+  def jocOrderStatistics(query: JobChainNodeQuery): Future[Stamped[JocOrderStatistics]]
 }

@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel
 import com.sos.jobscheduler.common.event.EventIdGenerator
 import com.sos.jobscheduler.common.event.collector.EventCollector
 import com.sos.jobscheduler.data.agent.AgentAddress
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerClient
@@ -45,31 +45,31 @@ final class DirectSchedulerClient @Inject private(
   protected val executionContext: ExecutionContext)
 extends SchedulerClient with DirectCommandClient with DirectEventClient with DirectOrderClient {
 
-  def overview: Future[Snapshot[SchedulerOverview]] =
-    respondWithSnapshotFuture { scheduler.overview }
+  def overview: Future[Stamped[SchedulerOverview]] =
+    respondWithStampedFuture { scheduler.overview }
 
-  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Snapshot[V]] =
-    respondWithSnapshotFuture {
+  def fileBased[P <: TypedPath, V <: FileBasedView: FileBasedView.Companion](path: P): Future[Stamped[V]] =
+    respondWithStampedFuture {
       fileBasedSubsystemRegister.fileBased(path).fileBasedView[V]
     }
 
-  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
-    respondWithSnapshotFuture {
+  def fileBaseds[P <: TypedPath: TypedPath.Companion, V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Stamped[immutable.Seq[V]]] =
+    respondWithStampedFuture {
       fileBasedSubsystemRegister.fileBaseds[P](query) map { _.fileBasedView[V] }
     }
 
-  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
-    respondWithSnapshotFuture {
+  def anyTypeFileBaseds[V <: FileBasedView: FileBasedView.Companion](query: PathQuery): Future[Stamped[immutable.Seq[V]]] =
+    respondWithStampedFuture {
       for (companion ← fileBasedSubsystemRegister.companions;
            seq ← fileBasedSubsystemRegister.fileBaseds[companion.Path](query)(companion.typedPathCompanion) map { _.fileBasedView[V] })
         yield seq
     }
 
   def order[V <: OrderView: OrderView.Companion](orderKey: OrderKey) =
-    respondWithSnapshotFuture { orderSubsystem.order(orderKey).view[V] }
+    respondWithStampedFuture { orderSubsystem.order(orderKey).view[V] }
 
-  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Snapshot[immutable.Seq[V]]] =
-    respondWithSnapshotFuture { orderSubsystem.orderViews[V](query) }
+  def ordersBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[immutable.Seq[V]]] =
+    respondWithStampedFuture { orderSubsystem.orderViews[V](query) }
 
   def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
     for (snapshot ← ordersComplementedBy[V](query))
@@ -77,7 +77,7 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
         yield OrderTreeComplemented.fromOrderComplemented(query.jobChainQuery.pathQuery.folderPath, o)
 
   def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
-    respondWithSnapshotFuture {
+    respondWithStampedFuture {
       complementOrders(orderSubsystem.orderViews[V](query))
     }
 
@@ -115,67 +115,67 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       (processClasses map { _.view[ProcessClassOverview] }).sorted)
   }
 
-  def jocOrderStatistics(query: JobChainNodeQuery): Future[Snapshot[JocOrderStatistics]] =
-    respondWithSnapshotFuture {
+  def jocOrderStatistics(query: JobChainNodeQuery): Future[Stamped[JocOrderStatistics]] =
+    respondWithStampedFuture {
       val (distriChains, localChains) = orderSubsystem.jobChainsByQuery(query.jobChainQuery) partition { _.isDistributed }
       val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(query, distriChains)
       val localStatistics = orderSubsystem.nonDistributedOrderStatistics(query, localChains)
       (localStatistics, distributedStatisticsFuture)
     } flatMap { snapshot ⇒
-      val Snapshot(eventId, (localStatistics, distributedStatisticsFuture)) = snapshot
+      val Stamped(eventId, (localStatistics, distributedStatisticsFuture)) = snapshot
       for (distributedStatistics ← distributedStatisticsFuture) yield
-        Snapshot(eventId, localStatistics + distributedStatistics)
+        Stamped(eventId, localStatistics + distributedStatistics)
     }
 
-  def jobChainOverview(jobChainPath: JobChainPath): Future[Snapshot[JobChainOverview]] =
-    respondWithSnapshotFuture {
+  def jobChainOverview(jobChainPath: JobChainPath): Future[Stamped[JobChainOverview]] =
+    respondWithStampedFuture {
       orderSubsystem.jobChain(jobChainPath).overview
     }
 
-  def jobChainOverviewsBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainOverview]]] =
-    respondWithSnapshotFuture {
+  def jobChainOverviewsBy(query: JobChainQuery): Future[Stamped[Seq[JobChainOverview]]] =
+    respondWithStampedFuture {
       (orderSubsystem.jobChainsByQuery(query) map { _.overview }).toVector
     }
 
-  def jobChainDetailed(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetailed]] =
-    respondWithSnapshotFuture {
+  def jobChainDetailed(jobChainPath: JobChainPath): Future[Stamped[JobChainDetailed]] =
+    respondWithStampedFuture {
       orderSubsystem.jobChain(jobChainPath).details
     }
 
-  def jobs[V <: JobView: JobView.Companion](query: PathQuery = PathQuery.All): Future[Snapshot[Vector[V]]] =
-    respondWithSnapshotFuture {
+  def jobs[V <: JobView: JobView.Companion](query: PathQuery = PathQuery.All): Future[Stamped[Vector[V]]] =
+    respondWithStampedFuture {
       jobSubsystem.fileBasedsBy(query) map { _.view[V] }
     }
 
-  def job[V <: JobView: JobView.Companion](jobPath: JobPath): Future[Snapshot[V]] =
-    respondWithSnapshotFuture {
+  def job[V <: JobView: JobView.Companion](jobPath: JobPath): Future[Stamped[V]] =
+    respondWithStampedFuture {
       jobSubsystem.job(jobPath).view[V]
     }
 
-  def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
-    respondWithSnapshotFuture {
+  def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Stamped[V]] =
+    respondWithStampedFuture {
       processClassSubsystem.fileBased(processClassPath).view[V]
     }
 
-  def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery): Future[Snapshot[immutable.Seq[V]]] =
-    respondWithSnapshotFuture {
+  def processClasses[V <: ProcessClassView: ProcessClassView.Companion](query: PathQuery): Future[Stamped[immutable.Seq[V]]] =
+    respondWithStampedFuture {
       processClassSubsystem.fileBasedsBy(query) map { _.view[V] }
     }
 
-  def taskOverview(taskId: TaskId): Future[Snapshot[TaskOverview]] =
-    respondWithSnapshotFuture {
+  def taskOverview(taskId: TaskId): Future[Stamped[TaskOverview]] =
+    respondWithStampedFuture {
       taskSubsystem.task(taskId).overview
     }
 
-  def taskOverviews(query: PathQuery): Future[Snapshot[immutable.Seq[TaskOverview]]] =
-    respondWithSnapshotFuture {
+  def taskOverviews(query: PathQuery): Future[Stamped[immutable.Seq[TaskOverview]]] =
+    respondWithStampedFuture {
       for (job ← jobSubsystem.fileBasedsBy(query);
            task ← job.tasks) yield
         task.overview
     }
 
-  def agentUris: Future[Snapshot[Set[AgentAddress]]] =
-    respondWithSnapshotFuture {
+  def agentUris: Future[Stamped[Set[AgentAddress]]] =
+    respondWithStampedFuture {
       (for (processClass ← processClassSubsystem.fileBaseds;
            agentUri ← processClass.agentUris)
         yield agentUri
@@ -187,10 +187,10 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       processClassSubsystem.fileBaseds exists { _ containsAgentUri uri }
     }
 
-  private def respondWithSnapshotFuture[A](content: ⇒ A): Future[Snapshot[A]] =
+  private def respondWithStampedFuture[A](content: ⇒ A): Future[Stamped[A]] =
     directOrSchedulerThreadFuture {
       // We are in control of the scheduler thread. No hot scheduler events may occur now.
       // eventCollector.newEventId returns a good EventId usable for the event web service.
-      eventIdGenerator.newSnapshot(content)
+      eventIdGenerator.stamp(content)
     }
 }

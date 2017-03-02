@@ -6,7 +6,7 @@ import com.sos.jobscheduler.common.scalautil.Futures.implicits._
 import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
-import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, Event, EventId, EventRequest, EventSeq, KeyedEvent, Stamped}
 import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.scheduler.engine.client.web.WebSchedulerClient
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
@@ -47,10 +47,10 @@ extends AutoCloseable {
   }
 
   private def start(after: EventId): Unit = {
-    (for (Snapshot(_, EventSeq.NonEmpty(eventSnapshots)) ← webSchedulerClient.events(EventRequest.singleClass[Event](after, 600.s)).appendCurrentStackTrace) yield {
-      this.webEvents ++= eventSnapshots filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
+    (for (Stamped(_, EventSeq.NonEmpty(eventStampeds)) ← webSchedulerClient.events(EventRequest.singleClass[Event](after, 600.s)).appendCurrentStackTrace) yield {
+      this.webEvents ++= eventStampeds filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
       if (!stopping) {
-        start(after = eventSnapshots.last.eventId)
+        start(after = eventStampeds.last.eventId)
       }
     })
     .failed foreach { throwable ⇒

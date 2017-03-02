@@ -4,7 +4,7 @@ import com.sos.jobscheduler.base.generic.SecretString
 import com.sos.jobscheduler.common.auth.{UserAndPassword, UserId}
 import com.sos.jobscheduler.common.scalautil.Futures.implicits._
 import com.sos.jobscheduler.common.time.ScalaTime._
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.scheduler.SchedulerId
 import com.sos.scheduler.engine.client.api.SchedulerClient
 import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
@@ -58,7 +58,7 @@ extends sos.spooler.Job_impl {
   }
 
   private def readOverview(client: SchedulerClient): SchedulerOverview = {
-    val Snapshot(_, overview) = client.overview await 10.s
+    val Stamped(_, overview) = client.overview await 10.s
     assert(overview.schedulerId == SchedulerId(spooler.id))
     overview
   }

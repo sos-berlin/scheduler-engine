@@ -6,7 +6,7 @@ import com.sos.scheduler.engine.client.web.WebSchedulerClient
 import com.sos.jobscheduler.common.scalautil.Futures.implicits._
 import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.jobscheduler.common.time.Stopwatch
-import com.sos.jobscheduler.data.event.Snapshot
+import com.sos.jobscheduler.data.event.Stamped
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
@@ -118,7 +118,7 @@ private[js1642] trait SpeedTests {
         "JocOrderStatistics" in {
           for (_ ← 1 to 5) {
             val stopwatch = new Stopwatch
-            val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
+            val Stamped(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
             logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "orders"))
             assert(orderStatistics == JocOrderStatistics(
               total = n + 8,
@@ -159,7 +159,7 @@ private[js1642] trait SpeedTests {
         "JocOrderStatistics" in {
           for (_ ← 1 to 20) {
             val stopwatch = new Stopwatch
-            val Snapshot(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
+            val Stamped(_, orderStatistics: JocOrderStatistics) = webSchedulerClient.jocOrderStatistics(JobChainQuery.All) await TestTimeout
             logger.info("JocOrderStatistics: " + stopwatch.itemsPerSecondString(n, "orders"))
             assert(orderStatistics == JocOrderStatistics(
               total = 2*n + 8,

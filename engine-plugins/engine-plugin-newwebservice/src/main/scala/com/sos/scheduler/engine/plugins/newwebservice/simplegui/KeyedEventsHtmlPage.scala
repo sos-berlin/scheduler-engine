@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.jobscheduler.data.event.{AnyKeyedEvent, EventId, EventSeq, KeyedEvent, Snapshot}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, EventId, EventSeq, KeyedEvent, Stamped}
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
@@ -21,7 +21,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class KeyedEventsHtmlPage private(
-  protected val snapshot: Snapshot[EventSeq[Seq, AnyKeyedEvent]],
+  protected val snapshot: Stamped[EventSeq[Seq, AnyKeyedEvent]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -44,7 +44,7 @@ extends SchedulerHtmlPage {
       eventSeq match {
         case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", snapshot.eventId, ")")
         case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
-        case EventSeq.NonEmpty(eventSnapshots) ⇒
+        case EventSeq.NonEmpty(eventStampeds) ⇒
           table(cls := "SimpleTable")(
             thead(
               tr(
@@ -57,13 +57,13 @@ extends SchedulerHtmlPage {
               )
             ),
             tbody(
-              (eventSnapshots map eventToTr).toVector))
+              (eventStampeds map eventToTr).toVector))
       }))
 
-  private def eventToTr(eventSnapshot: Snapshot[AnyKeyedEvent]): Frag =
+  private def eventToTr(eventStamped: Stamped[AnyKeyedEvent]): Frag =
     tr(
-      td(whiteSpace.nowrap)(eventIdToLocalHtml(eventSnapshot.eventId, withDateBefore = midnightInstant)),
-      eventToTds(eventSnapshot.value))
+      td(whiteSpace.nowrap)(eventIdToLocalHtml(eventStamped.eventId, withDateBefore = midnightInstant)),
+      eventToTds(eventStamped.value))
 
   private def eventToTds(keyedEvent: AnyKeyedEvent): Frag = {
     val eventName = keyedEvent.event.getClass.getSimpleName stripSuffix "$"
@@ -99,9 +99,9 @@ object KeyedEventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      ToHtmlPage[Snapshot[EventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
-        for (schedulerOverviewSnapshot ← client.overview) yield
-          new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, schedulerOverviewSnapshot.value)
+      ToHtmlPage[Stamped[EventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
+        for (stamped ← client.overview) yield
+          new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, stamped.value)
       }
   }
 }

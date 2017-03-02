@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.utils.JavaResource
-import com.sos.jobscheduler.data.event.{Event, EventId, ReverseEventRequest, Snapshot}
+import com.sos.jobscheduler.data.event.{Event, EventId, ReverseEventRequest, Stamped}
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobOverview
@@ -31,7 +31,7 @@ import spray.http.Uri
   */
 trait SchedulerHtmlPage extends HtmlPage {
 
-  protected def snapshot: Snapshot[Any]
+  protected def snapshot: Stamped[Any]
   protected val schedulerOverview: SchedulerOverview
   protected def pageTitle: String = "JobScheduler"
   protected val uris: SchedulerUris
