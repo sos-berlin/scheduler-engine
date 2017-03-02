@@ -79,7 +79,7 @@ extends FileBasedSubsystem {
     else
       for (jobChain ← jobChains.toIterator;
            node ← jobChain.jobNodes(query);
-           order ← jobChain.orderIterator)
+           order ← jobChain.orderIterator if order.nodeId == node.nodeId)
         yield order
 
   private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[JocOrderStatistics] = {
