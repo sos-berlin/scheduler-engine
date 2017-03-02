@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.data.order
 import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.base.sprayjson.SprayJson.lazyRootFormat
 import com.sos.scheduler.engine.data.filebased.FileBasedState
-import com.sos.scheduler.engine.data.jobchain.{NodeId, NodeKey}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.OrderProcessingState.OccupiedByClusterMember
 import com.sos.scheduler.engine.data.queries.QueryableOrder
 import java.time.Instant
@@ -19,17 +19,19 @@ final case class OrderOverview(
   path: OrderKey,
   fileBasedState: FileBasedState,
   orderSourceType: OrderSourceType,
+  jobChainPath: JobChainPath,
   nodeId: NodeId,
   orderProcessingState: OrderProcessingState,
   historyId: Option[OrderHistoryId] = None,
   obstacles: Set[OrderObstacle] = Set(),
   startedAt: Option[Instant] = None,
-  nextStepAt: Option[Instant] = None)
+  nextStepAt: Option[Instant] = None,
+  outerJobChainPath: Option[JobChainPath] = None)
 extends OrderView with QueryableOrder {
 
   def orderKey: OrderKey = path
 
-  def nodeKey: NodeKey = NodeKey(orderKey.jobChainPath, nodeId)
+  def nodeKey: NodeKey = NodeKey(jobChainPath, nodeId)
 
   def isSetback = orderProcessingStateClass == classOf[OrderProcessingState.Setback]
 
@@ -47,7 +49,7 @@ object OrderOverview extends OrderView.Companion[OrderOverview] {
   implicit val jsonFormat: RootJsonFormat[OrderOverview] = {
     implicit val a = FileBasedState.MyJsonFormat
     implicit val b = OrderSourceType.MyJsonFormat
-    lazyRootFormat(jsonFormat9(apply))
+    lazyRootFormat(jsonFormat11(apply))
   }
 
   implicit val ordering: Ordering[OrderOverview] = Ordering by { o ⇒ (o.orderKey.jobChainPath, o.nodeId, o.orderKey.id) }

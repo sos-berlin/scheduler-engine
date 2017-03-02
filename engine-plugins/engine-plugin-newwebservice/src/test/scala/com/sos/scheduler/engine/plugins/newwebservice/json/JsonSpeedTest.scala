@@ -43,10 +43,11 @@ private object JsonSpeedTest {
     val stopwatch = new Stopwatch
     val numbers = Iterator.from(1)
     val inProcessSince = Instant.parse("2016-08-01T01:02:03.044Z")
-    val result = for (i ← 1 to n) yield OrderOverview(
+    val result = for (_ ← 1 to n) yield OrderOverview(
       JobChainPath("/a") orderKey numbers.next().toString,
       FileBasedState.active,
       OrderSourceType.AdHoc,
+      JobChainPath("/a"),
       NodeId(numbers.next().toString),
       OrderProcessingState.InTaskProcess(TaskId(numbers.next()), ProcessClassPath.Default, inProcessSince, agentUri = None),
       nextStepAt = Some(now))

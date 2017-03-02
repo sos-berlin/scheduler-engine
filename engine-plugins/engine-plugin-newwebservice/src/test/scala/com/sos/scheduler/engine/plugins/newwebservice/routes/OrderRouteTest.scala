@@ -274,6 +274,7 @@ object OrderRouteTest {
     A1OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    A1OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(
       TaskId(3),

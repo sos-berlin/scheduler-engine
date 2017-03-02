@@ -25,7 +25,7 @@ import com.sos.scheduler.engine.data.event.{EventId, EventRequest, EventSeq, Key
 import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NestedJobChainNodeOverview, NodeId}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
@@ -78,7 +78,6 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         InMemoryDatabaseConfiguration))
   private implicit lazy val executionContext = instance[ExecutionContext]
   private lazy val taskSubsystem = instance[TaskSubsystemClient]
-  private lazy val eventCollector = instance[EventCollector]
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
   private object barrier {
@@ -198,7 +197,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
         _.orders[OrderOverview]
       }
-      assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews)
+      assert((orders.toVector.sorted map normalizeOrderOverview) == ExpectedOrderOverviews.sorted)
     }
 
     "ordersComplemented" in {
@@ -264,7 +263,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
         _.ordersBy[OrderOverview](orderQuery)
       }
-      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey))
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey, nestedOrderKey))
     }
 
     "orders single non-existent, non-distributed OrderKey throws exception" in {
@@ -282,7 +281,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
         _.ordersBy[OrderOverview](orderQuery)
       }
-      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey))
+      assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, a2OrderKey, aAdHocOrderKey, b1OrderKey, nestedOrderKey))
     }
 
     "orders query JobPath of non-existent job, distributed" in {
@@ -363,7 +362,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     def testAllJocOrderStatisticsFuture(client: SchedulerClient): Future[JocOrderStatistics] =
       for (Snapshot(_, orderStatistics: JocOrderStatistics) ← client.jocOrderStatistics(JobChainQuery.All)) yield {
         assert(orderStatistics == JocOrderStatistics(
-          total = 8,
+          total = 9,
           notPlanned = 0,
           planned = 0,
           due = 3,
@@ -373,9 +372,9 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           occupiedByClusterMember = 0,
           setback = 0,
           waitingForResource = 0,
-          suspended = 2,
+          suspended = 3,
           blacklisted = 0,
-          permanent = 6,
+          permanent = 7,
           fileOrder = 0))
         orderStatistics
       }
@@ -446,7 +445,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         _.jocOrderStatistics(JobChainNodeQuery(jobPaths = Some(Set(TestJobPath))))
       }
       assert(orderStatistics == JocOrderStatistics(
-        total = 4,
+        total = 5,
         notPlanned = 0,
         planned = 0,
         due = 0,
@@ -456,9 +455,9 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         occupiedByClusterMember = 0,
         setback = 0,
         waitingForResource = 0,
-        suspended = 1,
+        suspended = 2,
         blacklisted = 0,
-        permanent = 3,
+        permanent = 4,
         fileOrder = 0))
     }
 
@@ -491,8 +490,10 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           _.jobChainOverviewsBy(JobChainQuery.All)
         }
         assert(jobChainOverviews.toSet == Set(
-          JobChainOverview(aJobChainPath, FileBasedState.active, isDistributed = false),
-          JobChainOverview(bJobChainPath, FileBasedState.active, isDistributed = false),
+          JobChainOverview(aJobChainPath, FileBasedState.active),
+          JobChainOverview(bJobChainPath, FileBasedState.active),
+          nestedOuterJobChainOverview,
+          nestedInnerJobChainOverview,
           xaJobChainOverview,
           xbJobChainOverview))
       }
@@ -520,6 +521,41 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
             EndNodeOverview(
               xaJobChainPath,
               NodeId("END")))))
+    }
+  }
+
+  "Nested JobChain" - {
+    "JobChainDetailed for outer JobChain" in {
+      val jobChainDetailed: JobChainDetailed = fetchWebAndDirect {
+        _.jobChainDetailed(nestedOuterJobChainPath)
+      }
+      assert(jobChainDetailed ==
+        JobChainDetailed(
+          nestedOuterJobChainOverview,
+          List(
+            NestedJobChainNodeOverview(nestedOuterJobChainPath, NodeId("OUTER-1"), NodeId("END"), NodeId(""), nestedInnerJobChainPath),
+            EndNodeOverview(nestedOuterJobChainPath, NodeId("END")))))
+    }
+
+    "JobChainDetailed for inner JobChain" in {
+      val jobChainDetailed: JobChainDetailed = fetchWebAndDirect {
+        _.jobChainDetailed(nestedInnerJobChainPath)
+      }
+      assert(jobChainDetailed ==
+        JobChainDetailed(
+          nestedInnerJobChainOverview,
+          List(
+            NestedInner100NodeOverview,
+            EndNodeOverview(nestedInnerJobChainPath, NodeId("END")))))
+    }
+
+    for (jobChainPath ← Array(nestedOuterJobChainPath, nestedInnerJobChainPath)) s"Order in $jobChainPath" in {
+      val ordersComplemented = fetchWebAndDirect {
+        _.ordersComplementedBy[OrderOverview](OrderQuery(JobChainQuery(jobChainPath)))
+      }
+      assert(ordersComplemented.orders == List(nestedOrderOverview))
+      assert(ordersComplemented.usedJobChains.toSet == Set(nestedOuterJobChainOverview, nestedInnerJobChainOverview))
+      assert(ordersComplemented.usedJobs == List(TestJobOverview))
     }
   }
 

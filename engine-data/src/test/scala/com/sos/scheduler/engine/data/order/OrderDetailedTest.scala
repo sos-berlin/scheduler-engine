@@ -21,9 +21,10 @@ final class OrderDetailedTest extends FreeSpec {
   "JSON" in {
     val obj = OrderDetailed(
       OrderOverview(
-        JobChainPath("/a") orderKey "1",
+        JobChainPath("/outer") orderKey "1",
         FileBasedState.active,
         OrderSourceType.AdHoc,
+        JobChainPath("/inner"),
         NodeId("100"),
         OrderProcessingState.InTaskProcess(
           TaskId(123),
@@ -39,9 +40,10 @@ final class OrderDetailedTest extends FreeSpec {
       variables = Map("a" → "A", "b" → "B"))
     val jsValue = """{
       "overview": {
-        "path": "/a,1",
+        "path": "/outer,1",
         "fileBasedState": "active",
         "orderSourceType": "AdHoc",
+        "jobChainPath": "/inner",
         "nodeId": "100",
         "orderProcessingState": {
           "TYPE": "InTaskProcess",

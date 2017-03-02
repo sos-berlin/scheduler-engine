@@ -19,6 +19,8 @@ extends OrderView {
 
   def orderKey = overview.orderKey
 
+  def outerJobChainPath = overview.outerJobChainPath
+
   private[engine] def occupyingClusterMemberId = overview.occupyingClusterMemberId
 
   private[engine] def orderProcessingState = overview.orderProcessingState

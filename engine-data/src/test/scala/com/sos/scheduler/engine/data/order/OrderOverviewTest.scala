@@ -20,11 +20,12 @@ import spray.json._
 final class OrderOverviewTest extends FreeSpec {
 
   "JSON" in {
-    val orderKey = JobChainPath("/a") orderKey "1"
+    val path = JobChainPath("/outer") orderKey "1"
     val obj = OrderOverview(
-      orderKey,
+      path,
       FileBasedState.active,
       OrderSourceType.AdHoc,
+      JobChainPath("/inner"),
       NodeId("100"),
       OrderProcessingState.InTaskProcess(TaskId(123), ProcessClassPath("/TEST"),
         Instant.parse("2016-08-01T01:02:03.044Z"), Some(AgentAddress("http://1.2.3.4:5678"))),
@@ -34,12 +35,14 @@ final class OrderOverviewTest extends FreeSpec {
         OrderObstacle.Setback(Instant.parse("2016-08-02T11:22:33.444Z")),
         FileBasedObstacles(Set(FileBasedObstacle.Replaced()))),
       startedAt = Some(Instant.parse("2016-07-18T11:11:11Z")),
-      nextStepAt = Some(Instant.parse("2016-07-18T12:00:00Z")))
+      nextStepAt = Some(Instant.parse("2016-07-18T12:00:00Z")),
+      outerJobChainPath = Some(JobChainPath("/OUTER")))
     val jsValue = """{
-      "path": "/a,1",
+      "path": "/outer,1",
       "fileBasedState": "active",
       "historyId": 22,
       "orderSourceType": "AdHoc",
+      "jobChainPath": "/inner",
       "nodeId": "100",
       "orderProcessingState": {
         "TYPE": "InTaskProcess",
@@ -66,7 +69,8 @@ final class OrderOverviewTest extends FreeSpec {
         }
       ],
       "startedAt": "2016-07-18T11:11:11Z",
-      "nextStepAt": "2016-07-18T12:00:00Z"
+      "nextStepAt": "2016-07-18T12:00:00Z",
+      "outerJobChainPath": "/OUTER"
     }""".parseJson
     assert(obj.toJson == jsValue)
     assert(obj == jsValue.convertTo[OrderOverview])
