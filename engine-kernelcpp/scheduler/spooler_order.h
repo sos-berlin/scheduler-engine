@@ -203,6 +203,10 @@ struct Order : Com_order,
         return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched; 
     }
 
+    const Absolute_path& outer_job_chain_path() const {
+        return _outer_job_chain_path;
+    }
+
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -1016,6 +1020,7 @@ struct Job_chain : Com_job_chain,
     // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
     void                        disconnect_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
+    string                      order_id_space_name         () const;
     void                    set_order_id_space              ( Order_id_space* );
     bool                        order_id_space_contains_order_id(const string& order_id);
 

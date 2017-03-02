@@ -88,21 +88,21 @@ with OrderPersistence {
     }
 
   private[kernel] def overview: OrderOverview = {
-    val orderKey = this.pathOrKey
-    val nodeId = this.nodeId
     val flags = cppProxy.java_fast_flags
     val nextStepAtOption = this.nextStepAtOption
     val processingState = this.processingState(flags, nextStepAtOption)
     OrderOverview(
-      path = orderKey,  // key because this.path is valid only for permanent orders
+      path = pathOrKey,  // this.path is valid only for permanent orders
       CppFastFlags.fileBasedState(flags),
       sourceType,
+      jobChainPath,
       nodeId = nodeId,
       orderProcessingState = processingState,
       historyIdOption,
       obstacles = obstacles(flags, processingState),
       startedAt = startedAtOption,
-      nextStepAt = nextStepAtOption)
+      nextStepAt = nextStepAtOption,
+      outerJobChainPath = outerJobChainPathOption)
   }
 
   private[order] def processingState(flags: Long, nextStepAtOption: Option[Instant]): OrderProcessingState = {
@@ -256,6 +256,9 @@ with OrderPersistence {
 
   private def jobChainOption: Option[JobChain] =
     Option(cppProxy.job_chain) map { _.getSister }
+
+  private def outerJobChainPathOption: Option[JobChainPath] =
+    emptyToNone(cppProxy.outer_job_chain_path) map JobChainPath.apply
 
   private[kernel] def filePath: String = cppProxy.params.get_string(FileOrderPathVariableName)
 

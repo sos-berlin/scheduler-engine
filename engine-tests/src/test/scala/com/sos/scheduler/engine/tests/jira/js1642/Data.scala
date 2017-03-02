@@ -61,11 +61,16 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
           ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS"),
           SchedulePath("/xFolder/MISSING-SCHEDULE"),
           XTestBJobPath))))))
+  val nestedOuterJobChainOverview = JobChainOverview(nestedOuterJobChainPath, FileBasedState.active,
+    orderIdSpaceName = Some("strawberries"))
+  val nestedInnerJobChainOverview = JobChainOverview(nestedInnerJobChainPath, FileBasedState.active,
+    orderIdSpaceName = Some("strawberries"))
 
   val a1OrderOverview = OrderOverview(
     a1OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    a2OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(3), TestProcessClassPath, since = taskIdToStartedAt(TaskId(3)), agentUri = None),
     historyId = Some(OrderHistoryId(2)),
@@ -74,6 +79,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/aJobChain,1",
     "fileBasedState": "active",
     "orderSourceType": "Permanent",
+    "jobChainPath": "/aJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
@@ -90,6 +96,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     a2OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    a2OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(4), TestProcessClassPath, since = taskIdToStartedAt(TaskId(4)), agentUri = None),
     historyId = Some(OrderHistoryId(3)),
@@ -98,6 +105,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/aJobChain,2",
     "fileBasedState": "active",
     "orderSourceType": "Permanent",
+    "jobChainPath": "/aJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "InTaskProcess",
@@ -114,6 +122,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     aAdHocOrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.AdHoc,
+    aAdHocOrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.Planned(OrderStartAt),
     obstacles = Set(OrderObstacle.Suspended),
@@ -121,6 +130,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val aAdHocOrderOverviewJson = """{
     "path": "/aJobChain,ÅD-HÖC",
     "fileBasedState": "not_initialized",
+    "jobChainPath": "/aJobChain",
     "nodeId": "100",
     "orderSourceType": "AdHoc",
     "orderProcessingState" : {
@@ -139,6 +149,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     b1OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    b1OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(TaskId(5), TestProcessClassPath, since = taskIdToStartedAt(TaskId(5)), agentUri = None),
     historyId = Some(OrderHistoryId(4)),
@@ -147,6 +158,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   private val b1OrderOverviewJson = s"""{
     "path": "/bJobChain,1",
     "fileBasedState": "active",
+    "jobChainPath": "/bJobChain",
     "nodeId": "100",
     "orderSourceType": "Permanent",
     "orderProcessingState" : {
@@ -169,10 +181,41 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     ]
   }"""
 
+  val nestedOrderOverview = OrderOverview(
+    nestedOrderKey,
+    FileBasedState.active,
+    OrderSourceType.Permanent,
+    nestedInnerJobChainPath,
+    NodeId("INNER-100"),
+    OrderProcessingState.Due(EPOCH),
+    obstacles = Set(OrderObstacle.Suspended),
+    nextStepAt = Some(EPOCH),
+    outerJobChainPath = Some(nestedOuterJobChainPath))
+  private val nestedOrderOverviewJson = s"""{
+    "path": "/outer/nested-outer,1",
+    "fileBasedState": "active",
+    "jobChainPath": "/nested-inner",
+    "nodeId": "INNER-100",
+    "outerJobChainPath": "/outer/nested-outer",
+    "orderSourceType": "Permanent",
+    "nextStepAt": "1970-01-01T00:00:00Z",
+    "fileBasedState": "active",
+    "orderProcessingState": {
+      "TYPE": "Due",
+      "at": "1970-01-01T00:00:00Z"
+    },
+    "obstacles": [
+      {
+        "TYPE": "Suspended"
+      }
+    ]
+  }"""
+
   val xa1OrderOverview = OrderOverview(
     xa1OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    xa1OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
@@ -184,6 +227,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/xFolder/x-aJobChain,1",
     "fileBasedState": "active",
     "orderSourceType": "Permanent",
+    "jobChainPath": "/xFolder/x-aJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -209,6 +253,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xa2OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    xa2OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH),
@@ -221,6 +266,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/xFolder/x-aJobChain,2",
     "fileBasedState": "active",
     "orderSourceType": "Permanent",
+    "jobChainPath": "/xFolder/x-aJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -249,6 +295,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xb1OrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.Permanent,
+    xb1OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
@@ -256,6 +303,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/xFolder/x-bJobChain,1",
     "fileBasedState": "not_initialized",
     "orderSourceType": "Permanent",
+    "jobChainPath": "/xFolder/x-bJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -269,6 +317,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     xbAdHocDistributedOrderKey,
     FileBasedState.not_initialized,
     OrderSourceType.AdHoc,
+    xbAdHocDistributedOrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.Due(EPOCH),
     nextStepAt = Some(EPOCH))
@@ -276,6 +325,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     "path": "/xFolder/x-bJobChain,AD-HOC-DISTRIBUTED",
     "fileBasedState": "not_initialized",
     "orderSourceType": "AdHoc",
+    "jobChainPath": "/xFolder/x-bJobChain",
     "nodeId": "100",
     "orderProcessingState" : {
       "TYPE": "Due",
@@ -292,12 +342,17 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     b1OrderOverview,
     xa1OrderOverview,
     xa2OrderOverview,
+    nestedOrderOverview,
     xb1OrderOverview,
     xbAdHocDistributedOrderOverview)
 
   val A100NodeOverview = SimpleJobNodeOverview(aJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 3, obstacles = Set(NodeObstacle.Delaying(999999.s)))
   val B100NodeOverview = SimpleJobNodeOverview(bJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
+    TestJobPath, orderCount = 1)
+  //val NestedOuter1NodeOverview = SimpleJobNodeOverview(bJobChainPath, NodeId("OUTER-1"), NodeId("END"), NodeId(""),
+  //  TestJobPath, orderCount = 1)
+  val NestedInner100NodeOverview = SimpleJobNodeOverview(nestedInnerJobChainPath, NodeId("INNER-100"), NodeId("END"), NodeId(""),
     TestJobPath, orderCount = 1)
   val Xa100NodeOverview = SimpleJobNodeOverview(xaJobChainPath, NodeId("100"), NodeId("END"), NodeId(""),
     XTestJobPath, orderCount = 2,
@@ -324,11 +379,14 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     Vector(
       aJobChainOverview,
       bJobChainOverview,
+      nestedInnerJobChainOverview,
+      nestedOuterJobChainOverview,
       xaJobChainOverview,
       xbJobChainOverview),
     Vector(
       A100NodeOverview,
       B100NodeOverview,
+      NestedInner100NodeOverview,
       Xa100NodeOverview,
       Xb100NodeOverview),
     Vector(
@@ -344,7 +402,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
 
   val ExpectedSuspendedOrdersComplemented = ExpectedOrdersComplemented.copy(
     orders = ExpectedOrdersComplemented.orders filter { _.isSuspended },
-    usedJobChains = Vector(aJobChainOverview, xaJobChainOverview),
+    usedJobChains = Vector(aJobChainOverview, nestedInnerJobChainOverview, nestedOuterJobChainOverview, xaJobChainOverview),
     usedTasks = Nil,
     usedJobs = Vector(
       TestJobOverview),
@@ -352,6 +410,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       TestProcessClassOverview),
     usedNodes = Vector(
       A100NodeOverview,
+      NestedInner100NodeOverview,
       Xa100NodeOverview))
 
   val ExpectedOrderTreeComplemented = OrderTreeComplemented[OrderOverview](
@@ -363,6 +422,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
         aAdHocOrderOverview,
         b1OrderOverview),
       Vector(
+        FolderTree(
+          FolderPath("/outer"),
+          Vector(
+            nestedOrderOverview),
+          Vector()),
         FolderTree(
           FolderPath("/xFolder"),
           Vector(
@@ -385,6 +449,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     $b1OrderOverviewJson,
     $xa1OrderOverviewJson,
     $xa2OrderOverviewJson,
+    $nestedOrderOverviewJson,
     $xb1OrderOverviewJson,
     $xbAdHocDistributedOrderOverviewJson
   ]""".parseJson.asInstanceOf[JsArray]
@@ -401,6 +466,20 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
         "fileBasedState": "active",
         "isDistributed": false,
         "obstacles": []
+      },
+      {
+        "path": "/nested-inner",
+        "fileBasedState": "active",
+        "isDistributed": false,
+        "obstacles": [],
+        "orderIdSpaceName": "strawberries"
+      },
+      {
+        "path": "/outer/nested-outer",
+        "fileBasedState": "active",
+        "isDistributed": false,
+        "obstacles": [],
+        "orderIdSpaceName": "strawberries"
       },
       {
         "path": "/xFolder/x-aJobChain",
@@ -470,6 +549,17 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "action": "process",
       "orderCount": 1,
       "obstacles": []
+    },
+    {
+      "TYPE": "Job",
+      "errorNodeId": "",
+      "jobChainPath": "/nested-inner",
+      "nodeId": "INNER-100",
+      "nextNodeId": "END",
+      "jobPath": "/test",
+      "obstacles": [],
+      "action": "process",
+      "orderCount": 1
     },
     {
       "TYPE": "Job",
@@ -597,6 +687,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       ],
       "subfolders": [
         {
+          "path": "/outer",
+          "leafs": [
+            $nestedOrderOverviewJson
+          ],
+          "subfolders": []
+        },
+        {
           "path": "/xFolder",
           "leafs": [
             $xa1OrderOverviewJson,
@@ -631,10 +728,13 @@ private[js1642] object Data {
   val xa1OrderKey = xaJobChainPath orderKey OneOrderId
   val xa2OrderKey = xaJobChainPath orderKey "2"
   val xbJobChainPath = JobChainPath("/xFolder/x-bJobChain")
+  val nestedOuterJobChainPath = JobChainPath("/outer/nested-outer")
+  val nestedInnerJobChainPath = JobChainPath("/nested-inner")
 
   val xb1OrderKey = xbJobChainPath orderKey OneOrderId
   val xbAdHocDistributedOrderKey = xbJobChainPath orderKey "AD-HOC-DISTRIBUTED"
-  val AllOrderKeys = Set(a1OrderKey, a2OrderKey, b1OrderKey, xa1OrderKey, xa2OrderKey)
+  val nestedOrderKey = nestedOuterJobChainPath orderKey "1"
+  val AllOrderKeys = Set(a1OrderKey, a2OrderKey, b1OrderKey, xa1OrderKey, xa2OrderKey, nestedOrderKey)
   val ProcessableOrderKeys = Vector(a1OrderKey, a2OrderKey, b1OrderKey)
 
   private[js1642] val OrderStartAt = Instant.parse("2038-01-01T11:22:33Z")

@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.data.order
 
 import com.sos.scheduler.engine.data.common.HasViewCompanion
 import com.sos.scheduler.engine.data.filebased.HasPath
-import com.sos.scheduler.engine.data.jobchain.NodeKey
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeKey}
 import com.sos.scheduler.engine.data.scheduler.ClusterMemberId
 
 /**
@@ -16,6 +16,8 @@ trait OrderView extends HasPath {
   private[engine] def orderProcessingState: OrderProcessingState
 
   private[engine] def nodeKey: NodeKey
+
+  private[engine] def outerJobChainPath: Option[JobChainPath]
 
   final def orderProcessingStateClass = orderProcessingState.getClass
 }

@@ -2090,6 +2090,10 @@ void Job_chain::set_order_id_space( Order_id_space* order_id_space )
     _order_id_space = order_id_space;
 }
 
+string Job_chain::order_id_space_name() const {
+    return _order_id_space ? _order_id_space->name() : "";
+}
+
 //------------------------------------------------------------------Job_chain::connected_job_chains
 
 String_set Job_chain::connected_job_chains()

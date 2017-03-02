@@ -16,6 +16,7 @@ trait Job_chainC extends CppProxyWithSister[JobChain] with File_basedC[JobChain]
   def is_distributed: Boolean
   def default_process_class_path: String
   def file_watching_process_class_path: String
+  def order_id_space_name: String
 }
 
 object Job_chainC {

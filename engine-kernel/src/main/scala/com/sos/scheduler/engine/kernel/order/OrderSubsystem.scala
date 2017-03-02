@@ -20,7 +20,7 @@ import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnecti
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystem
 import com.sos.scheduler.engine.kernel.job.Job
-import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, Node}
+import com.sos.scheduler.engine.kernel.order.jobchain.{JobChain, NestedJobChainNode, Node}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate._
 import com.typesafe.config.Config
@@ -65,7 +65,7 @@ extends FileBasedSubsystem {
   }
 
   private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): JocOrderStatistics = {
-    var result = new JocOrderStatistics.Mutable
+    val result = new JocOrderStatistics.Mutable
     for (order ← nonDistributedOrderIteratorBy(query, nonDistributedJobChains)) {
       result.count(order.queryable)
     }
@@ -80,7 +80,7 @@ extends FileBasedSubsystem {
     else
       for (jobChain ← jobChains.toIterator;
            node ← jobChain.jobNodes(query);
-           order ← jobChain.orderIterator)
+           order ← jobChain.orderIterator if order.nodeId == node.nodeId)
         yield order
 
   private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[JocOrderStatistics] = {
@@ -109,7 +109,7 @@ extends FileBasedSubsystem {
 
   private[kernel] def orderViews[V <: OrderView: OrderView.Companion](query: OrderQuery): immutable.Seq[V] = {
     val (distriChains, localChains) = jobChainsByQuery(query.nodeQuery.jobChainQuery) partition { _.isDistributed }
-    val local = localOrderViews[V](localChains, query)
+    val local = localOrNestingOrderViews[V](localChains.toVector, query)
     val distributed = distributedOrderViews[V](distriChains, query)
     var all: Iterator[V] = local ++ distributed
     for (limit ← query.notInTaskLimitPerNode) {
@@ -121,20 +121,39 @@ extends FileBasedSubsystem {
     all.toVector
   }
 
+  private def localOrNestingOrderViews[V <: OrderView: OrderView.Companion](jobChains: Vector[JobChain], query: OrderQuery): Iterator[V] = {
+    val local = localOrderViews[V](jobChains.iterator, query)
+    val nesting = nestingJobChainOrderViews[V](jobChains.iterator, query).toVector
+    val nestingOrderKeys = (nesting map { _.orderKey }).toSet
+    (local filter { o ⇒ !nestingOrderKeys.contains(o.orderKey) }) ++ nesting
+  }
+
   private def localOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Iterator[V] = {
     val orders = query.orderKeyOption match {
       case Some(orderKey) ⇒
-        // If a single non-distributed Order is specified, we want get an exception (with error message) if it does not exists.
+        // If a single non-distributed Order is specified but does not exist, we want to get an exception (with error message)
         Iterator(jobChain(orderKey.jobChainPath).order(orderKey.id))
       case _ ⇒
-        val jobChainToOrders = query.orderIds match {
-          case Some(orderIds) ⇒ (o: JobChain) ⇒ o.orderIterator(orderIds)
-          case None           ⇒ (o: JobChain) ⇒ o.orderIterator
-        }
-        jobChains flatMap jobChainToOrders
+        jobChains flatMap queryToJobChainToOrders(query)
       }
     orders filter { o ⇒ query.matchesOrder(o.queryable, o.jobPathOption) } map { _.view[V] }
   }
+
+  private def nestingJobChainOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Iterator[V] =
+    jobChains
+      .filter { _.isNestingJobChain }
+      .flatMap { _.nodes }
+      .collect { case node: NestedJobChainNode ⇒ node.nestedJobChainPath }
+      .flatMap(jobChainOption)
+      .flatMap(queryToJobChainToOrders(query))
+      .filter { order ⇒ query.matchesOrder(order.queryable, order.jobPathOption) }
+      .map { _.view[V] }
+
+  private def queryToJobChainToOrders(query: OrderQuery): JobChain ⇒ Iterator[Order] =
+    query.orderIds match {
+      case Some(orderIds) ⇒ jobChain ⇒ orderIds.iterator flatMap jobChain.orderOption
+      case None           ⇒ jobChain ⇒ jobChain.orderIterator
+    }
 
   private object distributedOrderViews {
     def apply[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Seq[V] =

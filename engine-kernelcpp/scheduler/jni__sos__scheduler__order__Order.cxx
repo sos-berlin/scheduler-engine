@@ -560,6 +560,23 @@ static jlong JNICALL next_1time_1millis(JNIEnv* jenv, jobject, jlong cppReferenc
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL outer_1job_1chain_1path(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::order::Order* o_ = has_proxy< ::sos::scheduler::order::Order >::of_cpp_reference(cppReference,"::sos::scheduler::order::Order::outer_job_chain_path()");
+        return env.jstring_from_string(o_->outer_job_chain_path());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL params(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -940,6 +957,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"name_is_fixed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::name_1is_1fixed },
     { (char*)"next_step_at_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1step_1at_1millis },
     { (char*)"next_time_millis__native", (char*)"(J)J", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::next_1time_1millis },
+    { (char*)"outer_job_chain_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::outer_1job_1chain_1path },
     { (char*)"params__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::params },
     { (char*)"path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::path },
     { (char*)"priority__native", (char*)"(J)I", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::priority },
