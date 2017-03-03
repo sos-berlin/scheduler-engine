@@ -72,8 +72,8 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
     respondWithStampedFuture { orderSubsystem.orderViews[V](query) }
 
   def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
-    for (snapshot ← ordersComplementedBy[V](query))
-      yield for (o ← snapshot)
+    for (stamped ← ordersComplementedBy[V](query))
+      yield for (o ← stamped)
         yield OrderTreeComplemented.fromOrderComplemented(query.jobChainQuery.pathQuery.folderPath, o)
 
   def ordersComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery) =
@@ -121,8 +121,8 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(query, distriChains)
       val localStatistics = orderSubsystem.nonDistributedOrderStatistics(query, localChains)
       (localStatistics, distributedStatisticsFuture)
-    } flatMap { snapshot ⇒
-      val Stamped(eventId, (localStatistics, distributedStatisticsFuture)) = snapshot
+    } flatMap { stamped ⇒
+      val Stamped(eventId, (localStatistics, distributedStatisticsFuture)) = stamped
       for (distributedStatistics ← distributedStatisticsFuture) yield
         Stamped(eventId, localStatistics + distributedStatistics)
     }

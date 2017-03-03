@@ -24,8 +24,8 @@ extends HasCloser {
 
   def whenJocOrderStatisticsChanged(after: EventId, timeout: Duration, query: PathQuery = PathQuery.All): Future[Stamped[JocOrderStatisticsChanged]] =
     for (eventSeq ← eventCollector.when(EventRequest.singleClass[OrderEvent](after = after, timeout), pathPredicate(query));
-         snapshot ← jocOrderStatistics(JobChainNodeQuery(JobChainQuery(query, isDistributed = Some(false/*No database access*/)))))
-      yield snapshot map JocOrderStatisticsChanged.apply
+         stamped ← jocOrderStatistics(JobChainNodeQuery(JobChainQuery(query, isDistributed = Some(false/*No database access*/)))))
+      yield stamped map JocOrderStatisticsChanged.apply
 }
 
 object JocOrderStatisticsChangedSource {

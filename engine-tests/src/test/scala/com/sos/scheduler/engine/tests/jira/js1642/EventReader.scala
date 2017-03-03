@@ -48,7 +48,7 @@ extends AutoCloseable {
 
   private def start(after: EventId): Unit = {
     (for (Stamped(_, EventSeq.NonEmpty(eventStampeds)) ← webSchedulerClient.events(EventRequest.singleClass[Event](after, 600.s)).appendCurrentStackTrace) yield {
-      this.webEvents ++= eventStampeds filter { snapshot ⇒ snapshot.eventId > activatedEventId && isPermitted(snapshot.value) } map { _.value }
+      this.webEvents ++= eventStampeds filter { stamped ⇒ stamped.eventId > activatedEventId && isPermitted(stamped.value) } map { _.value }
       if (!stopping) {
         start(after = eventStampeds.last.eventId)
       }

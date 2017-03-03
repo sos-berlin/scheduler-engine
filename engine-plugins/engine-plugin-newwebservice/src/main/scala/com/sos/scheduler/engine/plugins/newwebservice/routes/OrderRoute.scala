@@ -123,8 +123,8 @@ trait OrderRoute extends LogRoute {
     eventRequest[Event].apply {
       case EventRequest(eventClasses, afterEventId, timeout, _/*limit*/) if eventClasses == Set(classOf[JocOrderStatisticsChanged]) ⇒
         completeTryHtml[TearableEventSeq[Seq, AnyKeyedEvent]] {
-          for (snapshot ← orderStatisticsChangedSource.whenJocOrderStatisticsChanged(after = afterEventId, timeout, query))
-            yield nestIntoSeqStamped(snapshot)
+          for (stamped ← orderStatisticsChangedSource.whenJocOrderStatisticsChanged(after = afterEventId, timeout, query))
+            yield nestIntoSeqStamped(stamped)
         }
       case _ ⇒
         reject

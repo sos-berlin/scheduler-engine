@@ -31,14 +31,14 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class OrdersHtmlPage private(
-  protected val snapshot: Stamped[OrdersComplemented[OrderOverview]],
+  stampedComplemented: Stamped[OrdersComplemented[OrderOverview]],
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
-  private val ordersComplemented: OrdersComplemented[OrderOverview] = snapshot.value
+  private val ordersComplemented: OrdersComplemented[OrderOverview] = stampedComplemented.value
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
   private val jobPathToOverview: Map[JobPath, JobOverview] = ordersComplemented.usedJobs toKeyedMap { _.path }
   private val jobPathToObstacleHtml: Map[JobPath, Option[Frag]] = ordersComplemented.usedJobs.toKeyedMap { _.path }
@@ -61,6 +61,7 @@ extends SchedulerHtmlPage {
     }
     .withDefaultValue(Some(span(cls := "text-danger")(stringFrag("Missing Node"))))
 
+  protected def eventId = stampedComplemented.eventId
   override protected def pageTitle = "Orders"
   override protected def cssPaths = super.cssPaths ++ CssPaths
   override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
@@ -221,7 +222,7 @@ object OrdersHtmlPage {
     toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.js")))
 
   def toHtmlPage(
-    snapshot: Stamped[OrdersComplemented[OrderOverview]],
+    stamped: Stamped[OrdersComplemented[OrderOverview]],
     pageUri: Uri,
     query: OrderQuery,
     client: SchedulerOverviewClient,
@@ -229,7 +230,7 @@ object OrdersHtmlPage {
     (implicit ec: ExecutionContext): Future[OrdersHtmlPage]
   =
     for (schedulerOverviewResponse ← client.overview) yield
-      new OrdersHtmlPage(snapshot, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)
+      new OrdersHtmlPage(stamped, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
     order.orderProcessingState match {

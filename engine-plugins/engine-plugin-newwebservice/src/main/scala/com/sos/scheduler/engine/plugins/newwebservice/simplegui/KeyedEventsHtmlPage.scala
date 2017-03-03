@@ -21,7 +21,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class KeyedEventsHtmlPage private(
-  protected val snapshot: Stamped[TearableEventSeq[Seq, AnyKeyedEvent]],
+  stampedEventSeq: Stamped[TearableEventSeq[Seq, AnyKeyedEvent]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -29,7 +29,9 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
 
-  private val eventSeq = snapshot.value
+  protected def eventId = stampedEventSeq.eventId
+
+  private val eventSeq = stampedEventSeq.value
 
   private implicit def orderKeyToHtml(orderKey: OrderKey): Frag = stringFrag(orderKey.toString) // a(cls := "inherit-markup", href := uris.order.detailed(orderKey))
 
@@ -42,7 +44,7 @@ extends SchedulerHtmlPage {
   def wholePage = htmlPage(
     div(cls := "ContentBox ContentBox-single Padded")(
       eventSeq match {
-        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", snapshot.eventId, ")")
+        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", stampedEventSeq.eventId, ")")
         case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
         case EventSeq.NonEmpty(eventStampeds) ⇒
           table(cls := "SimpleTable")(
@@ -99,9 +101,9 @@ object KeyedEventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      ToHtmlPage[Stamped[TearableEventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
-        for (stamped ← client.overview) yield
-          new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, stamped.value)
+      ToHtmlPage[Stamped[TearableEventSeq[Seq, AnyKeyedEvent]]] { (stampedEventSeq, pageUri) ⇒
+        for (stampedOverview ← client.overview) yield
+          new KeyedEventsHtmlPage(stampedEventSeq, pageUri, webServiceContext.uris, stampedOverview.value)
       }
   }
 }

@@ -25,9 +25,9 @@ private[routes] object EventRoutes {
   intelliJuseImports(anyEventJsonFormat)
 
   // Nests a simple Stamped[NoKeyEvent] into the expected nested type for the event web service.
-  def nestIntoSeqStamped[E <: NoKeyEvent](snapshot: Stamped[E]): Stamped[TearableEventSeq[Seq, AnyKeyedEvent]] = {
-    val eventId = snapshot.eventId
-    val anyKeyedEvent = KeyedEvent(snapshot.value).asInstanceOf[AnyKeyedEvent]
+  def nestIntoSeqStamped[E <: NoKeyEvent](stamped: Stamped[E]): Stamped[TearableEventSeq[Seq, AnyKeyedEvent]] = {
+    val eventId = stamped.eventId
+    val anyKeyedEvent = KeyedEvent(stamped.value).asInstanceOf[AnyKeyedEvent]
     Stamped(eventId, EventSeq.NonEmpty(List(Stamped(eventId, anyKeyedEvent))))
   }
 

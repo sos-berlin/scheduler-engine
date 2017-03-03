@@ -39,8 +39,8 @@ final class SchedulerEventCollectorTest extends FreeSpec with BeforeAndAfterAll 
       val event = KeyedEvent(AEvent)("1")
       eventBus.publish(event)
       eventCollector.when(EventRequest.singleClass[AEvent.type](aEventId, timeout = 0.s)) await 1.s match {
-        case EventSeq.NonEmpty(snapshots) ⇒
-          assert((snapshots.toList map { _.value }) == List(event))
+        case EventSeq.NonEmpty(stampeds) ⇒
+          assert((stampeds.toList map { _.value }) == List(event))
         case _ ⇒ fail()
       }
     }

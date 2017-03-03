@@ -23,14 +23,15 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class SchedulerOverviewHtmlPage private(
-  protected val snapshot: Stamped[SchedulerOverview],
+  stampedOverview: Stamped[SchedulerOverview],
   protected val pageUri: Uri,
   protected val uris: SchedulerUris)
 extends SchedulerHtmlPage {
 
-  protected val schedulerOverview = snapshot.value
+  protected val schedulerOverview = stampedOverview.value
   import schedulerOverview.{java, startedAt, state, system}
 
+  protected def eventId = stampedOverview.eventId
   override protected def cssPaths = super.cssPaths ++ CssPaths
   override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
 
@@ -148,8 +149,8 @@ object SchedulerOverviewHtmlPage {
     import scala.language.implicitConversions
 
     implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
-      ToHtmlPage[Stamped[SchedulerOverview]] { (snapshot, pageUri) ⇒
-        Future.successful(new SchedulerOverviewHtmlPage(snapshot, pageUri, webServiceContext.uris))
+      ToHtmlPage[Stamped[SchedulerOverview]] { (stamped, pageUri) ⇒
+        Future.successful(new SchedulerOverviewHtmlPage(stamped, pageUri, webServiceContext.uris))
       }
   }
 

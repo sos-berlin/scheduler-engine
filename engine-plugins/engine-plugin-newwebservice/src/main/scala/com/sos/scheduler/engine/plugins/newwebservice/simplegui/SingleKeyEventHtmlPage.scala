@@ -23,7 +23,7 @@ import spray.http.Uri
   */
 final class SingleKeyEventHtmlPage private(
   key: Any,
-  protected val snapshot: Stamped[TearableEventSeq[Seq, Event]],
+  stampedEventSeq: Stamped[TearableEventSeq[Seq, Event]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -31,19 +31,21 @@ extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
 
-  private val eventSeq = snapshot.value
+  protected def eventId = stampedEventSeq.eventId
+
+  private val eventSeq = stampedEventSeq.value
+  private val midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
   private implicit def nodeIdToHtml(nodeId: NodeId): Frag = stringFrag(nodeId.toString)
 
   private implicit def taskIdToHtml(taskId: TaskId): Frag = a(cls := "inherit-markup", href := uris.task.overview(taskId))(taskId.toString)
 
-  private val midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
   def wholePage = htmlPage(
     div(cls := "ContentBox ContentBox-single Padded")(
       h3(key.toString),
       eventSeq match {
-        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", snapshot.eventId, ")")
+        case EventSeq.Torn ⇒ p("Event stream is torn. Try a newer EventId (parameter after=", stampedEventSeq.eventId, ")")
         case EventSeq.Empty(eventId) ⇒ p("No events until " + EventId.toString(eventId))
         case EventSeq.NonEmpty(eventStampeds) ⇒
           table(cls := "SimpleTable")(
@@ -99,8 +101,8 @@ object SingleKeyEventHtmlPage {
   import scala.language.implicitConversions
 
   def singleKeyEventToHtmlPage[E <: Event](key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-    ToHtmlPage[Stamped[TearableEventSeq[Seq, E]]] { (snapshot, pageUri) ⇒
-      for (stamped ← client.overview) yield
-        new SingleKeyEventHtmlPage(key, snapshot, pageUri, webServiceContext.uris, stamped.value)
+    ToHtmlPage[Stamped[TearableEventSeq[Seq, E]]] { (stampedEventSeq, pageUri) ⇒
+      for (stampedOverview ← client.overview) yield
+        new SingleKeyEventHtmlPage(key, stampedEventSeq, pageUri, webServiceContext.uris, stampedOverview.value)
     }
 }

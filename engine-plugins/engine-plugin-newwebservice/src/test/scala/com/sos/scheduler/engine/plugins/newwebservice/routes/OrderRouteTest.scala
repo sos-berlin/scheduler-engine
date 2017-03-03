@@ -91,8 +91,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
     def orderTreeComplementedBy[V <: OrderView: OrderView.Companion](query: OrderQuery): Future[Stamped[OrderTreeComplemented[V]]] = {
       assert(query == TestOrderQuery)
-      for (snapshot ← ordersComplementedBy[V](query)) yield
-        for (flat ← snapshot) yield
+      for (stamped ← ordersComplementedBy[V](query)) yield
+        for (flat ← stamped) yield
           OrderTreeComplemented.fromOrderComplemented(FolderPath.Root, flat)
     }
 
@@ -136,8 +136,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       s"$OrderUri/?return=OrderOverview&isSuspended=false&isOrderSourceType=Permanent")) {
     s"$uri" in {
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        val snapshot = responseAs[Stamped[Orders[OrderOverview]]]
-        assert(snapshot == Stamped(TestEventId, Orders(TestOrderOverviews)))
+        val stamped = responseAs[Stamped[Orders[OrderOverview]]]
+        assert(stamped == Stamped(TestEventId, Orders(TestOrderOverviews)))
       }
     }
   }
@@ -216,8 +216,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
       "isSuspended" → JsFalse,
       "isOrderSourceType" → JsArray(JsString("Permanent")))
     Post("/api/order?return=OrderOverview", queryJson) ~> Accept(`application/json`) ~> route ~> check {
-      val snapshot = responseAs[Stamped[Orders[OrderOverview]]]
-      assert(snapshot == Stamped(TestEventId, Orders(TestOrderOverviews)))
+      val stamped = responseAs[Stamped[Orders[OrderOverview]]]
+      assert(stamped == Stamped(TestEventId, Orders(TestOrderOverviews)))
     }
   }
 
@@ -226,8 +226,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        val EventSeq.NonEmpty(snapshots) = responseAs[TearableEventSeq[Seq, Event]]
-        assert((snapshots map { _.value }) == OrderEvents)
+        val EventSeq.NonEmpty(stampeds) = responseAs[TearableEventSeq[Seq, Event]]
+        assert((stampeds map { _.value }) == OrderEvents)
       }
     }
   }
@@ -242,8 +242,8 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"POST $uri" in {
       // Events have been published before.
       Post(uri, queryJson) ~> Accept(`application/json`) ~> route ~> check {
-        val EventSeq.NonEmpty(snapshots) = responseAs[TearableEventSeq[Seq, Event]]
-        assert((snapshots map { _.value }) == OrderEvents)
+        val EventSeq.NonEmpty(stampeds) = responseAs[TearableEventSeq[Seq, Event]]
+        assert((stampeds map { _.value }) == OrderEvents)
       }
     }
   }

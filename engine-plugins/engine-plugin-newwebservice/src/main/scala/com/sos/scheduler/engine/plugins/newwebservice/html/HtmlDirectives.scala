@@ -132,7 +132,7 @@ object HtmlDirectives {
       }
   }
 
-  def completeTryHtml[A](snapshotFuture: ⇒ Future[Stamped[A]])(
+  def completeTryHtml[A](stampedFuture: ⇒ Future[Stamped[A]])(
     implicit
       toHtmlPage: ToHtmlPage[Stamped[A]],
       toResponseMarshaller: ToResponseMarshaller[Stamped[A]],
@@ -142,12 +142,12 @@ object HtmlDirectives {
     htmlPreferred(webServiceContext) {
       requestUri { uri ⇒
         complete {
-          for (snapshot ← snapshotFuture) yield
-            toHtmlPage(snapshot, uri)
+          for (stamped ← stampedFuture) yield
+            toHtmlPage(stamped, uri)
         }
       }
     } ~
-      complete(snapshotFuture)
+      complete(stampedFuture)
 
   def htmlPreferred(webServiceContext: WebServiceContext): Directive0 =
     mapInnerRoute { route ⇒

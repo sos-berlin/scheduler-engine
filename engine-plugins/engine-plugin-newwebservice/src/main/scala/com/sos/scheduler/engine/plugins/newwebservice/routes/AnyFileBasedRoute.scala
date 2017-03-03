@@ -84,8 +84,8 @@ trait AnyFileBasedRoute {
       case "FileBasedSource" ⇒
         typedPath(implicitly[TypedPath.Companion[P]]) { typedPath ⇒
           val future =
-            for (snapshot ← client.fileBased[P, FileBasedDetailed](typedPath)) yield
-              for (detailed ← snapshot) yield
+            for (stamped ← client.fileBased[P, FileBasedDetailed](typedPath)) yield
+              for (detailed ← stamped) yield
                 for (xml ← detailed.sourceXml) yield
                   XmlString(xml)
           onSuccess(future) {

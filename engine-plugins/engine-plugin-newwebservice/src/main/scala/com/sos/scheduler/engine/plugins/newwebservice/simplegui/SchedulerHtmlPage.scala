@@ -31,7 +31,7 @@ import spray.http.Uri
   */
 trait SchedulerHtmlPage extends HtmlPage {
 
-  protected def snapshot: Stamped[Any]
+  protected def eventId: EventId
   protected val schedulerOverview: SchedulerOverview
   protected def pageTitle: String = "JobScheduler"
   protected val uris: SchedulerUris
@@ -74,7 +74,7 @@ trait SchedulerHtmlPage extends HtmlPage {
   private def timestampHtml: Frag =
     a(href := "javascript:window.location.href = window.location.href", cls := "inherit-markup", title := "Click or press Enter to refresh")(
       span(id := "refresh", cls := "glyphicon glyphicon-refresh", position.relative, top := 2.px, marginRight := 8.px),
-      eventIdToLocalHtml(snapshot.eventId, withSubseconds = false),
+      eventIdToLocalHtml(eventId, withSubseconds = false),
       " ",
       span(cls := "time-extra")(DefaultZoneId.getId))
 
