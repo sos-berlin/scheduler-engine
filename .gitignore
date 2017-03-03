@@ -6,6 +6,7 @@
 # MAVEN
 .surefire-*
 /target/
+/*/target/
 
 # ECLIPSE
 .classpath
