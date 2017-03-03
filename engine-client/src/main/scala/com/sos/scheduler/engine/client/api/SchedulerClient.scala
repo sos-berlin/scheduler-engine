@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.client.api
 
-import com.sos.jobscheduler.data.event.{Event, EventSeq, KeyedEvent, Stamped, SomeEventRequest}
+import com.sos.jobscheduler.data.event.{Event, KeyedEvent, SomeEventRequest, Stamped, TearableEventSeq}
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.job.{JobPath, JobView}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
@@ -29,9 +29,9 @@ with ProcessClassClient {
 
   def jobs[V <: JobView: JobView.Companion](query: PathQuery): Future[Stamped[Seq[V]]]
 
-  def events[E <: Event](request: SomeEventRequest[E]): Future[Stamped[EventSeq[Seq, KeyedEvent[E]]]]
+  def events[E <: Event](request: SomeEventRequest[E]): Future[Stamped[TearableEventSeq[Seq, KeyedEvent[E]]]]
 
-  def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Stamped[EventSeq[Seq, KeyedEvent[E]]]]
+  def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Stamped[TearableEventSeq[Seq, KeyedEvent[E]]]]
 
   final def ordersComplemented[V <: OrderView: OrderView.Companion]: Future[Stamped[OrdersComplemented[V]]] =
     ordersComplementedBy[V](OrderQuery.All)

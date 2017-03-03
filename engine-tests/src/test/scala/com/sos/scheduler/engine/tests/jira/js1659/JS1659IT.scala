@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.tests.jira.js1659
 
-import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.jobscheduler.common.event.EventIdGenerator
 import com.sos.jobscheduler.common.event.collector.EventCollector
 import com.sos.jobscheduler.common.scalautil.Closers.implicits.RichClosersAutoCloseable
@@ -11,6 +10,7 @@ import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.jobscheduler.data.event.{Event, EventId, EventRequest, EventSeq, KeyedEvent, Stamped}
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.{ReturnCode, TaskId}
+import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, TaskClosed, TaskEnded, TaskEvent, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, JobChainState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success

@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
-import com.sos.scheduler.engine.client.web.common.QueryHttp._
 import com.sos.jobscheduler.common.event.collector.EventDirectives._
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
 import com.sos.jobscheduler.data.event._
+import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
+import com.sos.scheduler.engine.client.web.common.QueryHttp._
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, Orders}
@@ -122,7 +122,7 @@ trait OrderRoute extends LogRoute {
   private def orderStatisticsChanged(query: PathQuery): Route =
     eventRequest[Event].apply {
       case EventRequest(eventClasses, afterEventId, timeout, _/*limit*/) if eventClasses == Set(classOf[JocOrderStatisticsChanged]) ⇒
-        completeTryHtml[EventSeq[Seq, AnyKeyedEvent]] {
+        completeTryHtml[TearableEventSeq[Seq, AnyKeyedEvent]] {
           for (snapshot ← orderStatisticsChangedSource.whenJocOrderStatisticsChanged(after = afterEventId, timeout, query))
             yield nestIntoSeqStamped(snapshot)
         }

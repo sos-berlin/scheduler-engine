@@ -18,7 +18,7 @@ import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.jobscheduler.common.utils.IntelliJUtils.intelliJuseImports
-import com.sos.jobscheduler.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Stamped}
+import com.sos.jobscheduler.data.event.{EventId, EventRequest, EventSeq, KeyedEvent, Stamped, TearableEventSeq}
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.jobscheduler.data.scheduler.SchedulerId
@@ -165,7 +165,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   "eventsByPath" in {
     val request = EventRequest.singleClass[FileBasedAdded.type](after = EventId.BeforeFirst, timeout = 0.s)
     val query = PathQuery(xFolderPath)
-    fetchWebAndDirect[EventSeq[immutable.Seq, KeyedEvent[FileBasedAdded.type]]](_.eventsByPath[FileBasedAdded.type](request, query)) match {
+    fetchWebAndDirect[TearableEventSeq[immutable.Seq, KeyedEvent[FileBasedAdded.type]]](_.eventsByPath[FileBasedAdded.type](request, query)) match {
       case nonEmpty: EventSeq.NonEmpty[immutable.Seq, KeyedEvent[FileBasedAdded.type]] ⇒
         assertResult(Set(
           KeyedEvent(FileBasedAdded)(JobChainPath("/xFolder/x-aJobChain")),

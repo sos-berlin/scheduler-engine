@@ -226,7 +226,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"$uri" in {
       for (event ← OrderEvents) eventBus.publish(KeyedEvent(event)(A1OrderKey))
       Get(uri) ~> Accept(`application/json`) ~> route ~> check {
-        val EventSeq.NonEmpty(snapshots) = responseAs[EventSeq[Seq, Event]]
+        val EventSeq.NonEmpty(snapshots) = responseAs[TearableEventSeq[Seq, Event]]
         assert((snapshots map { _.value }) == OrderEvents)
       }
     }
@@ -242,7 +242,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
     s"POST $uri" in {
       // Events have been published before.
       Post(uri, queryJson) ~> Accept(`application/json`) ~> route ~> check {
-        val EventSeq.NonEmpty(snapshots) = responseAs[EventSeq[Seq, Event]]
+        val EventSeq.NonEmpty(snapshots) = responseAs[TearableEventSeq[Seq, Event]]
         assert((snapshots map { _.value }) == OrderEvents)
       }
     }

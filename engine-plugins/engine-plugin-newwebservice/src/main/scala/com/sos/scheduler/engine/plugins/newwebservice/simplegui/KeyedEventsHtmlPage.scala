@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
-import com.sos.jobscheduler.data.event.{AnyKeyedEvent, EventId, EventSeq, KeyedEvent, Stamped}
+import com.sos.jobscheduler.data.event.{AnyKeyedEvent, EventId, EventSeq, KeyedEvent, Stamped, TearableEventSeq}
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.client.web.SchedulerUris
@@ -21,7 +21,7 @@ import spray.http.Uri
   * @author Joacim Zschimmer
   */
 final class KeyedEventsHtmlPage private(
-  protected val snapshot: Stamped[EventSeq[Seq, AnyKeyedEvent]],
+  protected val snapshot: Stamped[TearableEventSeq[Seq, AnyKeyedEvent]],
   protected val pageUri: Uri,
   implicit protected val uris: SchedulerUris,
   protected val schedulerOverview: SchedulerOverview)
@@ -99,7 +99,7 @@ object KeyedEventsHtmlPage {
     import scala.language.implicitConversions
 
     implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
-      ToHtmlPage[Stamped[EventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
+      ToHtmlPage[Stamped[TearableEventSeq[Seq, AnyKeyedEvent]]] { (snapshot, pageUri) ⇒
         for (stamped ← client.overview) yield
           new KeyedEventsHtmlPage(snapshot, pageUri, webServiceContext.uris, stamped.value)
       }

@@ -19,10 +19,10 @@ trait DirectEventClient {
   protected def eventIdGenerator: EventIdGenerator
   protected implicit def executionContext: ExecutionContext
 
-  def events[E <: Event](request: SomeEventRequest[E]): Future[Stamped[EventSeq[Seq, KeyedEvent[E]]]] =
+  def events[E <: Event](request: SomeEventRequest[E]): Future[Stamped[TearableEventSeq[Seq, KeyedEvent[E]]]] =
     eventsByPredicate[E](request, _ ⇒ true)
 
-  def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Stamped[EventSeq[Seq, KeyedEvent[E]]]] =
+  def eventsByPath[E <: Event](request: SomeEventRequest[E], query: PathQuery): Future[Stamped[TearableEventSeq[Seq, KeyedEvent[E]]]] =
     eventsByPredicate[E](
       request,
       predicate = {
@@ -30,20 +30,20 @@ trait DirectEventClient {
         case _ ⇒ false
       })
 
-  def eventsByPredicate[E <: Event](request: SomeEventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Stamped[EventSeq[Seq, KeyedEvent[E]]]] =
-    eventIdGenerator.stampEventSeq {
+  def eventsByPredicate[E <: Event](request: SomeEventRequest[E], predicate: KeyedEvent[E] ⇒ Boolean): Future[Stamped[TearableEventSeq[Seq, KeyedEvent[E]]]] =
+    eventIdGenerator.stampTearableEventSeq {
       eventCollector.byPredicate[E](
         request,
         keyedEvent ⇒ KeyedEventJsonFormat.canSerialize(keyedEvent) && predicate(keyedEvent))
     }
 
-  def eventsByKeyAndPredicate[E <: Event](request: EventRequest[E], key: E#Key): Future[Stamped[EventSeq[Seq, E]]] =
-    eventIdGenerator.stampEventSeq {
+  def eventsByKeyAndPredicate[E <: Event](request: EventRequest[E], key: E#Key): Future[Stamped[TearableEventSeq[Seq, E]]] =
+    eventIdGenerator.stampTearableEventSeq {
       eventCollector.byKeyAndPredicate(request, key, eventTypedJsonFormat.canSerialize)
     }
 
-  def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Stamped[EventSeq[Seq, E]]] =
-    eventIdGenerator.stampEventSeq {
+  def eventsForKey[E <: Event](request: EventRequest[E], key: E#Key): Future[Stamped[TearableEventSeq[Seq, E]]] =
+    eventIdGenerator.stampTearableEventSeq {
       eventCollector.whenForKey(request, key, eventTypedJsonFormat.canSerialize)
     }
 
