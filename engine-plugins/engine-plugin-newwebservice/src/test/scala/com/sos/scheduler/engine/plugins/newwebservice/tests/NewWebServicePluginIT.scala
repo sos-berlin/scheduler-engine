@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.sos.jobscheduler.common.scalautil.Closers.implicits._
 import com.sos.jobscheduler.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.jobscheduler.common.scalautil.xmls.SafeXML
-import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.jobscheduler.common.sprayutils.XmlString
 import com.sos.jobscheduler.common.utils.FreeTcpPortFinder._
 import com.sos.jobscheduler.data.event.Stamped

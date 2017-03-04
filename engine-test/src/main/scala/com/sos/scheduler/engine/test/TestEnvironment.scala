@@ -83,7 +83,7 @@ extends HasCloser {
 
   def iniFile = (configDirectory / "factory.ini").getAbsoluteFile
 
-  def fileFromPath(p: TypedPath) = p.file(liveDirectory)
+  def fileFromPath(p: TypedPath): Path = liveDirectory resolve p.xmlFile
 
   /**
     * @return Pfad der Auftragsprotokolldatei für einfache OrderKey

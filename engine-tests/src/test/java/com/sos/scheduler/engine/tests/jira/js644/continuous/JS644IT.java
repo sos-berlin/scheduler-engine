@@ -68,7 +68,7 @@ public final class JS644IT extends SchedulerTest {
 
     private ImmutableList<File> files() {
         ImmutableList.Builder<File> result = ImmutableList.builder();
-        result.add(controller().environment().fileFromPath(jobChainPath));
+        result.add(controller().environment().fileFromPath(jobChainPath).toFile());
         result.addAll(jobFiles());
         return result.build();
     }
@@ -76,7 +76,7 @@ public final class JS644IT extends SchedulerTest {
     private Iterable<File> jobFiles() {
         final TestEnvironment e = controller().environment();
         return transform(jobPaths, new Function<String,File>() {
-            @Override public File apply(String o) { return e.fileFromPath(new JobPath(o)); }
+            @Override public File apply(String o) { return e.fileFromPath(new JobPath(o)).toFile(); }
         });
     }
 

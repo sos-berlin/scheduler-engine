@@ -90,7 +90,7 @@ final class FileBasedSubsystemClientIT extends FreeSpec with ScalaSchedulerTest 
             if (pathDontHasXml(path))
               assert(fileBasedDetailed.file.isEmpty)
             else
-              assert(fileBasedDetailed.file == Some(testEnvironment.fileFromPath(path).toPath))
+              assert(fileBasedDetailed.file == Some(testEnvironment.fileFromPath(path)))
           }
 
           "fileBasedState" in {

@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js806
 
 import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{InfoLogged, Logged}
 import com.sos.jobscheduler.data.message.MessageCode
@@ -32,7 +33,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       eventPipe.next[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
       eventPipe.next[OrderStepEnded](myOrderKey)
 
-      myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
+      (liveDirectory resolve myOrderKey.xmlFile).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
 
       eventPipe.next[FileBasedActivated.type](myOrderKey)
@@ -49,7 +50,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.next[OrderStepEnded](myOrderKey)
       eventPipe.next[OrderNodeChanged](myOrderKey).nodeIdTransition shouldEqual NodeId("100") -> NodeId("200")
-      myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
+      (liveDirectory resolve myOrderKey.xmlFile).xml = <order title={ChangedTitle}><run_time/></order>
       scheduler executeXml ModifyOrderCommand(myOrderKey, suspended = Some(true))
       eventPipe.nextWhen[InfoLogged] { _.event.codeOption == Some(MessageCode("SCHEDULER-991")) }    // "Order has been suspended"
       scheduler executeXml ModifyOrderCommand(myOrderKey, action = Some(ModifyOrderCommand.Action.reset))
@@ -68,7 +69,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="stop"/>
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.next[OrderStepEnded](myOrderKey)
-      myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
+      (liveDirectory resolve myOrderKey.xmlFile).xml = <order title={ChangedTitle}><run_time/></order>
       eventPipe.nextWhen[Logged] { _.event.codeOption == Some(MessageCode("SCHEDULER-892")) }   // This Standing_order is going to be replaced due to changed configuration file ...
       scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="200" action="process"/>
       eventPipe.next[OrderFinished](myOrderKey)
@@ -86,7 +87,7 @@ final class JS806IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml ModifyOrderCommand.startNow(myOrderKey)
       eventPipe.next[OrderSetBack](myOrderKey).nodeId shouldEqual NodeId("200")
       eventPipe.next[OrderStepEnded](myOrderKey)
-      myOrderKey.file(liveDirectory).xml = <order title={ChangedTitle}><run_time/></order>
+      (liveDirectory resolve myOrderKey.xmlFile).xml = <order title={ChangedTitle}><run_time/></order>
       variableSet("TestJob.setback") = false.toString
       eventPipe.next[OrderFinished](myOrderKey)
       eventPipe.next[FileBasedActivated.type](myOrderKey)

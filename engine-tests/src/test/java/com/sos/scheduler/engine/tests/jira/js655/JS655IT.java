@@ -64,7 +64,7 @@ public final class JS655IT extends SchedulerTest {
     }
 
     private File jobChainFile(JobChainPath p) {
-        return controller().environment().fileFromPath(p);
+        return controller().environment().fileFromPath(p).toFile();
     }
 
     private void checkWebServiceIsNotReady() {

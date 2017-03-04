@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1048
 
 import com.sos.jobscheduler.common.scalautil.AutoClosing._
+import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.jobscheduler.common.scalautil.xmls.ScalaXmls.implicits._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}
@@ -46,8 +47,8 @@ final class JS1048IT extends FreeSpec {
         requireOriginalFileBasedOrders()
         modifyOrders()
       }
-      SuspendOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order><run_time/></order>
-      TitleOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order title={FileChangedTitle}><run_time/></order>
+      (envProvider.live resolve SuspendOrderKey.xmlFile).xml = <order><run_time/></order>
+      (envProvider.live resolve TitleOrderKey.xmlFile).xml = <order title={FileChangedTitle}><run_time/></order>
       envProvider.runScheduler() { implicit controller =>
         assert(!orderOverview(SuspendOrderKey).isSuspended)
         order(TitleOrderKey).title shouldEqual FileChangedTitle
@@ -107,8 +108,8 @@ final class JS1048IT extends FreeSpec {
         assert(orderOverview(SuspendOrderKey).isSuspended)
         order(TitleOrderKey).title shouldEqual FileChangedTitle
       }
-      SuspendOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order><run_time/></order>
-      TitleOrderKey.file(envProvider.testEnvironment.liveDirectory).xml = <order title={FileChangedTitle}><run_time/></order>
+      (envProvider.live resolve SuspendOrderKey.xmlFile).xml = <order><run_time/></order>
+      (envProvider.live resolve TitleOrderKey.xmlFile).xml = <order title={FileChangedTitle}><run_time/></order>
       envProvider.runScheduler() { implicit controller =>
         requireOriginalFileBasedOrders()
         requireDatabaseRecords(suspendedOrderExists = false, expectedTitle = None)
@@ -127,8 +128,8 @@ final class JS1048IT extends FreeSpec {
   }
 
   private def removeOrderFiles(testEnvironment: TestEnvironment): Unit = {
-    for (o <- OrderKeys)
-      Files.delete(o.file(testEnvironment.liveDirectory).toPath)
+    for (o ← OrderKeys)
+      Files.delete(testEnvironment.liveDirectory resolve o.xmlFile)
   }
 
   private def requireOriginalFileBasedOrders()(implicit controller: TestSchedulerController): Unit = {
