@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.order.OrderProcessingState
+import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState}
 import com.sos.scheduler.engine.data.order.OrderSourceType._
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec

@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js817
 
 import com.sos.jobscheduler.data.event.KeyedEvent
-import com.sos.jobscheduler.data.order.OrderId
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderKey}
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js817.JS817IT.TestOrderId
 import org.junit.runner.RunWith

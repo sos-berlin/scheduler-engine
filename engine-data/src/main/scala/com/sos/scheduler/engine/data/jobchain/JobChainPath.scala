@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.data.jobchain
 
 import com.sos.jobscheduler.data.filebased.TypedPath
-import com.sos.jobscheduler.data.order.OrderId
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}
 
 final case class JobChainPath(string: String)
 extends TypedPath {

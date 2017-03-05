@@ -2,7 +2,6 @@ package com.sos.scheduler.engine.tests.jira.js864
 
 import com.sos.jobscheduler.common.scalautil.Closers.implicits._
 import com.sos.jobscheduler.data.event.KeyedEvent
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}

@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.data.queries
 
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderProcessingState, OrderSourceType}
 
 /**
   * @author Joacim Zschimmer

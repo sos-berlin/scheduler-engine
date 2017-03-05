@@ -3,9 +3,8 @@ package com.sos.scheduler.engine.tests.jira.js653
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.time.WaitForCondition.waitForCondition
 import com.sos.jobscheduler.data.event.KeyedEvent
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderKey, OrderStarted}
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderKey, OrderStarted}
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js653.JS653IT._

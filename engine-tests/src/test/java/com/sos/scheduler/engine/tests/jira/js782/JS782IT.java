@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js782;
 
-import com.sos.jobscheduler.data.order.OrderId;
+import com.sos.scheduler.engine.data.order.OrderId;
 import com.sos.scheduler.engine.test.SchedulerTest;
 import com.sos.scheduler.engine.test.configuration.TestConfigurationBuilder;
 import org.junit.Test;

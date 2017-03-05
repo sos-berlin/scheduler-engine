@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.data.order
 
 import com.sos.jobscheduler.data.filebased.TypedPath
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.OrderKeyTest._
 import org.junit.runner.RunWith

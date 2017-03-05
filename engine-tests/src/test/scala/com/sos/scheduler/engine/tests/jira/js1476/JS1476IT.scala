@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1476
 
-import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.jobscheduler.data.message.MessageCode
-import com.sos.jobscheduler.data.order.OrderId
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.xmlcommands.ModifyOrderCommand.NowAt
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyOrderCommand, OrderCommand}

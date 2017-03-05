@@ -1,9 +1,8 @@
 package com.sos.scheduler.engine.kernel.order
 
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.jobchain.NodeId
-import com.sos.scheduler.engine.data.order.OrderKey
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey}
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import java.time.Instant

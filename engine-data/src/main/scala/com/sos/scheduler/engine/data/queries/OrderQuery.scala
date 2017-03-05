@@ -3,9 +3,8 @@ package com.sos.scheduler.engine.data.queries
 import com.sos.jobscheduler.base.convert.ConvertiblePartialFunctions._
 import com.sos.jobscheduler.base.serial.PathAndParameterSerializable
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
-import com.sos.jobscheduler.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderSourceType}
+import com.sos.scheduler.engine.data.order.{OrderId, OrderKey, OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.CommaSeparated._
 import com.sos.scheduler.engine.data.queries.OrderQuery._
 import spray.json.DefaultJsonProtocol._
