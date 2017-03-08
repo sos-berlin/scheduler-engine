@@ -13,66 +13,66 @@ set -e
 
 unset SOS_INI
 
-declare SCHEDULER_HOME
-declare SCHEDULER_DATA
-
-declare -a javaOptions=()
-declare -a engineOptions=()
+javaOptions=()
+engineOptions=()
 httpPort=4444
 
 for arg in "$@"; do
-    case $arg in
-        -http-port=*)
-            httpPort="${arg#*=}"
-            shift
-            ;;
-        *)
-            engineOptions+=("$arg")
-            shift
-            ;;
-    esac
+  case $arg in
+    -http-port=*)
+      httpPort="${arg#*=}"
+      shift
+      ;;
+    *)
+      engineOptions+=("$arg")
+      shift
+      ;;
+  esac
 done
 
 if [ -n "$httpPort" ]; then
-    engineOptions+=("-http-port=$httpPort")
+  engineOptions+=("-http-port=$httpPort")
 fi
 
 declare jarDir
 . "$(cd "$(dirname -- "$0")" && pwd || kill $$)/set-context.sh"
+declare pathSeparator
 export SCHEDULER_HOME SCHEDULER_DATA
 
-configDirectory="$SCHEDULER_DATA"/config
-if [ ! -d "$configDirectory" ]; then :
-    echo "Missing directory $configDirectory"
-    exit 1
+config="$SCHEDULER_DATA"/config
+if [ ! -d "$config" ]; then :
+  echo "Missing directory $config"
+  exit 1
 fi
 
-liveDirectory="$SCHEDULER_DATA"/config/live
-if [ ! -d "$liveDirectory" ]; then :
-    echo "Missing directory $liveDirectory"
-    exit 1
+live="$SCHEDULER_DATA"/config/live
+if [ ! -d "$live" ]; then :
+  echo "Missing directory $live"
+  exit 1
 fi
 
-if [ -f "$configDirectory/logback.xml" ]; then :
-    logbackConfig="file:$configDirectory/logback.xml"
-else
-    logbackConfig="com/sos/scheduler/engine/kernel/logback.xml"
+logs="$SCHEDULER_DATA/logs"
+
+export SCHEDULER_LOGS="$logs"  # Usable in log4j2.xml
+unset log4jArg
+if [ -f "$config/log4j2.xml" ]; then :
+  log4jArg="-Dlog4j.configurationFile=$config/log4j2.xml"
+  javaOptions+=("-Dlog4j.configurationFile=$config/log4j2.xml")
 fi
 
-logbackArg="-Dlogback.configurationFile=$logbackConfig"
-javaOptions=("$logbackArg" "${javaOptions[@]}")
+javaOptions=("$log4jArg" "${javaOptions[@]}")
 
 export LD_LIBRARY_PATH="$SCHEDULER_HOME/bin:$LD_LIBRARY_PATH"
 executeEngine=(
-    "$SCHEDULER_HOME/bin/scheduler"
-    -sos.ini="$configDirectory/sos.ini"
-    -ini="$configDirectory/scheduler.ini"
-    -config="$configDirectory/scheduler.xml"
-    -java-options="${javaOptions[@]}"
-    -java-classpath="$jarDir/*.jar$pathSeparator$jarDir/extra/*.jar"
-    -job-java-options="$logbackArg"
-    -job-java-classpath="$jarDir/*.jar"
-    -configuration-directory="$liveDirectory"
-    "${engineOptions[@]}")
+  "$SCHEDULER_HOME/bin/scheduler"
+  -sos.ini="$config/sos.ini"
+  -ini="$config/scheduler.ini"
+  -config="$config/scheduler.xml"
+  -java-options="${javaOptions[@]}"
+  -java-classpath="$jarDir/*.jar$pathSeparator$jarDir/extra/*.jar"
+  -job-java-options="$log4jArg"
+  -job-java-classpath="$jarDir/*.jar"
+  -configuration-directory="$live"
+  "${engineOptions[@]}")
 echo "${executeEngine[@]}"
 exec "${executeEngine[@]}"
