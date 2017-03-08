@@ -1,0 +1,3 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <script java_class="com.sos.scheduler.engine.tests.jira.js1695.TestJob"/>
+</job>
