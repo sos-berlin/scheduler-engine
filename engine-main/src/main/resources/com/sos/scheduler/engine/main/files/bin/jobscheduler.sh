@@ -18,7 +18,7 @@ engineOptions=()
 httpPort=4444
 
 for arg in "$@"; do
-  case $arg in
+  case "$arg" in
     -http-port=*)
       httpPort="${arg#*=}"
       shift

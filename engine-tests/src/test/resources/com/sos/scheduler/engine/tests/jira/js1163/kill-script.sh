@@ -4,7 +4,7 @@ set -e
 arguments="$*"
 agentTaskId=""
 for arg in "$@"; do
-    case $arg in
+    case "$arg" in
         -kill-agent-task-id=*)
             agentTaskId="${arg#*=}"
             shift
