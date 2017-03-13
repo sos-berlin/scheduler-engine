@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.tests.agent.manytasks.a
 
 import com.sos.jobscheduler.common.scalautil.Futures.implicits._
-import com.sos.jobscheduler.common.scalautil.Logger
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.time.Stopwatch
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -30,11 +29,10 @@ final class ManyAgentTasksIT extends FreeSpec with ScalaSchedulerTest with Agent
     (for (orderId ← orderIds) yield
       startOrder(OrderCommand(TestJobChainPath orderKey orderId)).result
     ) await 600.s
-    logger.info(stopwatch.itemsPerSecondString(n, "orders"))
+    info(stopwatch.itemsPerSecondString(n, "orders"))
   }
 }
 
 private object ManyAgentTasksIT {
   private val TestJobChainPath = JobChainPath("/test")
-  private val logger = Logger(getClass)
 }
