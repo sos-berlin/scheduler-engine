@@ -259,11 +259,19 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
     }
 
     "orders query OrderId" in {
-      val orderQuery = OrderQuery(orderIds = Some(Set(OneOrderId)))
+      val query = OrderQuery(orderIds = Some(Set(OneOrderId)))
       val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
-        _.ordersBy[OrderOverview](orderQuery)
+        _.ordersBy[OrderOverview](query)
       }
       assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey, nestedOrderKey))
+    }
+
+    "ordersComplementedBy query by outer orderKey" in {
+      val query = OrderQuery(JobChainQuery(nestedOuterJobChainPath), orderIds = Some(Set(nestedOrderKey.id)))
+      val orders: immutable.Seq[OrderOverview] = fetchWebAndDirect {
+        _.ordersBy[OrderOverview](query)
+      }
+      assert((orders map { _.orderKey }).toSet == Set(nestedOrderKey))
     }
 
     "orders single non-existent, non-distributed OrderKey throws exception" in {
