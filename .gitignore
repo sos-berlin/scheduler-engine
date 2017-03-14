@@ -26,4 +26,5 @@
 /engine-agent-gui/target/
 /engine-agent-gui/node_modules/
 /engine-plugins/engine-plugins-legacy/target/
+/engine-plugins/engine-plugin-jetty/target/
 /engine-web/target/

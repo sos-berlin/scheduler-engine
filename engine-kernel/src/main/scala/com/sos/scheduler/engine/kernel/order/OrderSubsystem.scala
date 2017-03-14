@@ -130,7 +130,7 @@ extends FileBasedSubsystem {
 
   private def localOrderViews[V <: OrderView: OrderView.Companion](jobChains: Iterator[JobChain], query: OrderQuery): Iterator[V] = {
     val orders = query.orderKeyOption match {
-      case Some(orderKey) ⇒
+      case Some(orderKey) if !jobChain(orderKey.jobChainPath).isNestingJobChain ⇒
         // If a single non-distributed Order is specified but does not exist, we want to get an exception (with error message)
         Iterator(jobChain(orderKey.jobChainPath).order(orderKey.id))
       case _ ⇒
