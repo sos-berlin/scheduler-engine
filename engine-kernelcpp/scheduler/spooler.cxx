@@ -3573,6 +3573,9 @@ void spooler_restart( Log* log, bool is_service )
                         int n = sysconf( _SC_OPEN_MAX );
                         for( int i = 3; i < n; i++ )  close(i);
                         ::sleep( 1 );     // Warten bis Aufrufer sich beendet hat
+                        if (static_ld_library_path_changed) {
+                            set_environment_variable("LD_LIBRARY_PATH", static_original_ld_library_path);
+                        }
                         execv( _argv[0], _argv ); 
                         fprintf( stderr, "Error in execv %s: %s\n", _argv[0], strerror(errno) ); 
                         _exit(99);
