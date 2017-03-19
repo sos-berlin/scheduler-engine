@@ -22,7 +22,7 @@ import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
 import com.sos.scheduler.engine.kernel.event.collector.SchedulerEventCollector
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRouteTest._
 import java.nio.file.Paths
 import java.time.Instant
@@ -54,7 +54,7 @@ final class OrderRouteTest extends FreeSpec with BeforeAndAfterAll with Scalates
 
   protected def orderStatisticsChangedSource = throw new NotImplementedError
 
-  protected def webServiceContext = new WebServiceContext()
+  protected def webServiceContext = new SchedulerWebServiceContext()
 
   protected implicit def executionContext = ExecutionContext.global
 

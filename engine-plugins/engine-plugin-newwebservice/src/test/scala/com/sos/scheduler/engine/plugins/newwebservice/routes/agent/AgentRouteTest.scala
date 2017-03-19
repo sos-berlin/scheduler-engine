@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.client.api.ProcessClassClient
 import com.sos.scheduler.engine.data.processclass.ProcessClassView.Companion
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.PathQuery
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -39,7 +39,7 @@ final class AgentRouteTest extends FreeSpec with BeforeAndAfterAll with HasClose
 
   private lazy val agentClient = AgentClient(agent.localUri.string)
   protected def isKnownAgentUriFuture(uri: AgentAddress) = Future.successful(uri == agent.localUri)
-  protected val webServiceContext = new WebServiceContext()
+  protected val webServiceContext = new SchedulerWebServiceContext()
   protected def actorRefFactory = actorSystem
   protected def executionContext = actorSystem.dispatcher
   protected val toAgentClient = (uri: AgentAddress) ⇒ AgentClient(uri.string)

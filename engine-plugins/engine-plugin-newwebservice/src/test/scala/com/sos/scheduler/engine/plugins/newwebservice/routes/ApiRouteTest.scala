@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import akka.actor.ActorSystem
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.pathSegments
 import com.sos.jobscheduler.data.agent.AgentAddress
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext
@@ -24,7 +24,7 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
 
   protected def executionContext = ExecutionContext.global
 
-  protected def webServiceContext = new WebServiceContext(htmlEnabled = true)
+  protected def webServiceContext = new SchedulerWebServiceContext(htmlEnabled = true)
 
   protected def actorRefFactory = actorSystem
 

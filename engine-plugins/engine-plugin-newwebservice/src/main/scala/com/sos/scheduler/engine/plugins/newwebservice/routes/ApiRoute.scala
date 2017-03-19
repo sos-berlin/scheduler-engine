@@ -7,7 +7,6 @@ import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ApiRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoute
@@ -90,7 +89,7 @@ with TaskRoute {
         }
       }
     } ~
-    pathEndElseRedirect(webServiceContext) {
+    pathEndElseRedirect {
       get {
         completeTryHtml(client.overview)
       }

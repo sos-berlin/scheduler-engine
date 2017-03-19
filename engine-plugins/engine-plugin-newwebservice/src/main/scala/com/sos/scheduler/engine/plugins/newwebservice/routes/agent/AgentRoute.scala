@@ -4,10 +4,10 @@ import akka.actor.ActorRefFactory
 import com.sos.jobscheduler.agent.client.AgentClient
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.completeWithError
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives
 import com.sos.jobscheduler.data.agent.AgentAddress
 import com.sos.scheduler.engine.client.api.ProcessClassClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.agent.AgentRoute._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -23,16 +23,16 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-trait AgentRoute {
+trait AgentRoute extends HtmlDirectives[SchedulerWebServiceContext] {
   protected def isKnownAgentUriFuture(uri: AgentAddress): Future[Boolean]
   protected def toAgentClient: AgentAddress ⇒ AgentClient
   protected def client: ProcessClassClient
-  protected def webServiceContext: WebServiceContext
+  protected def webServiceContext: SchedulerWebServiceContext
   protected implicit def actorRefFactory: ActorRefFactory
   protected implicit def executionContext: ExecutionContext
 
   final def agentRoute: Route =
-    getRequiresSlash(webServiceContext) {
+    getRequiresSlash {
       get {
         rawPathPrefix(Slash) {
           pathEnd {

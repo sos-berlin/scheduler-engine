@@ -1,15 +1,13 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives.ToHtmlPage
 import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.system.JavaInformation
-import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.queries.OrderQuery
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.instantWithDurationToHtml
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerOverviewHtmlPage._
 import java.util.Locale.US
@@ -25,15 +23,17 @@ import spray.http.Uri
 final class SchedulerOverviewHtmlPage private(
   stampedOverview: Stamped[SchedulerOverview],
   protected val pageUri: Uri,
-  protected val uris: SchedulerUris)
+  protected val webServiceContext: SchedulerWebServiceContext)
 extends SchedulerHtmlPage {
 
   protected val schedulerOverview = stampedOverview.value
+
   import schedulerOverview.{java, startedAt, state, system}
+  import webServiceContext.htmlIncluder
 
   protected def eventId = stampedOverview.eventId
-  override protected def cssPaths = super.cssPaths ++ CssPaths
-  override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
+  override protected val cssPaths = super.cssPaths ++ (CssResources map htmlIncluder.toVersionedUriPath)
+  override protected val scriptPaths = super.scriptPaths ++ (ScriptResources map htmlIncluder.toVersionedUriPath)
 
   def wholePage =
     htmlPage(
@@ -122,7 +122,7 @@ extends SchedulerHtmlPage {
         " · ", b(state.toString)))
 
   private def orderStatistics: Frag =
-    new JocOrderStatisticsWidget(uris, OrderQuery.All).html
+    new JocOrderStatisticsWidget(webServiceContext.uris, OrderQuery.All).html
 
   private def commandInput: Frag =
     form(action := "api/command", method := "get", clear.both)(
@@ -139,18 +139,18 @@ extends SchedulerHtmlPage {
 object SchedulerOverviewHtmlPage {
   private val logger = Logger(getClass)
   private val ThinSpace = '\u2009'
-  private val CssPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css")),
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/schedulerOverview/overview.css")))
-  private val ScriptPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js")))
+  private val CssResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css"),
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/schedulerOverview/overview.css"))
+  private val ScriptResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js"))
 
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: WebServiceContext) =
+    implicit def schedulerOverviewToHtmlPage(implicit webServiceContext: SchedulerWebServiceContext) =
       ToHtmlPage[Stamped[SchedulerOverview]] { (stamped, pageUri) ⇒
-        Future.successful(new SchedulerOverviewHtmlPage(stamped, pageUri, webServiceContext.uris))
+        Future.successful(new SchedulerOverviewHtmlPage(stamped, pageUri, webServiceContext))
       }
   }
 

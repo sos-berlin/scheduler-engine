@@ -2,12 +2,12 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.jobscheduler.common.scalautil.Collections.implicits.RichTraversable
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage.{EmptyFrag, joinHtml, seqFrag}
 import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
-import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.compounds.OrdersComplemented
 import com.sos.scheduler.engine.data.folder.FolderTree
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath}
@@ -16,9 +16,7 @@ import com.sos.scheduler.engine.data.order.OrderProcessingState._
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderOverview}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.toVersionedUriPath
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import java.time.Instant.EPOCH
@@ -35,8 +33,10 @@ final class OrdersHtmlPage private(
   protected val pageUri: Uri,
   query: OrderQuery,
   protected val schedulerOverview: SchedulerOverview,
-  protected val uris: SchedulerUris)
+  protected val webServiceContext: SchedulerWebServiceContext)
 extends SchedulerHtmlPage {
+
+  import webServiceContext.uris
 
   private val ordersComplemented: OrdersComplemented[OrderOverview] = stampedComplemented.value
   //private val taskIdToOverview: Map[TaskId, TaskOverview] = ordersComplemented.usedTasks toKeyedMap { _.id }
@@ -63,8 +63,8 @@ extends SchedulerHtmlPage {
 
   protected def eventId = stampedComplemented.eventId
   override protected def pageTitle = "Orders"
-  override protected def cssPaths = super.cssPaths ++ CssPaths
-  override protected def scriptPaths = super.scriptPaths ++ ScriptPaths
+  override protected val cssPaths = super.cssPaths ++ (CssResources map webServiceContext.htmlIncluder.toVersionedUriPath)
+  override protected val scriptPaths = super.scriptPaths ++ (ScriptResources map webServiceContext.htmlIncluder.toVersionedUriPath)
 
   def wholePage = {
     htmlPage(
@@ -161,7 +161,7 @@ extends SchedulerHtmlPage {
       case Setback(at) ⇒ seqFrag("Setback, next try ", instantWithDurationToHtml(at))
       case inTask: InTask ⇒
         val taskId = inTask.taskId
-        val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath.string } getOrElse "(unknown job)"
+        //val jobPath = nodeKeyToOverview.get(order.nodeKey) map { _.jobPath.string } getOrElse "(unknown job)"
         val taskHtml = b(taskToA(taskId)("Task ", taskId.string))
         inTask match {
           case _: WaitingInTask ⇒ seqFrag(taskHtml, " WaitingInTask")
@@ -213,24 +213,24 @@ extends SchedulerHtmlPage {
 object OrdersHtmlPage {
 
   private val Dot = '\u00b7'
-  private val CssPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css")),
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.css")),
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/order.css")))
-  private val ScriptPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js")),
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.js")))
+  private val CssResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.css"),
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.css"),
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/order.css"))
+  private val ScriptResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/OrderStatisticsWidget.js"),
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/order/OrderSelectionWidget.js"))
 
   def toHtmlPage(
     stamped: Stamped[OrdersComplemented[OrderOverview]],
     pageUri: Uri,
     query: OrderQuery,
     client: SchedulerOverviewClient,
-    webServiceContext: WebServiceContext)
+    webServiceContext: SchedulerWebServiceContext)
     (implicit ec: ExecutionContext): Future[OrdersHtmlPage]
   =
     for (schedulerOverviewResponse ← client.overview) yield
-      new OrdersHtmlPage(stamped, pageUri, query, schedulerOverviewResponse.value, webServiceContext.uris)
+      new OrdersHtmlPage(stamped, pageUri, query, schedulerOverviewResponse.value, webServiceContext)
 
   private def orderToTrClass(order: OrderOverview): Option[String] =
     order.orderProcessingState match {

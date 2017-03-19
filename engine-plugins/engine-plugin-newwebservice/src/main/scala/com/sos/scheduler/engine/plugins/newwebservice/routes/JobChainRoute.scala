@@ -1,14 +1,13 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.data.event.{AnyEvent, Event, KeyedEvent}
+import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.queries.{JobChainQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
 import spray.json.DefaultJsonProtocol._
@@ -18,14 +17,14 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-trait JobChainRoute {
+trait JobChainRoute extends EventRoutes {
 
   protected implicit def client: DirectSchedulerClient
-  protected implicit def webServiceContext: WebServiceContext
+  protected implicit def webServiceContext: SchedulerWebServiceContext
   protected implicit def executionContext: ExecutionContext
 
   final def jobChainRoute: Route =
-    getRequiresSlash(webServiceContext) {
+    getRequiresSlash {
       parameter("return".?) { returnType ⇒
         pathQuery(JobChainPath) {
           case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)
@@ -45,7 +44,7 @@ trait JobChainRoute {
     returnType match {
       case Some("JobChainOverview") | None ⇒
         completeTryHtml(client.jobChainOverviewsBy(query))
-      case Some(o) ⇒
+      case Some(_) ⇒
         events[Event](
           predicate = {
             case KeyedEvent(jobChainPath: JobChainPath, _) ⇒ query.pathQuery.matches(jobChainPath)

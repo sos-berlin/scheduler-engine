@@ -1,19 +1,19 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.sprayutils.html.HtmlIncluder.{toCssLinkHtml, toScriptHtml}
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage.{joinHtml, seqFrag}
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.utils.JavaResource
-import com.sos.jobscheduler.data.event.{Event, EventId, ReverseEventRequest, Stamped}
-import com.sos.scheduler.engine.client.web.SchedulerUris
+import com.sos.jobscheduler.data.event.{Event, EventId, ReverseEventRequest}
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobOverview
 import com.sos.scheduler.engine.data.processclass.ProcessClassOverview
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.Scheduler.DefaultZoneId
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{joinHtml, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.simplegui.HtmlIncluder.{toCssLinkHtml, toScriptHtml, toVersionedUriPath}
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute.NeededWebjars
 import java.time.Instant.now
@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
 import java.time.temporal.ChronoField._
 import java.time.{Instant, LocalDate, OffsetDateTime}
+import scala.collection.immutable.Seq
 import scala.language.implicitConversions
 import scalatags.Text.all._
 import scalatags.Text.{TypedTag, tags2}
@@ -34,10 +35,16 @@ trait SchedulerHtmlPage extends HtmlPage {
   protected def eventId: EventId
   protected val schedulerOverview: SchedulerOverview
   protected def pageTitle: String = "JobScheduler"
-  protected val uris: SchedulerUris
+  protected val webServiceContext: SchedulerWebServiceContext
   protected def pageUri: Uri
 
-  private val includer = new HtmlIncluder(uris)
+  import webServiceContext.{htmlIncluder, uris}
+
+  private val _cssPaths = CssResources map htmlIncluder.toVersionedUriPath
+  private val _scriptPaths = ScriptResources map htmlIncluder.toVersionedUriPath
+  protected def cssPaths: Seq[String] = _cssPaths
+  protected def scriptPaths: Seq[String] = _scriptPaths
+  private val rabbitPicturePath = htmlIncluder.toVersionedUriPath(RabbitPictureResource)
 
   protected def htmlPage(innerBody: Frag*): TypedTag[String] =
     html(lang := "en")(
@@ -51,19 +58,16 @@ trait SchedulerHtmlPage extends HtmlPage {
       tags2.title(pageTitle, " · ", schedulerOverview.schedulerId.string),
       css,
       javascript,
-      link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
+      link(rel := "icon", attr("sizes") := "64x64", `type` := "image/vnd.microsoft.icon",
         href := (uris / "api/frontend/common/images/jobscheduler.ico").toString))
 
   private def css: Frag =
-    (NeededWebjars map includer.cssHtml) ++
+    (NeededWebjars map htmlIncluder.cssHtml) ++
       (for (o ← cssPaths) yield toCssLinkHtml(uris / o))
 
   private def javascript: Frag =
-    (NeededWebjars map includer.javascriptHtml) ++
+    (NeededWebjars map htmlIncluder.javascriptHtml) ++
       (for (o ← scriptPaths) yield toScriptHtml(uris / o))
-
-  protected def cssPaths: Vector[String] = CssPaths
-  protected def scriptPaths: Vector[String] = ScriptPaths
 
   protected def pageBody(innerBody: Frag*): Frag =
     seqFrag(
@@ -98,8 +102,8 @@ trait SchedulerHtmlPage extends HtmlPage {
         tbody(
           tr(
             td(rowspan := 2, paddingRight := 1.ex)(
-              img("width".attr := 40, "height".attr := 40, alt := "Rabbit",
-                src := uris.uriString(RabbitPicturePath))),
+              img(attr("width") := 40, attr("height") := 40, alt := "Rabbit",
+                src := uris.uriString(rabbitPicturePath))),
             td(
               span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
           tr(
@@ -136,15 +140,15 @@ trait SchedulerHtmlPage extends HtmlPage {
 }
 
 private[simplegui] object SchedulerHtmlPage {
-  private lazy val nav = "nav".tag[String]
+  private lazy val nav = tag("nav")
   val OurZoneId = DefaultZoneId
 
-  private val CssPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.css")))
-  private val ScriptPaths = Vector(
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.js")))
-  private val RabbitPicturePath =
-    toVersionedUriPath(JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif"))
+  private val CssResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.css"))
+  private val ScriptResources = Vector(
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/common.js"))
+  private val RabbitPictureResource =
+    JavaResource("com/sos/scheduler/engine/plugins/newwebservice/simplegui/frontend/common/images/job_scheduler_rabbit_circle_60x60.gif")
 
   def fileBasedStateToHtml(fileBasedState: FileBasedState): Frag =
     span(cls := fileBasedStateToBootstrapTextClass(fileBasedState))(fileBasedState.toString)

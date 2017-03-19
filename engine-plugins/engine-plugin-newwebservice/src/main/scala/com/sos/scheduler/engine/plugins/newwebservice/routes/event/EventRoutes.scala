@@ -2,14 +2,14 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes.event
 
 import com.sos.jobscheduler.common.event.collector.EventDirectives._
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives
 import com.sos.jobscheduler.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.jobscheduler.data.event._
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.completeTryHtml
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SingleKeyEventHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.collection.immutable.Seq
@@ -21,7 +21,7 @@ import spray.routing._
 /**
   * @author Joacim Zschimmer
   */
-private[routes] object EventRoutes {
+private[routes] trait EventRoutes extends HtmlDirectives[SchedulerWebServiceContext]  {
   intelliJuseImports(anyEventJsonFormat)
 
   // Nests a simple Stamped[NoKeyEvent] into the expected nested type for the event web service.
@@ -32,7 +32,7 @@ private[routes] object EventRoutes {
   }
 
   def singleKeyEvents[E <: Event: ClassTag](key: E#Key, defaultReturnType: Option[String] = None)
-    (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
+    (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: SchedulerWebServiceContext, ec: ExecutionContext)
   : Route =
     eventRequest[E](defaultReturnType = defaultReturnType).apply { request ⇒
       completeTryHtml {
@@ -49,7 +49,7 @@ private[routes] object EventRoutes {
     }
 
   def events[E <: Event: ClassTag](predicate: KeyedEvent[E] ⇒ Boolean, defaultReturnType: Option[String] = None)
-    (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext)
+    (implicit client: DirectEventClient with SchedulerOverviewClient, webServiceContext: SchedulerWebServiceContext, ec: ExecutionContext)
   : Route =
     eventRequest[E](defaultReturnType = defaultReturnType).apply {
       case request: SomeEventRequest[_] ⇒

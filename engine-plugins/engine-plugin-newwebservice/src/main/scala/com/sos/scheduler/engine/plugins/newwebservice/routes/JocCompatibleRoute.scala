@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.{passIf, pathSegments}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.cpp.CppHttpRoute
 import java.nio.file.Path
 import spray.http.StatusCodes._
@@ -17,7 +17,7 @@ import spray.routing._
 trait JocCompatibleRoute extends CommandRoute with CppHttpRoute {
 
   protected def schedulerConfiguration: SchedulerConfiguration
-  protected def webServiceContext: WebServiceContext
+  protected def webServiceContext: SchedulerWebServiceContext
 
   final def jocCompatibleRoute: Route =
     pathSegments("operations_gui") {

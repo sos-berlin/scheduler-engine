@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives.ToHtmlPage
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage.seqFrag
 import com.sos.jobscheduler.data.event.{Event, EventId, EventSeq, Stamped, TearableEventSeq}
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
@@ -8,9 +10,7 @@ import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
 import java.time.{Instant, LocalDate}
 import scala.collection.immutable.Seq
@@ -25,7 +25,7 @@ final class SingleKeyEventHtmlPage private(
   key: Any,
   stampedEventSeq: Stamped[TearableEventSeq[Seq, Event]],
   protected val pageUri: Uri,
-  implicit protected val uris: SchedulerUris,
+  protected val webServiceContext: SchedulerWebServiceContext,
   protected val schedulerOverview: SchedulerOverview)
 extends SchedulerHtmlPage {
 
@@ -33,6 +33,7 @@ extends SchedulerHtmlPage {
 
   protected def eventId = stampedEventSeq.eventId
 
+  private implicit val uris = webServiceContext.uris
   private val eventSeq = stampedEventSeq.value
   private val midnightInstant = Instant.ofEpochSecond(LocalDate.now(SchedulerHtmlPage.OurZoneId).toEpochDay * 24*3600)
 
@@ -100,9 +101,9 @@ extends SchedulerHtmlPage {
 object SingleKeyEventHtmlPage {
   import scala.language.implicitConversions
 
-  def singleKeyEventToHtmlPage[E <: Event](key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+  def singleKeyEventToHtmlPage[E <: Event](key: Any)(implicit client: SchedulerOverviewClient, webServiceContext: SchedulerWebServiceContext, ec: ExecutionContext) =
     ToHtmlPage[Stamped[TearableEventSeq[Seq, E]]] { (stampedEventSeq, pageUri) ⇒
       for (stampedOverview ← client.overview) yield
-        new SingleKeyEventHtmlPage(key, stampedEventSeq, pageUri, webServiceContext.uris, stampedOverview.value)
+        new SingleKeyEventHtmlPage(key, stampedEventSeq, pageUri, webServiceContext, stampedOverview.value)
     }
 }

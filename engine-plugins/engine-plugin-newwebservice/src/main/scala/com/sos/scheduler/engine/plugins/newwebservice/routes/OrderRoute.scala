@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.jobscheduler.common.event.collector.EventDirectives._
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.asFromStringOptionDeserializer
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives
 import com.sos.jobscheduler.data.event._
 import com.sos.scheduler.engine.client.api.{OrderClient, SchedulerOverviewClient}
 import com.sos.scheduler.engine.client.web.common.QueryHttp._
@@ -12,11 +13,10 @@ import com.sos.scheduler.engine.data.order.{JocOrderStatisticsChanged, OrderDeta
 import com.sos.scheduler.engine.data.queries.{OrderQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.event.{DirectEventClient, JocOrderStatisticsChangedSource}
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.OrderRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
-import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes._
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.OrdersHtmlPage
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
@@ -29,16 +29,16 @@ import spray.routing._
 /**
   * @author Joacim Zschimmer
   */
-trait OrderRoute extends LogRoute {
+trait OrderRoute extends LogRoute with EventRoutes with HtmlDirectives[SchedulerWebServiceContext] {
 
   protected def orderSubsystem: OrderSubsystemClient
   protected def orderStatisticsChangedSource: JocOrderStatisticsChangedSource
   protected implicit def client: OrderClient with SchedulerOverviewClient with DirectEventClient
-  protected implicit def webServiceContext: WebServiceContext
+  protected implicit def webServiceContext: SchedulerWebServiceContext
   protected implicit def executionContext: ExecutionContext
 
   protected final def orderRoute: Route =
-    (getRequiresSlash(webServiceContext) | pass) {
+    (getRequiresSlash | pass) {
       parameter("return".?) {
         case Some("JocOrderStatistics") ⇒
           jobChainNodeQuery { query ⇒
@@ -102,7 +102,7 @@ trait OrderRoute extends LogRoute {
         }
 
       case None ⇒
-        htmlPreferred(webServiceContext) {
+        htmlPreferred {
           requestUri { uri ⇒
             complete(
               for (o ← client.ordersComplementedBy[OrderOverview](query)) yield

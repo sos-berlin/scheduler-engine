@@ -1,12 +1,12 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage.seqFrag
 import com.sos.jobscheduler.data.folder.FolderPath
 import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderProcessingState, OrderSourceType}
 import com.sos.scheduler.engine.data.queries.OrderQuery
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.seqFrag
 import scalatags.Text.all._
 
 /**

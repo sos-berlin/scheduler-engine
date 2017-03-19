@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
 import akka.actor.ActorRefFactory
 import com.sos.jobscheduler.common.scalautil.Logger
+import com.sos.jobscheduler.common.sprayutils.html.Webjar
 import com.sos.jobscheduler.common.time.ScalaTime._
 import com.sos.jobscheduler.common.utils.JavaResource
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute._

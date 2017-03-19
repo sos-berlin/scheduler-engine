@@ -5,6 +5,7 @@ import com.sos.jobscheduler.common.event.collector.EventDirectives._
 import com.sos.jobscheduler.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.{completeWithError, pathSegments}
 import com.sos.jobscheduler.common.sprayutils.XmlString
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives
 import com.sos.jobscheduler.data.event.Stamped
 import com.sos.jobscheduler.data.filebased.TypedPath
 import com.sos.jobscheduler.data.folder.FolderPath
@@ -15,8 +16,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedDetailed, FileBasedEven
 import com.sos.scheduler.engine.data.filebaseds.TypedPathRegister
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.kernel.event.DirectEventClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AnyFileBasedRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.SchedulerDirectives.typedPath
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
@@ -31,10 +31,10 @@ import spray.routing._
 /**
   * @author Joacim Zschimmer
   */
-trait AnyFileBasedRoute {
+trait AnyFileBasedRoute extends HtmlDirectives[SchedulerWebServiceContext] {
 
   protected implicit def client: FileBasedClient with DirectEventClient with SchedulerOverviewClient
-  protected implicit def webServiceContext: WebServiceContext
+  protected implicit def webServiceContext: SchedulerWebServiceContext
   protected implicit def actorRefFactory: ActorRefFactory
   protected implicit def executionContext: ExecutionContext
 

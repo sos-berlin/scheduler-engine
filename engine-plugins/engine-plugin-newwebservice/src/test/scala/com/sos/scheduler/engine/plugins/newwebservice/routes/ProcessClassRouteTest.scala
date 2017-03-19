@@ -10,7 +10,7 @@ import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassOverview, ProcessClassPath, ProcessClassView, ProcessDetailed}
 import com.sos.scheduler.engine.data.queries.PathQuery
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.ProcessClassRouteTest._
 import java.time.Instant
 import org.junit.runner.RunWith
@@ -66,7 +66,7 @@ final class ProcessClassRouteTest extends FreeSpec with ScalatestRouteTest with 
     def overview = throw new NotImplementedError
   }
 
-  protected implicit def webServiceContext = new WebServiceContext()
+  protected implicit def webServiceContext = new SchedulerWebServiceContext()
 
   protected implicit def executionContext = ExecutionContext.global
 

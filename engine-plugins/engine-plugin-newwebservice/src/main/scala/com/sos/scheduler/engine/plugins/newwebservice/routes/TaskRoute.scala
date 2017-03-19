@@ -8,9 +8,8 @@ import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.data.job.{JobPath, TaskEvent, TaskKey}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
-import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.events
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes
 import com.sos.scheduler.engine.plugins.newwebservice.routes.log.LogRoute
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent.ExecutionContext
@@ -21,11 +20,11 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-trait TaskRoute extends LogRoute {
+trait TaskRoute extends LogRoute with EventRoutes {
 
   protected def taskSubsystem: TaskSubsystemClient
   protected implicit def client: DirectSchedulerClient
-  protected implicit def webServiceContext: WebServiceContext
+  protected implicit def webServiceContext: SchedulerWebServiceContext
   protected implicit def executionContext: ExecutionContext
 
   def taskRoute: Route =
@@ -53,7 +52,7 @@ trait TaskRoute extends LogRoute {
     }
 
   private def multipleTasks(returnType: String): Route =
-    getRequiresSlash(webServiceContext) {
+    getRequiresSlash {
       pathQuery[JobPath].apply { query ⇒
         returnType match {
           case "TaskOverview" ⇒ completeTryHtml(client.taskOverviews(query))

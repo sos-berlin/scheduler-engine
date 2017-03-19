@@ -1,16 +1,15 @@
 package com.sos.scheduler.engine.plugins.newwebservice.simplegui
 
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives.ToHtmlPage
+import com.sos.jobscheduler.common.sprayutils.html.HtmlPage.{EmptyFrag, seqFrag}
 import com.sos.jobscheduler.data.event.{AnyKeyedEvent, EventId, EventSeq, KeyedEvent, Stamped, TearableEventSeq}
 import com.sos.jobscheduler.data.job.TaskId
 import com.sos.scheduler.engine.client.api.SchedulerOverviewClient
-import com.sos.scheduler.engine.client.web.SchedulerUris
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.log.Logged
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.ToHtmlPage
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlPage.{EmptyFrag, seqFrag}
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.SchedulerHtmlPage.eventIdToLocalHtml
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
@@ -23,11 +22,12 @@ import spray.http.Uri
 final class KeyedEventsHtmlPage private(
   stampedEventSeq: Stamped[TearableEventSeq[Seq, AnyKeyedEvent]],
   protected val pageUri: Uri,
-  implicit protected val uris: SchedulerUris,
+  protected val webServiceContext: SchedulerWebServiceContext,
   protected val schedulerOverview: SchedulerOverview)
 extends SchedulerHtmlPage {
 
   import scala.language.implicitConversions
+  private implicit val uris = webServiceContext.uris
 
   protected def eventId = stampedEventSeq.eventId
 
@@ -100,10 +100,10 @@ object KeyedEventsHtmlPage {
   object implicits {
     import scala.language.implicitConversions
 
-    implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: WebServiceContext, ec: ExecutionContext) =
+    implicit def keyedEventsToHtmlPage(implicit client: SchedulerOverviewClient, webServiceContext: SchedulerWebServiceContext, ec: ExecutionContext) =
       ToHtmlPage[Stamped[TearableEventSeq[Seq, AnyKeyedEvent]]] { (stampedEventSeq, pageUri) ⇒
         for (stampedOverview ← client.overview) yield
-          new KeyedEventsHtmlPage(stampedEventSeq, pageUri, webServiceContext.uris, stampedOverview.value)
+          new KeyedEventsHtmlPage(stampedEventSeq, pageUri, webServiceContext, stampedOverview.value)
       }
   }
 }

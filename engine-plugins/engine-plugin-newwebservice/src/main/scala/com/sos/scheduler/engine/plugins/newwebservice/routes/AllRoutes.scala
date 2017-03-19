@@ -3,8 +3,8 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import akka.actor.ActorRefFactory
 import com.sos.jobscheduler.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.jobscheduler.common.sprayutils.SprayUtils.{passIf, passSome, pathSegments}
-import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives.htmlPreferred
-import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.jobscheduler.common.sprayutils.html.HtmlDirectives
+import com.sos.scheduler.engine.plugins.newwebservice.html.SchedulerWebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.AllRoutes._
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.WebjarsRoute
 import spray.http.StatusCodes.TemporaryRedirect
@@ -14,10 +14,10 @@ import spray.routing.Route
 /**
   * @author Joacim Zschimmer
   */
-trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with TestRoute {
+trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with TestRoute with HtmlDirectives[SchedulerWebServiceContext] {
 
   protected implicit def actorRefFactory: ActorRefFactory
-  protected final val webServiceContext = new WebServiceContext(htmlEnabled = webjarsExists)
+  protected final val webServiceContext = new SchedulerWebServiceContext(htmlEnabled = webjarsExists)
   private val guiPath: Option[String] = schedulerConfiguration.existingHtmlDirOption match {
     case Some(_) ⇒ Some(Joc1Path)
     case None ⇒ webServiceContext.htmlEnabled option ExperimentalGuiPath
@@ -40,7 +40,7 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
     }
 
   private def redirectToDefaultGui: Route =
-    htmlPreferred(webServiceContext) {
+    htmlPreferred {
       passSome(guiPath) { path ⇒
         redirect(path, TemporaryRedirect)
       }
@@ -48,7 +48,7 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
 
   private def masterRoute: Route =
     pathEndOrSingleSlash {
-      htmlPreferred(webServiceContext) {
+      htmlPreferred {
         redirect("/jobscheduler/master/api", TemporaryRedirect)
       }
     } ~
