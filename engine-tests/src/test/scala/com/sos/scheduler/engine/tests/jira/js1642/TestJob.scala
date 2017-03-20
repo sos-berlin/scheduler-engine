@@ -11,6 +11,7 @@ import java.nio.file.Paths
 private[js1642] final class TestJob extends sos.spooler.Job_impl {
 
   override def spooler_process = {
+    spooler_task.order.set_state_text("TestJob")
     val barrierFile = Paths.get(spooler.variables.value(BarrierFileVariableName))
     require(barrierFile.toString.nonEmpty)
     while (exists(barrierFile)) {

@@ -29,7 +29,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NestedJobChainNodeOverview, NodeId}
-import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderKey, OrderOverview, OrderStepStarted}
+import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.{SchedulerInitiated, SchedulerOverview, SchedulerState}
@@ -266,6 +266,19 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
         _.ordersBy[OrderOverview](query)
       }
       assert((orders map { _.orderKey }).toSet == Set(a1OrderKey, b1OrderKey, xa1OrderKey, xb1OrderKey, nestedOrderKey))
+    }
+
+    "orders query OrderKey, OrderDetailed" in {
+      val query = OrderQuery.All.withOrderKey(b1OrderKey)
+      val orders: immutable.Seq[OrderDetailed] = fetchWebAndDirect {
+        _.ordersBy[OrderDetailed](query)
+      }
+      assert((orders map { o ⇒ o.copy(overview = o.overview.copy(startedAt = None)) }) == Vector(OrderDetailed(
+        overview = b1OrderOverview,
+        initialNodeId = Some(NodeId("100")),
+        title = "B1-TITLE",
+        stateText = "TestJob",
+        variables = Map("TEST-VAR" → "TEST-VALUE"))))
     }
 
     "ordersComplementedBy query by outer orderKey" in {
