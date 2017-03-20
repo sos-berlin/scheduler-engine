@@ -36,6 +36,7 @@ final class OrderDetailedTest extends FreeSpec {
       priority = 7,
       initialNodeId = Some(NodeId("INITIAL")),
       endNodeId = Some(NodeId("END")),
+      stateText = "STATE-TEXT",
       title = "TITLE",
       variables = Map("a" → "A", "b" → "B"))
     val jsValue = """{
@@ -66,6 +67,7 @@ final class OrderDetailedTest extends FreeSpec {
       "priority": 7,
       "initialNodeId": "INITIAL",
       "endNodeId": "END",
+      "stateText": "STATE-TEXT",
       "title": "TITLE",
       "variables": {
         "a": "A",

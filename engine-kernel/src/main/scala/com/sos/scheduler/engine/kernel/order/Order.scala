@@ -150,6 +150,7 @@ with OrderPersistence {
     priority = priority,
     initialNodeId = emptyToNone(cppProxy.initial_state_string) map NodeId.apply,
     endNodeId = emptyToNone(cppProxy.end_state_string) map NodeId.apply,
+    stateText = cppProxy.state_text,
     title = title,
     variables = variables)
 

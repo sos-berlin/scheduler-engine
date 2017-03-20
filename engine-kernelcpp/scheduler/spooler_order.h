@@ -246,7 +246,7 @@ struct Order : Com_order,
     string                      end_state_string        ()                                          { return _end_state.as_string(); }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
-    string                      state_text              ()                                          { return _state_text; }
+    const string&               state_text              () const                                    { return _state_text; }
 
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }

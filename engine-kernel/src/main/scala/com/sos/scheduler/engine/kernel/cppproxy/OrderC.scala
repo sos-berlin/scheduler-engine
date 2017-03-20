@@ -24,6 +24,7 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   def set_priority(o: Int): Unit
   def string_state: String
   def initial_state_string: String
+  def state_text: String
   def set_end_state(order_state: String): Unit
   def end_state_string: String
   def java_remove(): Unit
