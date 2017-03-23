@@ -349,6 +349,9 @@ struct Dummy_process : Abstract_process {
     public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
         xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
         process_element.setAttribute("running_since", _running_since.xml_value());
+        if (int pid = process_id()) {
+            process_element.setAttribute("pid", pid);
+        }
         return process_element;
     }
 
