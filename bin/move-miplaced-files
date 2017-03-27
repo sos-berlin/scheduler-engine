@@ -4,12 +4,12 @@ set -e
 move() {
   from="$1"
   to="$2"
-  for dir in $(find -type d -path "**/src/main"); do 
+  for dir in $(find -type d -path "**/src/main"); do
     if [ -d "$dir/$from" ]; then
       for path in $(cd "$dir/$from" && find -type f -name "*.$to"); do
         fromFile="$dir/$from/$path"
         toFile="$dir/$to/$path"
-        mkdir --parents $(dirname "$toFile")
+        mkdir -p $(dirname "$toFile")
         mv -v "$fromFile" "$toFile"
       done
     fi
