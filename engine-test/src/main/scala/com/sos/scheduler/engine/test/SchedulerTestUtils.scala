@@ -16,9 +16,10 @@ import com.sos.scheduler.engine.data.job._
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderKey, OrderOverview, OrderStarted}
-import com.sos.scheduler.engine.data.processclass.ProcessClassPath
+import com.sos.scheduler.engine.data.processclass.{ProcessClassDetailed, ProcessClassPath}
 import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, StartJobCommand}
 import com.sos.scheduler.engine.eventbus.EventSubscription
+import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
 import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
@@ -135,6 +136,9 @@ object SchedulerTestUtils {
   @deprecated("Avoid direct access to C++ near objects")
   def task(taskId: TaskId)(implicit hasInjector: HasInjector): Task =
     instance[TaskSubsystemClient].task(taskId)
+
+  def processClassDetailed(path: ProcessClassPath)(implicit hasInjector: HasInjector, timeout: ImplicitTimeout): ProcessClassDetailed =
+    (instance[DirectSchedulerClient].processClass[ProcessClassDetailed](path) await timeout.duration).value
 
   @deprecated("Avoid direct access to C++ near objects")
   def processClass(path: ProcessClassPath)(implicit hasInjector: HasInjector): ProcessClass =
