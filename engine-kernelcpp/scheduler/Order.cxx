@@ -2737,7 +2737,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
                 set_suspended();  // Like processing_error()
             else
-            if (_is_success_state && _outer_job_chain_path == ""  &&  _state == _end_state) {
+            if (_outer_job_chain_path == ""  &&  _state == _end_state) {
                 log()->info( message_string( "SCHEDULER-704", _end_state ) );
                 set_end_state_reached();
                 handle_end_state();

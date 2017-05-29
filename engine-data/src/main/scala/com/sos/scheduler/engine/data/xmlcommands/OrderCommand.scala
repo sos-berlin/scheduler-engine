@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.data.order.{OrderKey, OrderState}
 final case class OrderCommand(
     orderKey: OrderKey,
     state: Option[OrderState] = None,
+    endState: Option[OrderState] = None,
     title: Option[String] = None,
     suspended: Option[Boolean] = None,
     parameters: Map[String, String] = Map(),
@@ -19,6 +20,7 @@ extends XmlCommand {
         job_chain={orderKey.jobChainPath.string}
         id={orderKey.id.string}
         state={(state map { _.string }).orNull}
+        end_state={(endState map { _.string }).orNull}
         suspended={(suspended map { _.toString }).orNull}
         title={title.orNull}>{parameterElem}{xmlChildren}</order>
   }
