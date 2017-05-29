@@ -8,6 +8,7 @@ import java.time.Instant
 final case class OrderCommand(
     orderKey: OrderKey,
     nodeId: Option[NodeId] = None,
+    endNodeId: Option[NodeId] = None,
     at: Option[Instant] = None,
     suspended: Option[Boolean] = None,
     title: Option[String] = None,
@@ -23,6 +24,7 @@ extends XmlCommand {
         job_chain={orderKey.jobChainPath.string}
         id={orderKey.id.string}
         state={(nodeId map { _.string }).orNull}
+        end_state={(endNodeId map { _.string }).orNull}
         at={(at map SchedulerDateTime.formatUtc).orNull}
         suspended={(suspended map { _.toString }).orNull}
         title={title.orNull}>{
