@@ -56,13 +56,13 @@ extends Subsystem with HasCloser {
 object DatabaseSubsystem {
   def quoteSqlString(o: String) = {
     val quote = '\''
-    require(!o.contains(quote), s"SQL string must not contain a single-quote ($quote)")
+    require(!o.contains(quote), s"SQL string must not contain single quotes ($quote)")
     quote + o + quote
   }
 
   def quoteSqlName(o: String) = {
-    val quote = '`'
-    require(!o.contains(quote), s"SQL name must not contain a back-tick ($quote)")
+    val quote = '"'
+    require(!o.contains(quote), s"SQL name must not contain double quotes ($quote)")
     quote + o + quote
   }
 }
