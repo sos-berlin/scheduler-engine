@@ -1447,7 +1447,7 @@ void Order::set_dom( const xml::Element_ptr& element )
     assert_is_not_initialized();
     subsystem()->assert_xml_element_name( element );
 
-    set_dom( element, (Variable_set_map*)NULL );
+    set_dom(element, &_spooler->_variable_set_map);
 
     //if( !job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
 
