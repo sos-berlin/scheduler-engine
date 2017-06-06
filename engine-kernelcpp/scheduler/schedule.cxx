@@ -1565,18 +1565,16 @@ void Period::set_dom( const xml::Element_ptr& element, Period::With_or_without_d
             if( !_absolute_repeat.is_eternal() )  _repeat = Duration::eternal;
           //if( !_repeat.is_never()   )  z::throw_xc( "SCHEDULER-442", "absolute_repeat", "repeat" );
         }
-    }
 
-    string end = element.getAttribute( "end" , "24:00:00" );
-    if( !end.empty() )
-    {
-        if( w == with_date )  dt = end;
-                        else  dt.set_time( end );
-        _end = Time(dt);
+        string end = element.getAttribute( "end" , "24:00:00" );
+        if( !end.empty() )
+        {
+            if( w == with_date )  dt = end;
+                            else  dt.set_time( end );
+            _end = Time(dt);
+        }
+        _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
     }
-
-    _start_once = element.bool_getAttribute( "start_once", _start_once );   // Für Joacim Zschimmer
-    //Wird das schon benutzt? Ist nicht berechnet.  if( _start_once  &&  !_spooler->_zschimmer_mode )  z::throw_xc( Z_FUNCTION, "Attribute start_once is not supported" );
 
     if( element.hasAttribute( "when_holiday" ) )  _when_holiday = when_holiday_from_string( element.getAttribute( "when_holiday" ) );
 

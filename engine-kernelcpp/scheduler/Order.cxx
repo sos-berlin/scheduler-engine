@@ -3306,13 +3306,13 @@ Time Order::next_start_time()
         Time now = Time::now();
         _schedule_use->log_changed_active_schedule(now);
 
-        if (_period.end() < now) _period = _schedule_use->next_period(Time::now(), schedule::wss_next_any_start);
+        if (_period.end() < now) _period = _schedule_use->next_period(now, schedule::wss_next_any_start);
         result = _period.next_repeated_allow_after_end(now);
 
         if (result >= _period.end())       // Periode abgelaufen?
         {
             bool period_not_initialized = _period.end().is_never(); // JS-957
-            Period next_period = _schedule_use->next_period(period_not_initialized ? Time::now() : _period.end(), schedule::wss_next_any_start);
+            Period next_period = _schedule_use->next_period(period_not_initialized ? now : _period.end(), schedule::wss_next_any_start);
 
             if (result.is_never())
                 result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??
