@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1709
 
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.OrderFinishedEvent
+import com.sos.scheduler.engine.data.order.OrderFinished
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.Scheduler
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
@@ -39,8 +39,8 @@ final class JS1709IT extends FreeSpec with ScalaSchedulerTest {
           <period single_start={t1.format(format)}/>
           <period begin={t2.format(format)} end={t3.format(format)} absolute_repeat={absoluteRepeat.toString}/>
         </run_time>))
-      eventPipe.nextKeyed[OrderFinishedEvent](orderKey)
-      eventPipe.nextKeyed[OrderFinishedEvent](orderKey)
+      eventPipe.next[OrderFinished](orderKey)
+      eventPipe.next[OrderFinished](orderKey)
     }
   }
 }
