@@ -898,6 +898,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute_optional( "version_commit_hash", SchedulerJ::versionCommitHash() );    
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
+    state_element.setAttribute( "configuration_directory", local_configuration_directory());
     state_element.setAttribute( "host"                 , _short_hostname );
     state_element.setAttribute_optional("http_port", _settings->_http_port);
     state_element.setAttribute_optional("https_port", _settings->_https_port);
