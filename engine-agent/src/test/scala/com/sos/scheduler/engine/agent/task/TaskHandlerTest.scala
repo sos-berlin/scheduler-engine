@@ -49,8 +49,8 @@ final class TaskHandlerTest extends FreeSpec {
     import testContext.{taskHandler, taskServers, tasks}
     def startTask() = awaitResult(taskHandler.execute(TestStartApiTask), 3.s)
     startTask()
-    taskServers(0).mockedTerminate()
     intercept[LicenseKeyParameterIsMissingException] { startTask() }
+    taskServers(0).mockedTerminate()
     awaitResult(taskHandler.execute(CloseTask(tasks(0).id, kill = false)), 3.s)
     startTask()
   }

@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.soslicense.Parameters.UniversalAgent
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
@@ -42,6 +41,10 @@ extends TaskHandlerView {
   private val tasks = new TaskRegister
   private val crashKillScriptOption = for (script ← agentConfiguration.killScript if agentConfiguration.crashKillScriptEnabled)
     yield new CrashKillScript(script, agentConfiguration.crashKillScriptFile)
+  private val licensedTaskLimiter = new LicensedTaskLimiter {
+    def errorMessage(taskCount: Int) = "No license key provided by master to execute jobs in parallel " +
+      s"($taskCount unreleased tasks: ${ (tasks.values filterNot { _.terminated.isCompleted } mkString ", ") })"
+  }
 
   def isTerminating = terminating.get
   def terminated = terminatedPromise.future
@@ -55,18 +58,21 @@ extends TaskHandlerView {
       case AbortImmediately ⇒ executeAbortImmediately()
     }
 
-  private def executeStartTask(command: StartTask, meta: CommandMeta) = Future {
-    if (!(tasks.values forall { _.isReleasedCalled })) {
-        meta.licenseKeyBunch.require(UniversalAgent,
-          s"No license key provided by master to execute jobs in parallel (unreleased tasks: ${tasks.values filterNot { _.isReleasedCalled } mkString ", "})")
-    }
-    if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
-    val task = newAgentTask(command, meta.clientIpOption)
-    for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
-    tasks.insert(task)
-    task.start()
-    task.onTunnelInactivity(killAfterTunnelInactivity(task))
-    StartTaskResponse(task.id, task.tunnelToken)
+  private def executeStartTask(command: StartTask, meta: CommandMeta): Future[StartTaskResponse] =
+    Future {
+      if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
+      val (removeLicensedTask, task) =
+        licensedTaskLimiter.countTask(meta.licenseKeyBunch) {
+          val task = newAgentTask(command, meta.clientIpOption)
+          for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
+          tasks.insert(task)
+          task.start()
+          task.onTunnelInactivity(killAfterTunnelInactivity(task))
+          task
+        }
+      task.taskReleaseFuture onComplete { _ ⇒ removeLicensedTask() }
+      task.terminated onComplete { _ ⇒ removeLicensedTask() }   // Fallback, to be sure that free license is released
+      StartTaskResponse(task.id, task.tunnelToken)
   }
 
   private def killAfterTunnelInactivity(task: AgentTask)(since: Instant): Unit = {
