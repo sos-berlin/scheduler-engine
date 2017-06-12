@@ -37,7 +37,7 @@ extends HasCloser {
   lazy val tmpDirectory = directory / "tmp" sideEffect { o ⇒ createDirectory(o) }
   val schedulerLog = logDirectory / "scheduler.log"
   val databaseDirectory = directory
-  lazy val agent = new AgentEnvironment(directory)
+  lazy val agent = new AgentEnvironment(directory / "agent")
   private var isPrepared = false
 
   def prepare(): Unit = {
@@ -133,12 +133,11 @@ object TestEnvironment {
     s"$varName=" + OperatingSystem.concatFileAndPathChain(directory, previous)
   }
 
-  final class AgentEnvironment(directory: Path) {
-    val dataDirectory = directory / "agent"
-    val logDirectory = dataDirectory / "logs"
-    val configDirectory = dataDirectory / "config"
+  final class AgentEnvironment(val directory: Path) {
+    val logDirectory = directory / "logs"
+    val configDirectory = directory / "config"
     val privateConfigDirectory = configDirectory / "private"
-    for (dir ← Array(dataDirectory, logDirectory, configDirectory, privateConfigDirectory)) {
+    for (dir ← Array(directory, logDirectory, configDirectory, privateConfigDirectory)) {
       if (!exists(dir)) createDirectory(dir)
     }
   }

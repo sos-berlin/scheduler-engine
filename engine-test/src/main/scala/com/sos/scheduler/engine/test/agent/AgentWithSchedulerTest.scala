@@ -31,7 +31,7 @@ trait AgentWithSchedulerTest extends HasCloser with ScalaSchedulerTest {
 
   protected def newAgentConfiguration(): AgentConfiguration = newAgentConfiguration(None)
 
-  protected final def newAgentConfiguration(data: Option[Path]) = AgentConfiguration.forTest(data = data)
+  protected final def newAgentConfiguration(configAndData: Option[Path]) = AgentConfiguration.forTest(configAndData = configAndData)
 
   protected override def onSchedulerActivated() = {
     val started = agent.start()

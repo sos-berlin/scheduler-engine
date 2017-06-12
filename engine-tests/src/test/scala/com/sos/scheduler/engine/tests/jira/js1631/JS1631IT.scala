@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js1631
 
-import com.sos.jobscheduler.agent.test.AgentConfigDirectoryProvider.{PrivateHttpJksResource, PublicHttpJksResource}
+import com.sos.jobscheduler.agent.test.AgentDirectoryProvider.{PrivateHttpJksResource, PublicHttpJksResource}
 import com.sos.jobscheduler.common.scalautil.FileUtils.implicits._
 import com.sos.jobscheduler.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.JobPath
@@ -19,8 +19,8 @@ import org.scalatest.junit.JUnitRunner
 final class JS1631IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   override protected def newAgentConfiguration() = {
-    PrivateHttpJksResource.copyToFile(testEnvironment.agent.dataDirectory / "config/private/private-https.jks")
-    super.newAgentConfiguration(data = Some(testEnvironment.agent.dataDirectory)).copy(
+    PrivateHttpJksResource.copyToFile(testEnvironment.agent.configDirectory / "private/private-https.jks")
+    super.newAgentConfiguration(configAndData = Some(testEnvironment.agent.directory)).copy(
       http = None)
       .withHttpsInetSocketAddress(new InetSocketAddress("127.0.0.1", findRandomFreeTcpPort()))
   }
