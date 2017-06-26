@@ -1313,6 +1313,7 @@ string extension_of_path( const string& path )
 
 //-------------------------------------------------------------------------------------------------
 
+#if defined Z_WINDOWS
 static int getFileTime(HANDLE handle, OS_specific_file_stat* stat_buf) {
     errno = 0;
     FILETIME creation_time, last_access_time, last_write_time;
@@ -1324,6 +1325,7 @@ static int getFileTime(HANDLE handle, OS_specific_file_stat* stat_buf) {
     } else
         return 1;
 }
+#endif
 
 int file_status(const char* path, OS_specific_file_stat* stat_buf)
 {
