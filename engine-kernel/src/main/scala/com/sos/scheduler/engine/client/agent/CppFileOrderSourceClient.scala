@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.client.agent
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.sos.jobscheduler.agent.data.commands.RequestFileOrderSourceContent
+import com.sos.jobscheduler.agent.data.commands.AgentCommand.RequestFileOrderSourceContent
 import com.sos.jobscheduler.base.utils.StackTraces._
 import com.sos.jobscheduler.common.guice.GuiceImplicits.RichInjector
 import com.sos.jobscheduler.common.scalautil.Logger

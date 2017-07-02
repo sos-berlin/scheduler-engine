@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass
 
-import com.sos.jobscheduler.agent.data.commands.StartTask
+import com.sos.jobscheduler.agent.data.commands.AgentCommand.StartTask
 import com.sos.jobscheduler.common.guice.GuiceImplicits._
 import com.sos.jobscheduler.common.scalautil.Collections._
 import com.sos.jobscheduler.common.scalautil.Logger

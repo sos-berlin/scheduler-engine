@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.kernel.job.internal
 
 import com.google.inject.Injector
 import com.sos.jobscheduler.agent.client.AgentClient
-import com.sos.jobscheduler.agent.data.commands.{DeleteFile, MoveFile}
+import com.sos.jobscheduler.agent.data.commands.AgentCommand.{DeleteFile, MoveFile}
 import com.sos.jobscheduler.base.utils.ScalaUtils.cast
 import com.sos.jobscheduler.common.guice.GuiceImplicits._
 import com.sos.jobscheduler.common.scalautil.Futures.catchInFuture
