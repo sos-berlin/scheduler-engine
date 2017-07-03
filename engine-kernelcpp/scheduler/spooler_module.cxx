@@ -396,7 +396,7 @@ void Module::init()
 // JS-498: Vorhandensein von Scriptcode prüfen
         case kind_scripting_engine_java: break;
         
-        case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
+        case kind_scripting_engine:     if( _dotnet_class_name.empty() && !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
         case kind_process:              if (!has_source_script()) z::throw_xc("SCHEDULER-173");
