@@ -476,9 +476,9 @@ AGAIN:
                     params_array[ nr++ ] = "monitor.com_class="       + monitor->module()->_com_class_name;
                     params_array[ nr++ ] = "monitor.filename="        + monitor->module()->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + monitor->module()->_java_class_name;
+                    if (monitor->module()->_dotnet_class_name != "") params_array[ nr++ ] = "monitor.dotnet_class=" + monitor->module()->_dotnet_class_name;
+                    if (monitor->module()->_dll != "") params_array[ nr++ ] = "monitor.dll=" + monitor->module()->_dll;
                     params_array[ nr++ ] = "monitor.script="          + monitor->module()->_text_with_includes.includes_resolved().xml_string();    // JS-444  // Muss der letzte Parameter sein!
-                    if (monitor->module()->_dotnet_class_name != "") params_array[ nr++ ] = "dotnet_class=" + monitor->module()->_dotnet_class_name;
-                    if (monitor->module()->_dll != "") params_array[ nr++ ] = "dll=" + monitor->module()->_dll;
                 }
             }
 
