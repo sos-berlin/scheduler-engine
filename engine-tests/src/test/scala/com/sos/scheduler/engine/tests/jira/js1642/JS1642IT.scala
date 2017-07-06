@@ -17,7 +17,8 @@ import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
+import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
@@ -81,7 +82,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
   private val orderKeyToTaskId = mutable.Map[OrderKey, TaskId]()
 
   private object barrier {
-    lazy val file = testEnvironment.tmpDirectory / "TEST-BARRIER"
+    private lazy val file = testEnvironment.tmpDirectory / "TEST-BARRIER"
 
     def touchFile() = {
       val variableSet = instance[SchedulerVariableSet]
@@ -271,11 +272,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val orders: immutable.Seq[OrderDetailed] = fetchWebAndDirect {
         _.ordersBy[OrderDetailed](query)
       }
+      val expectedStateText = "TestJob"
+      waitForCondition(99.s, 100.ms) { orders.map(_.stateText) == Vector(expectedStateText) }  // Wait for job
       assert((orders map { o ⇒ o.copy(overview = o.overview.copy(startedAt = None)) }) == Vector(OrderDetailed(
         overview = b1OrderOverview,
         initialNodeId = Some(NodeId("100")),
         title = "B1-TITLE",
-        stateText = "TestJob",
+        stateText = expectedStateText,
         variables = Map("TEST-VAR" → "TEST-VALUE"))))
     }
 
