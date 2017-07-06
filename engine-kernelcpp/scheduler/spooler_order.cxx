@@ -2562,7 +2562,9 @@ vector<javabridge::Has_proxy*> Job_chain::java_orders() {
         }
     }
     Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, i) {
-        result.push_back(i->second);
+        if (!i->second->job()) {
+           result.push_back(i->second);
+        }
     }
     return result;
 }
