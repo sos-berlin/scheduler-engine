@@ -361,15 +361,15 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
       "orderOverviews" in {
         val jsObject = webSchedulerClient.get[JsObject](_.order[OrderOverview]) await TestTimeout
-        assert((jsObject("orders").asJsArray map normalizeOrderOverviewJson) == ExpectedOrderOverviewsJsArray)
+        assert((jsObject.fields("orders").asJsArray map normalizeOrderOverviewJson) == ExpectedOrderOverviewsJsArray)
       }
 
       "ordersComplemented" in {
         val ordersComplemented = webSchedulerClient.get[JsObject](_.order.complemented[OrderOverview]()) await TestTimeout
         val orderedOrdersComplemented = JsObject((ordersComplemented.fields - Stamped.EventIdJsonName) ++ Map(
-          "orders" → (ordersComplemented("orders").asJsArray map normalizeOrderOverviewJson),
-          "usedTasks" → ordersComplemented("usedTasks").asJsArray,
-          "usedJobs" → ordersComplemented("usedJobs").asJsArray))
+          "orders" → (ordersComplemented.fields("orders").asJsArray map normalizeOrderOverviewJson),
+          "usedTasks" → ordersComplemented.fields("usedTasks").asJsArray,
+          "usedJobs" → ordersComplemented.fields("usedJobs").asJsArray))
         assert(orderedOrdersComplemented == ExpectedOrdersOrdersComplementedJsObject)
       }
 
