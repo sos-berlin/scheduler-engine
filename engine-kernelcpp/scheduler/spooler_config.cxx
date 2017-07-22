@@ -105,10 +105,10 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             _central_configuration_directory = config_element.getAttribute( "central_configuration_directory", _central_configuration_directory );
 
         if (!_http_port_as_option_set && config_element.hasAttribute("http_port")) {
-            modifiable_settings()->set(setting_http_port, as_string(config_element.int_getAttribute("http_port")));
+            modifiable_settings()->set(setting_http_port, config_element.getAttribute("http_port"));
         }
         if (!_https_port_as_option_set && config_element.hasAttribute("https_port")) {
-            modifiable_settings()->set(setting_https_port, as_string(config_element.int_getAttribute("https_port")));
+            modifiable_settings()->set(setting_https_port, config_element.getAttribute("https_port"));
         }
         if( !_tcp_port_as_option_set )
         {
