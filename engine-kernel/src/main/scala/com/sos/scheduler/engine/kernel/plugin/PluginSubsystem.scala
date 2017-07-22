@@ -25,8 +25,8 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   private val classNameToConfiguration: Map[String, PluginConfiguration] =
     pluginConfigurations toKeyedMap { _.className } withDefault { o ⇒ throw new NoSuchElementException(s"Unknown plugin '$o'") }
-  private var classToPluginAdapter: Map[Class[Plugin], PluginAdapter] = null
-  private var namespaceToPlugin: Map[String, NamespaceXmlPlugin] = null
+  private var classToPluginAdapter: Map[Class[Plugin], PluginAdapter] = Map()
+  private var namespaceToPlugin: Map[String, NamespaceXmlPlugin] = Map()
   private lazy val typeToSourceChangingPlugins: Map[FileBasedType, immutable.Seq[XmlConfigurationChangingPlugin]] =
     (for (p ← plugins[XmlConfigurationChangingPlugin]; t ← p.fileBasedTypes) yield t → p).toSeqMultiMap withDefaultValue Nil
 
