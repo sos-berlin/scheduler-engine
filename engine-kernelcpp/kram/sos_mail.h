@@ -34,6 +34,7 @@ struct Mail_static : Sos_self_deleting
     bool                       _auto_dequeue;
     bool                       _queue_only;
     bool                       _debug;
+    bool                       _last_send_failed;
 
     Any_file                   _dir;
 };

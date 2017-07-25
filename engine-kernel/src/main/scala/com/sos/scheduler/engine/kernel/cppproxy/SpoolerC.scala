@@ -78,6 +78,7 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   @CppThreadSafe def write_to_scheduler_log(category: String, text: String): Unit
   def time_zone_name: String
   def supervisor_uri: String
+  def last_mail_failed: Boolean
 
   @CppExpression("$->_mail_defaults.to_java()")
   def mailDefaults: java.util.List[String]

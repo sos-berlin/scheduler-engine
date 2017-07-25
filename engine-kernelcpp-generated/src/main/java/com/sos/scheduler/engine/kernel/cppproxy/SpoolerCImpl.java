@@ -525,6 +525,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.SpoolerC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.Job_subsystemC job_subsystem_or_null__native(long cppReference);
 
 
+    @Override public boolean last_mail_failed() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return last_mail_failed__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native boolean last_mail_failed__native(long cppReference);
+
+
     @Override public java.lang.String local_configuration_directory() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

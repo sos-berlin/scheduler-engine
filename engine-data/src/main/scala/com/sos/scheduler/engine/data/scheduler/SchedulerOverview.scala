@@ -17,9 +17,10 @@ final case class SchedulerOverview(
   supervisor: Option[SupervisorUri] = None,
   pid: Int,
   state: SchedulerState,
+  lastMailFailed: Boolean,
   system: SystemInformation,
   java: JavaInformation)
 
 object SchedulerOverview {
-  implicit val MyJsonFormat = jsonFormat11(apply)
+  implicit val MyJsonFormat = jsonFormat12(apply)
 }

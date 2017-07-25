@@ -730,6 +730,23 @@ static jobject JNICALL job_1subsystem_1or_1null(JNIEnv* jenv, jobject, jlong cpp
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL last_1mail_1failed(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Spooler* o_ = has_proxy< ::sos::scheduler::Spooler >::of_cpp_reference(cppReference,"::sos::scheduler::Spooler::last_mail_failed()");
+        return (o_->last_mail_failed());
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jstring JNICALL local_1configuration_1directory(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -1228,6 +1245,7 @@ const static JNINativeMethod native_methods[] = {
     { (char*)"java_execute_http_with_security_level__native", (char*)"(JLcom/sos/scheduler/engine/kernel/http/SchedulerHttpRequest;Lcom/sos/scheduler/engine/kernel/http/SchedulerHttpResponse;Ljava/lang/String;)Lcom/sos/scheduler/engine/kernel/cppproxy/HttpResponseC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::java_1execute_1http_1with_1security_1level__Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpRequest_2Lcom_sos_scheduler_engine_kernel_http_SchedulerHttpResponse_2Ljava_lang_String_2 },
     { (char*)"job_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1subsystem },
     { (char*)"job_subsystem_or_null__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Job_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::job_1subsystem_1or_1null },
+    { (char*)"last_mail_failed__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::last_1mail_1failed },
     { (char*)"local_configuration_directory__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::local_1configuration_1directory },
     { (char*)"lock_subsystem__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Lock_subsystemC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::lock_1subsystem },
     { (char*)"log__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Prefix_logC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::log },

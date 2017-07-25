@@ -313,6 +313,7 @@ with HasCloser {
       supervisor = schedulerConfiguration.supervisorUriOption,
       pid = cppProxy.pid,
       state = SchedulerState.values()(cppProxy.state),
+      lastMailFailed = cppProxy.last_mail_failed,
       system = systemInformation(),
       java = JavaInformation())
 

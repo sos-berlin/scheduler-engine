@@ -297,8 +297,12 @@ void Java_message::send2()
     LOG( "JavaMail Send smtp=" << get("smtp",false) << " to=\"" << get("to",false) << "\" subject=\"" << get("subject",false) << "\"\n" );
 
     env->CallVoidMethod( get_jobject(), _send_method.id() );
-    if( env->ExceptionCheck() )  env.throw_java( "send" );
-
+    if( env->ExceptionCheck() ) {
+        _static->_last_send_failed = true;
+        env.throw_java( "send" );
+    } else {
+        _static->_last_send_failed = false;
+    }
     LOG( "JavaMail Send finished\n" );
 }
 

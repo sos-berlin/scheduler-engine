@@ -25,6 +25,7 @@ final class SchedulerOverviewTest extends FreeSpec {
       supervisor = Some(SupervisorUri("tcp://example.com:4000")),
       pid = 77,
       SchedulerState.running,
+      lastMailFailed = false,
       system = SystemInformation(hostname = "TEST-HOSTNAME"),
       java = JavaInformation(
         systemProperties = Map("test" → "TEST"),
@@ -39,6 +40,7 @@ final class SchedulerOverviewTest extends FreeSpec {
       "supervisor": "tcp://example.com:4000",
       "pid": 77,
       "state": "running",
+      "lastMailFailed": false,
       "java": {
         "systemProperties": {
           "test": "TEST"
