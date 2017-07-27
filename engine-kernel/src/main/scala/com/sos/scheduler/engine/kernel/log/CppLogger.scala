@@ -7,9 +7,10 @@ import scala.collection.JavaConversions._
 
 object CppLogger {
 
+  private lazy val logger = LoggerFactory.getLogger("JobScheduler")
+
   def log(prefix: String, level: SchedulerLogLevel, lines: String): Unit = {
     if (level != SchedulerLogLevel.none) {
-      val logger = LoggerFactory.getLogger("JobScheduler")
       for (line <- splitLines(lines)) {
         val prefixedLine = if (prefix.isEmpty) line else s"($prefix) $line"
         logLine(logger, level, prefixedLine)
@@ -40,7 +41,7 @@ object CppLogger {
         Iterable(rightTrim(lines))
     }
   }
-  
+
   private def rightTrim(s: String) = {
     var i = s.length - 1
     if (i >= 0 && s.charAt(i) == '\r') i -= 1
