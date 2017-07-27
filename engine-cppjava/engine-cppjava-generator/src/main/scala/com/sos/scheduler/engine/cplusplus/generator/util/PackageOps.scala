@@ -37,7 +37,7 @@ object PackageOps {
   }
 
   def classForName(name: String) =
-    try Class.forName(name)
+    try Class.forName(name, /*initialize=*/false, getClass.getClassLoader)
     catch {
       case t: ClassNotFoundException ⇒
         val u = new ClassNotFoundException(s"${t.getMessage} [class $name]", t)
