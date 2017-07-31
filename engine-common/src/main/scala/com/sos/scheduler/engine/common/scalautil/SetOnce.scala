@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.common.scalautil
 
+import java.util.Objects.requireNonNull
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -52,6 +53,9 @@ class SetOnce[A] {
     val ok = ref.compareAndSet(null.asInstanceOf[A], value)
     if (!ok) throw new IllegalStateException(s"SetOnce[${ref.get.getClass.getName}] has already been set")
   }
+
+  final def trySet(value: A): Boolean =
+    ref.compareAndSet(null.asInstanceOf[A], requireNonNull(value))   // Returns false on concurrent execution. Then value is discarded
 }
 
 object SetOnce {
