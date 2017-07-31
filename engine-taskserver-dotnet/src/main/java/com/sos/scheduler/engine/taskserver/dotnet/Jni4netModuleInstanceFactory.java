@@ -10,20 +10,26 @@ import sos.spooler.Monitor_impl;
 public final class Jni4netModuleInstanceFactory implements
         DotnetModuleInstanceFactory {
 
-    private final DotnetBridge dotnetBridge;
+    private DotnetBridge dotnetBridge = null;
     private final Path dllDirectory;
 
     public Jni4netModuleInstanceFactory(Path dllDirectory) throws Exception {
         this.dllDirectory = dllDirectory;
-        boolean debug = System.getProperty("jni4net.debug") != null;
-        dotnetBridge = new DotnetBridge();
-        dotnetBridge.init(dllDirectory, debug);
+    }
+
+    private synchronized void initialize() throws Exception {
+        if (dotnetBridge == null) {
+            dotnetBridge = new DotnetBridge();
+            boolean debug = System.getProperty("jni4net.debug") != null;
+            dotnetBridge.init(dllDirectory, debug);
+        }
     }
 
     public void close() {
     }
 
     public <T> T newInstance(Class<T> clazz, TaskContext taskContext, DotnetModuleReference reference) throws Exception {
+        initialize();
         return newSchedulerDotnetAdapter(clazz, reference, taskContext);
     }
 
