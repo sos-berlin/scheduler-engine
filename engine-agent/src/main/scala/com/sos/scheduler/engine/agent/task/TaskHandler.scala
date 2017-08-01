@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.agent.task.TaskHandler._
 import com.sos.scheduler.engine.base.exceptions.StandardPublicException
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.Parameters.UniversalAgent
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
@@ -61,8 +62,10 @@ extends TaskHandlerView {
     if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
     val task = newAgentTask(command, meta.clientIpOption)
     for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
+    closeOnError(task) {
+      task.start()
+    }
     tasks.insert(task)
-    task.start()
     task.onTunnelInactivity(killAfterTunnelInactivity(task))
     StartTaskResponse(task.id, task.tunnelToken)
   }
