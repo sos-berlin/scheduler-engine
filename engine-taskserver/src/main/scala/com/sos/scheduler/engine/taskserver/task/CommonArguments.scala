@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
+import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.taskserver.spoolerapi.TypedNamedIDispatches
 import scala.collection.immutable
 
@@ -13,4 +14,5 @@ private[task] final case class CommonArguments(
   namedIDispatches: TypedNamedIDispatches,
   monitors: immutable.Seq[Monitor],
   hasOrder: Boolean,
-  stdFiles: StdFiles)
+  stdFiles: StdFiles,
+  logon: Option[StartTask.KeyLogon])

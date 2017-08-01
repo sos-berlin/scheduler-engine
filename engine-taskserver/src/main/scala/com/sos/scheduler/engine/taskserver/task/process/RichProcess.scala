@@ -2,8 +2,10 @@ package com.sos.scheduler.engine.taskserver.task.process
 
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
+import com.sos.scheduler.engine.common.process.Processes
 import com.sos.scheduler.engine.common.process.Processes._
 import com.sos.scheduler.engine.common.process.StdoutStderr.{Stderr, Stdout, StdoutStderrType, StdoutStderrTypes}
+import com.sos.scheduler.engine.common.process.windows.WindowsUserName
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.{ClosedFuture, HasCloser, Logger}
 import com.sos.scheduler.engine.common.system.OperatingSystem._
@@ -19,6 +21,7 @@ import java.nio.file.Path
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import org.jetbrains.annotations.TestOnly
 import scala.collection.JavaConversions._
+import scala.collection.immutable.Seq
 import scala.concurrent.{ExecutionContext, Future, Promise, blocking}
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -27,7 +30,7 @@ import scala.util.control.NonFatal
  * @author Joacim Zschimmer
  */
 class RichProcess protected[process](val processConfiguration: ProcessConfiguration, process: Process)
-  (implicit exeuctionContext: ExecutionContext)
+  (implicit executionContext: ExecutionContext)
 extends HasCloser with ClosedFuture {
 
   val pidOption = processToPidOption(process)
@@ -74,7 +77,9 @@ extends HasCloser with ClosedFuture {
 
   private def executeKillScript(args: Seq[String]) = Future[Unit] {
     logger.info("Executing kill script: " + args.mkString("  "))
-    val onKillProcess = new ProcessBuilder(args).redirectOutput(INHERIT).redirectError(INHERIT).start()
+    val onKillProcess = Processes.startProcess(
+      new ProcessBuilder(args).redirectOutput(INHERIT).redirectError(INHERIT),
+      processConfiguration.logon)
     val promise = Promise[Unit]()
       blocking { waitForProcessTermination(onKillProcess) }
       onKillProcess.exitValue match {
@@ -105,22 +110,25 @@ extends HasCloser with ClosedFuture {
 }
 
 object RichProcess {
-  private val WaitForProcessPeriod = 100.ms
   private val logger = Logger(getClass)
 
-  def start(processConfiguration: ProcessConfiguration, file: Path, arguments: Seq[String] = Nil)
-      (implicit exeuctionContext: ExecutionContext): RichProcess =
+  def start(processConfiguration: ProcessConfiguration, executable: Path, arguments: Seq[String] = Nil)
+      (implicit executionContext: ExecutionContext): RichProcess =
   {
-    val process = startProcessBuilder(processConfiguration, file, arguments) { _.start() }
+    val process = startProcessBuilder(processConfiguration, executable, arguments)(
+      Processes.startProcess(_, processConfiguration.logon))
     new RichProcess(processConfiguration, process)
   }
 
-  private[process] def startProcessBuilder(processConfiguration: ProcessConfiguration, file: Path, arguments: Seq[String] = Nil)
+  private[process] def startProcessBuilder(processConfiguration: ProcessConfiguration, executable: Path, arguments: Seq[String] = Nil)
       (start: ProcessBuilder ⇒ Process): Process = {
     import processConfiguration.{additionalEnvironment, stdFileMap}
-    val processBuilder = new ProcessBuilder(toShellCommandArguments(file, arguments ++ processConfiguration.idArgumentOption))
+    val processBuilder = new ProcessBuilder(toShellCommandArguments(executable, arguments ++ processConfiguration.idArgumentOption))
     processBuilder.redirectOutput(toRedirect(stdFileMap.get(Stdout)))
     processBuilder.redirectError(toRedirect(stdFileMap.get(Stderr)))
+    if (processConfiguration.logon.isDefined) {
+      processBuilder.environment.clear()  // WindowsProcess will use user's environment variables as base
+    }
     processBuilder.environment ++= additionalEnvironment
     logger.info("Start process " + (arguments map { o ⇒ s"'$o'" } mkString ", "))
     start(processBuilder)
@@ -128,11 +136,12 @@ object RichProcess {
 
   private def toRedirect(pathOption: Option[Path]) = pathOption map { o ⇒ Redirect.to(o) } getOrElse INHERIT
 
-  def createStdFiles(directory: Path, id: String): Map[StdoutStderrType, Path] = (StdoutStderrTypes map { o ⇒ o → newLogFile(directory, id, o) }).toMap
+  def createStdFiles(directory: Path, id: String, user: Option[WindowsUserName] = None): Map[StdoutStderrType, Path] =
+    (StdoutStderrTypes map { o ⇒ o → newLogFile(directory, id, o, user) }).toMap
 
   private def waitForProcessTermination(process: Process): Unit = {
     logger.debug(s"waitFor ${processToString(process)} ...")
-    while (!process.waitFor(WaitForProcessPeriod.toMillis, MILLISECONDS)) {}
+    process.waitFor()
     logger.debug(s"waitFor ${processToString(process)} exitCode=${process.exitValue}")
   }
 

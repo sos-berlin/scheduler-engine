@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task.process
 
+import com.sos.scheduler.engine.common.process.Processes
 import com.sos.scheduler.engine.common.process.Processes._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.taskserver.data.TaskServerConfiguration.Encoding
@@ -36,11 +37,13 @@ object ShellScriptProcess {
     scriptString: String)
     (implicit executionContext: ExecutionContext): ShellScriptProcess =
   {
-    val shellFile = newTemporaryShellFile(name)
+    val shellFile = newTemporaryShellFile(name, processConfiguration.logon map { _.user })
     try {
       shellFile.write(scriptString, Encoding)
       val conf = processConfiguration.copy(fileOption = Some(shellFile))
-      val process  = startProcessBuilder(conf, shellFile) { _.startRobustly() }
+      val process = startProcessBuilder(conf, shellFile) {
+        _.startRobustly(start = Processes.startProcess(_, processConfiguration.logon))
+      }
       new ShellScriptProcess(conf, process, shellFile)
     }
     catch { case NonFatal(t) ⇒

@@ -14,6 +14,22 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
         requireContextIsNull(context);
     }
 
+    @Override public java.lang.String _credentials_key() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            java.lang.String result = _credentials_key__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native java.lang.String _credentials_key__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC _environment() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
         try {
@@ -104,6 +120,20 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Api_process_configurationC {
     }
 
     private static native java.lang.String _job_path__native(long cppReference);
+
+
+    @Override public boolean _load_user_profile() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.lock();
+        try {
+            return _load_user_profile__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+        finally {
+            com.sos.scheduler.engine.cplusplus.runtime.CppProxy.threadLock.unlock();
+        }
+    }
+
+    private static native boolean _load_user_profile__native(long cppReference);
 
 
     @Override public boolean _log_stdout_and_stderr() {

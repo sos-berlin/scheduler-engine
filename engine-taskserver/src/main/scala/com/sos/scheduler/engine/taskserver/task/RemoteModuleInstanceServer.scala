@@ -61,7 +61,8 @@ extends HasCloser with AnnotatedInvocable with InvocableIDispatch {
       namedIDispatches,
       taskArguments.rawMonitorArguments map { o ⇒ Monitor(moduleFactoryRegister.toModuleArguments(o.rawModuleArguments), o.name, o.ordering) },
       hasOrder = taskArguments.hasOrder,
-      stdFiles)
+      stdFiles,
+      logon = taskStartArguments.logon)
     val task = moduleFactoryRegister.newModule(taskArguments.rawModuleArguments) match {
       case module: ShellModule ⇒
         new ShellProcessTask(module, commonArguments,

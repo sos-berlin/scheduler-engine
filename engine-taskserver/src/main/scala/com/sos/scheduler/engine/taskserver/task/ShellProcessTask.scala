@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal._
 import com.sos.scheduler.engine.common.process.StdoutStderr.StdoutStderrType
+import com.sos.scheduler.engine.common.process.windows.{Logon, WindowsProcess, WindowsProcessCredentials}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -43,10 +44,9 @@ extends HasCloser with Task {
   import namedIDispatches.spoolerTask
 
   private val monitorProcessor = MonitorProcessor.create(monitors, namedIDispatches).closeWithCloser
-  private lazy val orderParamsFile = createTempFile("sos-", ".tmp")
-  private lazy val processStdFileMap = if (stdFiles.isEmpty) RichProcess.createStdFiles(logDirectory, id = logFilenamePart) else Map[StdoutStderrType, Path]()
-  private lazy val concurrentStdoutStderrWell = new ConcurrentStdoutAndStderrWell(s"Job $jobName",
-    stdFiles.copy(stdFileMap = processStdFileMap ++ stdFiles.stdFileMap)).closeWithCloser
+  private var orderParamsFile: Path = null
+  private var processStdFileMap: Map[StdoutStderrType, Path] = Map()
+  private var concurrentStdoutStderrWell: ConcurrentStdoutAndStderrWell = null
   private var startCalled = false
   private val richProcessOnce = new SetOnce[RichProcess]
   private val logger = Logger.withPrefix(getClass, toString)
@@ -67,12 +67,21 @@ extends HasCloser with Task {
       Future.successful(false)
   }
 
-  private def startProcess() = {
+  private def startProcess(): Future[Boolean] = {
     sigtermForwarder = for (terminated ← taskServerMainTerminatedOption) yield
       JavaShutdownHook.add(ShellProcessTask.getClass.getName) {
         sendProcessSignal(SIGTERM)
         Await.ready(terminated, Inf)  // Delay until TaskServer has been terminated
       }
+    val logon = for (logon ← commonArguments.logon) yield
+      Logon(WindowsProcessCredentials.byKey(logon.credentialsKey), withUserProfile = logon.withUserProfile)
+    logon map { _.user } match {
+      case Some(user) ⇒
+        orderParamsFile = createTempFile("sos-", ".tmp")
+        WindowsProcess.makeFileAppendableForUser(orderParamsFile, user)
+      case None ⇒
+        orderParamsFile = createTempFile("sos-", ".tmp")
+    }
     val env = {
       val params = spoolerTask.parameterMap ++ spoolerTask.orderParameterMap
       val paramEnv = params map { case (k, v) ⇒ (variablePrefix concat k.toUpperCase) → v }
@@ -81,11 +90,17 @@ extends HasCloser with Task {
     val (agentTaskIdOption, killScriptFileOption) =
       if (taskServerMainTerminatedOption.nonEmpty) (None, None)
       else (Some(agentTaskId), killScriptOption)  // No idString if this is an own process (due to a monitor), already started with idString
+    if (stdFiles.isEmpty) {
+      processStdFileMap = RichProcess.createStdFiles(logDirectory, id = logFilenamePart, logon map { _.user })
+    }
+    concurrentStdoutStderrWell = new ConcurrentStdoutAndStderrWell(s"Job $jobName",
+      stdFiles.copy(stdFileMap = processStdFileMap ++ stdFiles.stdFileMap)).closeWithCloser
     val processConfiguration = ProcessConfiguration(
       processStdFileMap,
       additionalEnvironment = env,
       agentTaskIdOption = agentTaskIdOption,
-      killScriptOption = killScriptFileOption)
+      killScriptOption = killScriptFileOption,
+      logon = logon)
     synchronizedStartProcess {
       startShellScript(processConfiguration, name = jobName, scriptString = module.script.string.trim).closeWithCloser
     } map { richProcess ⇒
@@ -144,12 +159,14 @@ extends HasCloser with Task {
   def deleteLogFiles() = deleteFilesWhenProcessClosed(processStdFileMap.values)
 
   private def deleteFilesWhenProcessClosed(files: Iterable[Path]): Unit = {
-    if (files.nonEmpty) {
-      for (richProcess ← richProcessOnce;
-           _ ← richProcess.closed;
-           _ ← concurrentStdoutStderrWell.closed)
-      {
-        RichProcess.tryDeleteFiles(files)
+    if (concurrentStdoutStderrWell != null) {
+      if (files.nonEmpty) {
+        for (richProcess ← richProcessOnce;
+             _ ← richProcess.closed;
+             _ ← concurrentStdoutStderrWell.closed)
+        {
+          RichProcess.tryDeleteFiles(files)
+        }
       }
     }
   }

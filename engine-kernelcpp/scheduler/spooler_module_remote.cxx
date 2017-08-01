@@ -354,6 +354,8 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
         process_configuration._job_path = _task->job()->path();
         process_configuration._job_name = _job_name;
         process_configuration._task_id = _task_id;
+        process_configuration._credentials_key = _module->_credentials_key;
+        process_configuration._load_user_profile = _module->_load_user_profile;
 
         bool ok = Module_instance::try_to_get_process(&process_configuration);
         if (ok) {

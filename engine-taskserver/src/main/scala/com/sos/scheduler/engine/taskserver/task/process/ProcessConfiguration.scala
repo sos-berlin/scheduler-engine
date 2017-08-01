@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.taskserver.task.process
 import com.sos.scheduler.engine.agent.data.{AgentTaskId, ProcessKillScript}
 import com.sos.scheduler.engine.common.process.Processes.Pid
 import com.sos.scheduler.engine.common.process.StdoutStderr.StdoutStderrType
+import com.sos.scheduler.engine.common.process.windows.Logon
 import java.nio.file.Path
 import scala.collection.immutable
 
@@ -14,7 +15,8 @@ final case class ProcessConfiguration(
   additionalEnvironment: Map[String, String] = Map(),
   fileOption: Option[Path] = None,
   agentTaskIdOption: Option[AgentTaskId] = None,
-  killScriptOption: Option[ProcessKillScript] = None)
+  killScriptOption: Option[ProcessKillScript] = None,
+  logon: Option[Logon] = None)
 {
   require(killScriptOption.isEmpty || agentTaskIdOption.nonEmpty, "killScriptFile requires idString")
 

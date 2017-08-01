@@ -169,7 +169,8 @@ private object TaskHandlerTest {
   private val JavaClasspath = "JAVA-CLASSPATH"
   private val TestMasterPort = 9999
   private val TestStartApiTask = StartApiTask(javaOptions = JavaOptions, javaClasspath = JavaClasspath,
-    meta = Some(StartTask.Meta(taskId = TaskId(1), job = JobPath("/test-job"))))
+    meta = Some(StartTask.Meta(taskId = TaskId(1), job = JobPath("/test-job"))),
+    logon = None)
   private val TestLicenseKeyBunch = LicenseKeyBunch("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6")
   private val TestTunnelToken = TunnelToken(TunnelId("1"), TunnelToken.Secret("SECRET"))
 

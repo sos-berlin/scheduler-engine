@@ -41,6 +41,8 @@ struct Api_process_configuration : javabridge::has_proxy<Api_process_configurati
     string _java_options;
     string _java_classpath;
     bool _is_shell_dummy;
+    string _credentials_key;
+    bool _load_user_profile;
 };
 
 

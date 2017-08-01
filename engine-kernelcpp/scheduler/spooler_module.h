@@ -145,6 +145,8 @@ struct Module : Object
     string                     _process_shell_variable_prefix;
     bool                       _process_shell_variable_prefix_is_configured;
     string                     _priority;                   // "", "-20" bis "+20" oder "idle", "below_normal" etc.
+    string                     _credentials_key;
+    bool                       _load_user_profile;
 
 #ifdef Z_WINDOWS
     int                        _encoding_code_page;

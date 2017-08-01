@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.RichAny
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import java.io.File
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 
 /**
@@ -26,7 +27,7 @@ object JavaProcess {
       processConfiguration.copy(
         fileOption = Some(JavaExecutable),
         additionalEnvironment = processConfiguration.additionalEnvironment + classpathEnv),
-      file = JavaExecutable,
+      executable = JavaExecutable,
       arguments = options ++ List(mainClass) ++ arguments)
   }
 

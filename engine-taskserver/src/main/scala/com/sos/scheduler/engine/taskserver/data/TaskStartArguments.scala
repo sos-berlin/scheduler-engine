@@ -30,7 +30,8 @@ final case class TaskStartArguments(
   stdFileMap: Map[StdoutStderrType, Path] = Map(),
   logStdoutAndStderr: Boolean = false,
   killScriptOption: Option[ProcessKillScript] = None,
-  rpcKeepaliveDurationOption: Option[Duration])
+  rpcKeepaliveDurationOption: Option[Duration],
+  logon: Option[StartTask.KeyLogon])
 {
   def masterInetSocketAddress = toInetSocketAddress(masterAddress)
   def logFilenamePart = s"task-${agentTaskId.string}-${startMeta.job.name}-${startMeta.taskId.string}"
@@ -51,12 +52,13 @@ object TaskStartArguments {
       logDirectory = temporaryDirectory,
       stdFileMap = stdFileMap,
       agentTaskId = AgentTaskId("1-1"),
-      rpcKeepaliveDurationOption = None)
+      rpcKeepaliveDurationOption = None,
+      logon = None)
 
   private def toInetSocketAddress(string: String): InetSocketAddress =
     string match {
       case HostPortRegex(host, port) ⇒ new InetSocketAddress(host, parseTcpPort(port))
     }
 
-  implicit val MyJsonFormat = jsonFormat12(apply)
+  implicit val MyJsonFormat = jsonFormat13(apply)
 }

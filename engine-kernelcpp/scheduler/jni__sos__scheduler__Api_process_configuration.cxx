@@ -17,6 +17,23 @@ namespace zschimmer { namespace javabridge {
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jstring JNICALL _1credentials_1key(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Api_process_configuration* o_ = has_proxy< ::sos::scheduler::Api_process_configuration >::of_cpp_reference(cppReference,"::sos::scheduler::Api_process_configuration::_credentials_key()");
+        return env.jstring_from_string(o_->_credentials_key);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jstring();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jobject JNICALL _1environment(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -119,6 +136,23 @@ static jstring JNICALL _1job_1path(JNIEnv* jenv, jobject, jlong cppReference)
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
 
+static jboolean JNICALL _1load_1user_1profile(JNIEnv* jenv, jobject, jlong cppReference)
+{
+    Env env = jenv;
+    try {
+        ::sos::scheduler::Api_process_configuration* o_ = has_proxy< ::sos::scheduler::Api_process_configuration >::of_cpp_reference(cppReference,"::sos::scheduler::Api_process_configuration::_load_user_profile()");
+        return (o_->_load_user_profile);
+    }
+    catch(const exception& x) {
+        env.set_java_exception(x);
+        return jboolean();
+    }
+}
+
+}}}}}}}
+
+namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace cppproxy { 
+
 static jboolean JNICALL _1log_1stdout_1and_1stderr(JNIEnv* jenv, jobject, jlong cppReference)
 {
     Env env = jenv;
@@ -203,12 +237,14 @@ static jstring JNICALL controllerAddressString(JNIEnv* jenv, jobject, jlong cppR
 }}}}}}}
 
 const static JNINativeMethod native_methods[] = {
+    { (char*)"_credentials_key__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1credentials_1key },
     { (char*)"_environment__native", (char*)"(J)Lcom/sos/scheduler/engine/kernel/cppproxy/Variable_setC;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1environment },
     { (char*)"_has_api__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1has_1api },
     { (char*)"_is_thread__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1is_1thread },
     { (char*)"_java_classpath__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1java_1classpath },
     { (char*)"_java_options__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1java_1options },
     { (char*)"_job_path__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1job_1path },
+    { (char*)"_load_user_profile__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1load_1user_1profile },
     { (char*)"_log_stdout_and_stderr__native", (char*)"(J)Z", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1log_1stdout_1and_1stderr },
     { (char*)"_priority__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1priority },
     { (char*)"_remote_scheduler_address__native", (char*)"(J)Ljava/lang/String;", (void*)::javaproxy::com::sos::scheduler::engine::kernel::cppproxy::_1remote_1scheduler_1address },

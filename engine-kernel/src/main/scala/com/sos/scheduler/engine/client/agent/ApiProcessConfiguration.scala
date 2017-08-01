@@ -9,13 +9,14 @@ final case class ApiProcessConfiguration(
   meta: StartTask.Meta,
   hasApi: Boolean,
   javaOptions: String,
-  javaClasspath: String) {
+  javaClasspath: String,
+  logon: Option[StartTask.KeyLogon]) {
 
 
   def toUniversalAgentCommand: StartTask = {
     if (hasApi)
-      StartApiTask(Some(meta), javaOptions = javaOptions, javaClasspath = javaClasspath)
+      StartApiTask(Some(meta), logon, javaOptions = javaOptions, javaClasspath = javaClasspath)
     else
-      StartNonApiTask(Some(meta))
+      StartNonApiTask(Some(meta), logon)
   }
 }

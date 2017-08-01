@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
-import com.sos.scheduler.engine.data.job.{TaskId, JobPath}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -15,6 +15,7 @@ final class StartApiTaskTest extends FreeSpec {
   "JSON minimum" in {
     val obj = StartApiTask(
       meta = None,
+      logon = None,
       javaOptions = "JAVA-OPTIONS",
       javaClasspath = "JAVA-CLASSPATH")
     val json = """{
@@ -31,6 +32,7 @@ final class StartApiTaskTest extends FreeSpec {
       meta = Some(StartTask.Meta(
         JobPath("/folder/test"),
         TaskId(123))),
+      logon = Some(StartTask.KeyLogon(credentialsKey = "CREDENTIALS", withUserProfile = true)),
       javaOptions = "JAVA-OPTIONS",
       javaClasspath = "JAVA-CLASSPATH")
     val json = """{
@@ -38,6 +40,10 @@ final class StartApiTaskTest extends FreeSpec {
       "meta": {
         "job": "/folder/test",
         "taskId": "123"
+      },
+      "logon": {
+        "credentialsKey": "CREDENTIALS",
+        "withUserProfile": true
       },
       "javaOptions": "JAVA-OPTIONS",
       "javaClasspath": "JAVA-CLASSPATH"
