@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.common.utils
 
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.{HasClose, logger}
 import com.sos.scheduler.engine.common.scalautil.Logger
 import java.time.{Duration, Instant}
 import scala.collection.mutable
@@ -10,6 +11,7 @@ import scala.util.{Failure, Try}
   * @author Joacim Zschimmer
   */
 object Exceptions {
+  private val logger = Logger(getClass)
 
   def repeatUntilNoException[A](timeout: Duration, delayNext: Duration)(body: ⇒ A): A =
     repeatUntilNoException(until = Instant.now() plus timeout, delayNext)(body)
@@ -51,4 +53,26 @@ object Exceptions {
     }
     throwables mkString ", caused by "
   }
+
+  def andRethrow(body: ⇒ Unit): PartialFunction[Throwable, Nothing] = {
+    case NonFatal(t) ⇒
+      onExceptionAddSuppressed(t) {
+        body
+      }
+      throw t
+  }
+
+  /**
+    * Catches an exception and tries to add it to `t` with `addSuppressed`.
+    * If not supported, the exception is logged.
+    */
+  def onExceptionAddSuppressed(t: Throwable)(body: ⇒ Unit): Unit =
+    try body
+    catch {
+      case suppressed: Throwable ⇒
+        t.addSuppressed(suppressed)
+        val suppresseds = t.getSuppressed
+        if (suppresseds.isEmpty || (suppresseds.last ne suppressed)) // Suppression disabled?
+          logger.warn(s"While handling an exception, this second exception is ignored: $suppressed\n" + s"Original exception is: $t", suppressed)
+    }
 }

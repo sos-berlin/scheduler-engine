@@ -8,6 +8,7 @@ import java.io.IOException
 import java.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
+import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.util.{Success, Try}
 
@@ -78,6 +79,17 @@ final class ExceptionsTest extends FreeSpec {
     assert(toStringWithCauses(new RuntimeException("TEST")) == "java.lang.RuntimeException: TEST")
     assert(toStringWithCauses(new RuntimeException("TEST", new IllegalStateException("STATE"))) ==
       "java.lang.RuntimeException: TEST, caused by java.lang.IllegalStateException: STATE")
+  }
+
+  "andRethrow" in {
+    intercept[IllegalArgumentException] {
+      try throw new IllegalArgumentException
+      catch andRethrow {}
+    } .getSuppressed shouldEqual Array()
+    intercept[IllegalArgumentException] {
+      try throw new IllegalArgumentException
+      catch andRethrow { throw new IllegalStateException }
+    } .getSuppressed map { _.getClass } shouldBe Array(classOf[IllegalStateException])
   }
 }
 
