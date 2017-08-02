@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.common.process.Processes.Pid
 import com.sos.scheduler.engine.common.process.windows.CommandLineConversion.argsToCommandLine
 import com.sos.scheduler.engine.common.process.windows.WindowsApi.{advapi32, call, handleCall, kernel32, myUserenv, openProcessToken, usersEnvironment, waitForSingleObject, windowsDirectory}
 import com.sos.scheduler.engine.common.process.windows.WindowsProcess._
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sun.jna.platform.win32.Advapi32Util.getEnvironmentBlock
@@ -16,10 +17,14 @@ import com.sun.jna.{Structure, WString}
 import java.io.OutputStream
 import java.lang.Math.{max, min}
 import java.lang.ProcessBuilder.Redirect
+import java.lang.ProcessBuilder.Redirect.INHERIT
+import java.nio.charset.Charset
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConversions._
+import scala.io.Codec
+import scala.util.control.NonFatal
 
 /**
   * A Windows process, started with CreateProcessW via JNA.
@@ -256,15 +261,21 @@ object WindowsProcess {
     */
   private def grantFileAccess(file: Path, grant: String): file.type = {
     require(grant forall { o ⇒ !o.isSpaceChar }, s"Illegal syntax for argument grant='$grant'")  // Avoid code injection
-    execute(windowsDirectory / "System32\\icacls.exe", file.toString, "/q", "/grant", grant)
+    execute(windowsDirectory / "System32\\icacls.exe", '"' + file.toString + '"', "/q", "/grant", grant)
     file
   }
 
   def execute(executable: Path, args: String*): Vector[String] = {
     logger.debug(executable + args.mkString(" [", ", ", "]"))
-    val process = new ProcessBuilder(executable.toString +: args: _*).start()
-    process.getOutputStream.close()
-    val lines = io.Source.fromInputStream(process.getErrorStream).getLines().toVector  // icacls writes error message to stderr
+    val process = new ProcessBuilder(executable.toString +: args: _*).redirectOutput(INHERIT).start()
+    process.getOutputStream.close()  // stdin
+    val lines = {
+      val commandCodec = new Codec(Charset forName "cp850")
+      try autoClosing(io.Source.fromInputStream(process.getErrorStream)(commandCodec)) { _.getLines().toVector }
+      catch { case NonFatal(t) ⇒
+        Vector(s"error message not readable: $t")
+      }
+    }
     val returnCode = process.waitFor()
     if (returnCode != 0) throw new RuntimeException(s"Windows command failed: $executable => ${lines mkString " / "}")
     lines

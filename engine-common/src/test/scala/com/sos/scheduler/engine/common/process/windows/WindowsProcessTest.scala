@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.common.process.windows
 
 import com.sos.scheduler.engine.common.process.windows.WindowsApi.windowsDirectory
-import com.sos.scheduler.engine.common.process.windows.WindowsProcess.WindowsProcessTargetSystemProperty
+import com.sos.scheduler.engine.common.process.windows.WindowsProcess.{WindowsProcessTargetSystemProperty, execute}
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import java.lang.ProcessBuilder.Redirect
 import java.lang.ProcessBuilder.Redirect.INHERIT
+import java.nio.charset.Charset
 import java.nio.charset.Charset.defaultCharset
 import java.nio.charset.StandardCharsets.US_ASCII
 import java.nio.file.Files.{createTempFile, delete}
@@ -17,6 +18,8 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
+import scala.io.Codec
+import scala.util.{Failure, Try}
 
 /**
   * @author Joacim Zschimmer
@@ -225,8 +228,20 @@ final class WindowsProcessTest extends FreeSpec {
         .redirectOutput(Redirect to stdoutFile)
         .start()
         .waitFor()
-      try stdoutFile.contentString(defaultCharset)
+      try stdoutFile.contentString(Charset forName "cp850")
       finally delete(stdoutFile)
+    }
+
+    "execute" in {
+      val file = "NON-EXISTANT-FILE-WITH-ÜMLÅÙTS"
+      val user = "NON-EXISTENT-ÜSËR"
+      val Failure(t) = Try {
+        WindowsProcess.execute(windowsDirectory / "System32\\icacls.exe", file, "/q", "/grant", s"$user:R")
+      }
+      val Array(a, b) = t.getMessage split "=>"
+      println(t.getMessage)
+      assert(a contains "icacls.exe")
+      assert(b contains user)
     }
   }
 
