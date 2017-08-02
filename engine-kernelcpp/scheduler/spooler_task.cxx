@@ -287,6 +287,13 @@ void Task::close()
         _terminated_events.clear();
 
         _closed = true;
+        if (has_error() || _log->highest_level() >= log_error) {
+            try {
+                _history.start();
+            } catch (exception& x) {
+                log()->error(S() << "When starting task history after error: " << x.what());
+            }
+        }
         _history.end();    // DB-Operation, kann Exception auslösen
     }
 
