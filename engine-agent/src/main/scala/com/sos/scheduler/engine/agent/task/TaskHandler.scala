@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.agent.task
 import com.sos.scheduler.engine.agent.command.CommandMeta
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskResponse}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskFailed, StartTaskSucceeded}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskHandlerView, TaskOverview}
 import com.sos.scheduler.engine.agent.task.TaskHandler._
@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.{Inject, Singleton}
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
@@ -55,19 +56,32 @@ extends TaskHandlerView {
     }
 
   private def executeStartTask(command: StartTask, meta: CommandMeta) = Future {
+    checkAgentAvailability(meta)  // Exception is here is like an HTTP exception, leading to Master's Agent fail-over (trying another Agent)
+    executeStartTask2(command, meta)  // Exception is here is return as StartTaskFailed, leading to Master Task failure
+  }
+
+  private def checkAgentAvailability(meta: CommandMeta): Unit = {
     if (!(tasks.values forall { _.isReleasedCalled })) {
-        meta.licenseKeyBunch.require(UniversalAgent,
-          s"No license key provided by master to execute jobs in parallel (unreleased tasks: ${tasks.values filterNot { _.isReleasedCalled } mkString ", "})")
+      meta.licenseKeyBunch.require(UniversalAgent,
+        s"No license key provided by master to execute jobs in parallel (unreleased tasks: ${tasks.values filterNot { _.isReleasedCalled } mkString ", "})")
     }
     if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
-    val task = newAgentTask(command, meta.clientIpOption)
-    for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
-    closeOnError(task) {
-      task.start()
+  }
+
+  private def executeStartTask2(command: StartTask, meta: CommandMeta) = {
+    try {
+      val task = newAgentTask(command, meta.clientIpOption)
+      for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
+      closeOnError(task) {
+        task.start()
+      }
+      tasks.insert(task)
+      task.onTunnelInactivity(killAfterTunnelInactivity(task))
+      StartTaskSucceeded(task.id, task.tunnelToken)
+    } catch { case NonFatal(t) ⇒
+      logger.debug(t.toString, t)
+      StartTaskFailed(t.toString)
     }
-    tasks.insert(task)
-    task.onTunnelInactivity(killAfterTunnelInactivity(task))
-    StartTaskResponse(task.id, task.tunnelToken)
   }
 
   private def killAfterTunnelInactivity(task: AgentTask)(since: Instant): Unit = {

@@ -43,6 +43,8 @@ class FailableSelector[Failable, Result](
           case x if cancelled ⇒
             logger.debug(s"$x")
             promise.failure(new CancelledException)
+          case Success(Failure(ExpectedException(e))) ⇒
+            promise.failure(e)
           case Success(Failure(throwable)) ⇒ // Tolerated failure
             failables.setFailure(failable, throwable)
             loopUntilConnected()
@@ -101,4 +103,6 @@ object FailableSelector {
   }
 
   final class CancelledException private[FailableSelector] extends RuntimeException
+
+  final case class ExpectedException(throwable: Throwable) extends RuntimeException(throwable)
 }

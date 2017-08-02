@@ -6,7 +6,7 @@ import com.google.inject.{Guice, Provides}
 import com.sos.scheduler.engine.agent.command.CommandMeta
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, StartTaskResponse}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, StartTaskSucceeded}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.TaskHandlerOverview
 import com.sos.scheduler.engine.agent.task.TaskHandlerTest._
@@ -61,7 +61,7 @@ final class TaskHandlerTest extends FreeSpec {
       assert(!taskHandler.terminated.isCompleted)
       for (nextAgentTaskId ← AgentTaskIds) {
         val response = awaitResult(taskHandler.execute(TestStartApiTask, CommandMeta(licenseKeyBunch = TestLicenseKeyBunch)), 3.s)
-        inside(response) { case StartTaskResponse(id, TestTunnelToken) ⇒ id shouldEqual nextAgentTaskId }
+        inside(response) { case StartTaskSucceeded(id, TestTunnelToken) ⇒ id shouldEqual nextAgentTaskId }
       }
       for (o ← taskServers) {
         assert(o.started)

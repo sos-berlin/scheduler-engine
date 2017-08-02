@@ -4,7 +4,7 @@ import com.sos.scheduler.engine.common.process.windows.{WindowsProcessCredential
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.job.JobPath
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -44,12 +44,18 @@ final class JS861IT extends FreeSpec with ScalaSchedulerTest with AgentWithSched
       }
     }
 
-    "Unknown credential key" in {
-      val returnCodes = controller.toleratingErrorCodes( _ ⇒ true) {
-        for (_ ← 1 to 100) yield
-          (startJob(JobPath("/invalid-credentials")).result await TestTimeout).returnCode
+    for ((jobPath, n) ← Array(JobPath("/invalid-credentials-shell") → 50, JobPath("/invalid-credentials-api") → 3)) {
+      s"Unknown credential key $jobPath" in {
+        controller.toleratingErrorCodes( _ ⇒ true) {
+          val closeds = for (_ ← 1 to n) yield
+            startJob(jobPath).closed await TestTimeout  // No TaskEndedEvent
+          // Now, logString must be fetched from database
+          for (closed ← closeds) {
+            //assert(taskRun.returnCode == ReturnCode(1))
+            assert(taskLog(closed.taskId) contains "Windows Credential Manager does not return an entry named 'NON-EXISTING-CREDENTIALS-KEY': WINDOWS-1168 (CredRead)")
+          }
+        }
       }
-      assert(returnCodes forall { _ == ReturnCode(1) })
     }
 
     def check(result: OrderRunResult, userName: WindowsUserName) =
