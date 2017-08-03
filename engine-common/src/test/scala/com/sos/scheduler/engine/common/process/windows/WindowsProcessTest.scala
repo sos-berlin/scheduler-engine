@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import java.lang.ProcessBuilder.Redirect
 import java.lang.ProcessBuilder.Redirect.INHERIT
 import java.nio.charset.Charset
-import java.nio.charset.Charset.defaultCharset
 import java.nio.charset.StandardCharsets.US_ASCII
 import java.nio.file.Files.{createTempFile, delete}
 import java.nio.file.{Files, Path}
@@ -18,7 +17,6 @@ import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConversions._
-import scala.io.Codec
 import scala.util.{Failure, Try}
 
 /**
@@ -28,6 +26,7 @@ import scala.util.{Failure, Try}
 final class WindowsProcessTest extends FreeSpec {
 
   if (isWindows) {
+    val commandCharset = Charset forName "cp850"
     lazy val logon = sys.props.get(WindowsProcessTargetSystemProperty)
       .filter { _.nonEmpty }
       .map { o ⇒ Logon(WindowsProcessCredentials.byKey(o), withUserProfile = false) }
@@ -70,7 +69,7 @@ final class WindowsProcessTest extends FreeSpec {
       assert(!process.isAlive)
       assert(process.exitValue == 0)
       assert(Files.size(stdoutFile) > 0)
-      val stdout = stdoutFile.contentString(defaultCharset)
+      val stdout = stdoutFile.contentString(commandCharset)
       println(stdout)
       assert(stdout contains "TEST-STDERR")
       assert(stdout contains "127.0.0.1")
@@ -125,7 +124,7 @@ final class WindowsProcessTest extends FreeSpec {
       val process = WindowsProcess.start(processBuilder, logon)
       process.waitFor(5, SECONDS) shouldBe true
       assert(process.exitValue == 0)
-      assert(stdoutFile.contentString(defaultCharset) contains s"$testVariableName=$testVariableValue")
+      assert(stdoutFile.contentString(commandCharset) contains s"$testVariableName=$testVariableValue")
       delete(stdoutFile)
     }
 
@@ -145,7 +144,7 @@ final class WindowsProcessTest extends FreeSpec {
       process.getOutputStream.write(testBytes, 0, testBytes.length)
       process.getOutputStream.flush()
       process.waitFor(5, SECONDS) shouldBe true
-      stdoutFile.contentString(defaultCharset) shouldEqual s"input=$testString"
+      stdoutFile.contentString(commandCharset) shouldEqual s"input=$testString"
       delete(stdoutFile)
       delete(scriptFile)
     }
@@ -177,7 +176,7 @@ final class WindowsProcessTest extends FreeSpec {
         val scriptFile = createTempFile("test-", ".cmd")
         scriptFile.contentString = s"echo TEST>>$appendableFile\n"
         WindowsProcess.start(new ProcessBuilder(scriptFile.toString).redirectOutput(Redirect to stdoutFile), logon).waitFor()
-        println(stdoutFile.contentString(defaultCharset))
+        println(stdoutFile.contentString(commandCharset))
         delete(stdoutFile)
         delete(scriptFile)
         assert(appendableFile.contentString == "TEST\r\n")
@@ -199,7 +198,7 @@ final class WindowsProcessTest extends FreeSpec {
         process.waitFor()
         println(f"exitValue=${process.exitValue}%08x")
         assert(process.exitValue == 0)
-        assert(stdoutFile.contentString(defaultCharset) contains "java version 1.8.0_131")
+        assert(stdoutFile.contentString(commandCharset) contains "java version 1.8.0_131")
         delete(stdoutFile)
         delete(scriptFile)
       }
@@ -212,11 +211,11 @@ final class WindowsProcessTest extends FreeSpec {
           .redirectOutput(Redirect to stderrFile)
         val process = WindowsProcess.start(processBuilder, logon map { _.copy(withUserProfile = true) })
         process.waitFor()
-        println(stdoutFile.contentString(defaultCharset))
-        println(stderrFile.contentString(defaultCharset))
+        println(stdoutFile.contentString(commandCharset))
+        println(stderrFile.contentString(commandCharset))
         println(f"exitValue=${process.exitValue}%08x")
         assert(process.exitValue == 0)
-        assert(stdoutFile.contentString(defaultCharset) contains "java version 1.8.0_131")
+        assert(stdoutFile.contentString(commandCharset) contains "java version 1.8.0_131")
         delete(stdoutFile)
         delete(stderrFile)
       }
@@ -228,7 +227,7 @@ final class WindowsProcessTest extends FreeSpec {
         .redirectOutput(Redirect to stdoutFile)
         .start()
         .waitFor()
-      try stdoutFile.contentString(Charset forName "cp850")
+      try stdoutFile.contentString(commandCharset)
       finally delete(stdoutFile)
     }
 
