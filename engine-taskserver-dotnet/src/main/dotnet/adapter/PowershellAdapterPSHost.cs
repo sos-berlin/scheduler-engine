@@ -24,15 +24,19 @@
             this.hostId = Guid.NewGuid();
             this.ui = new PowershellAdapterPSHostUserInterface(log);
             var culture = Thread.CurrentThread.CurrentCulture;
+            var uiCulture = Thread.CurrentThread.CurrentUICulture;
             if (culture != null && culture.Name != null)
             {
-                if (Regex.IsMatch(culture.Name, "^jp-|^zh-|^ko-|^ar-", RegexOptions.IgnoreCase))
+                if (Regex.IsMatch(culture.Name, "^ja-|^zh-|^ko-|^ar-", RegexOptions.IgnoreCase))
                 {
                     culture = CultureInfo.InvariantCulture;
+                    uiCulture = CultureInfo.InvariantCulture;
+                    Thread.CurrentThread.CurrentCulture = culture;
+                    Thread.CurrentThread.CurrentUICulture = uiCulture;
                 }
             }
             this.currentCulture = culture;
-            this.currentUiCulture = culture;
+            this.currentUiCulture = uiCulture;
         }
 
         #endregion
