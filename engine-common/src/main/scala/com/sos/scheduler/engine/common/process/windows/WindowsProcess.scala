@@ -267,11 +267,11 @@ object WindowsProcess {
 
   def execute(executable: Path, args: String*): Vector[String] = {
     logger.debug(executable + args.mkString(" [", ", ", "]"))
-    val process = new ProcessBuilder(executable.toString +: args: _*).redirectOutput(INHERIT).start()
+    val process = new ProcessBuilder(executable.toString +: args: _*).redirectErrorStream(true).start()
     process.getOutputStream.close()  // stdin
     val lines = {
       val commandCodec = new Codec(Charset forName "cp850")
-      try autoClosing(io.Source.fromInputStream(process.getErrorStream)(commandCodec)) { _.getLines().toVector }
+      try autoClosing(io.Source.fromInputStream(process.getInputStream)(commandCodec)) { _.getLines().toVector }
       catch { case NonFatal(t) ⇒
         Vector(s"error message not readable: $t")
       }
