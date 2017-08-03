@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.Charset.defaultCharset
+import java.util.concurrent.TimeUnit.SECONDS
 import org.joda.time.Instant
 import scala.concurrent.blocking
 
@@ -52,12 +53,7 @@ extends AutoCloseable {
     }
   }
 
-  def isTerminated =
-    try {
-      process.exitValue
-      true
-    }
-    catch { case _: IllegalThreadStateException => false }
+  def isTerminated = process.waitFor(0, SECONDS)
 
   def kill(): Unit = {
     process.destroy()

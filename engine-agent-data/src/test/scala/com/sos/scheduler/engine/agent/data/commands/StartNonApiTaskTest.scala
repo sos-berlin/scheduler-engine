@@ -13,22 +13,28 @@ import spray.json._
 final class StartNonApiTaskTest extends FreeSpec {
 
   "JSON minimum" in {
-    val obj = StartNonApiTask(meta = None)
+    val obj = StartNonApiTask(meta = None, logon = None)
     val json = """{ "$TYPE": "StartNonApiTask" }""".parseJson
     assert((obj: Command).toJson == json)   // Command serializer includes $TYPE
     assert(obj == json.convertTo[Command])
   }
 
   "JSON maximum" in {
-    val obj = StartNonApiTask(Some(StartTask.Meta(JobPath("/folder/test"), TaskId(123))))
+    val obj = StartNonApiTask(
+      Some(StartTask.Meta(JobPath("/folder/test"), TaskId(123))),
+      Some(StartTask.KeyLogon("CREDENTIALS", false)))
     val json =
       """{
         "$TYPE": "StartNonApiTask",
         "meta": {
           "job": "/folder/test",
           "taskId": "123"
-          }
-        }""".parseJson
+        },
+        "logon": {
+          "credentialsKey": "CREDENTIALS",
+          "withUserProfile": false
+        }
+      }""".parseJson
     assert((obj: Command).toJson == json)   // Command serializer includes $TYPE
     assert(obj == json.convertTo[Command])
   }

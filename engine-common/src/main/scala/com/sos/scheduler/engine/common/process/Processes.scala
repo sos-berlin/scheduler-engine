@@ -4,7 +4,9 @@ import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.common.process.OperatingSystemSpecific.OS
 import com.sos.scheduler.engine.common.process.Processes.RobustlyStartProcess.TextFileBusyIOException
 import com.sos.scheduler.engine.common.process.StdoutStderr.StdoutStderrType
+import com.sos.scheduler.engine.common.process.windows.{Logon, WindowsProcess, WindowsUserName}
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.io.IOException
 import java.nio.file.Path
@@ -19,7 +21,11 @@ object Processes {
 
   def processToString(process: Process, pid: Option[Pid]) = pid map { _.toString } getOrElse process.toString
 
-  def processToPidOption(process: Process): Option[Pid] = ProcessesJava8pid.processToPid(process)
+  def processToPidOption(process: Process): Option[Pid] =
+    process match {
+      case process: WindowsProcess ⇒ Some(process.pid)
+      case _ ⇒ ProcessesJava8pid.processToPid(process)
+    }
 
   final case class Pid(number: Long) {
     def string = number.toString
@@ -28,7 +34,8 @@ object Processes {
   /**
    * Builds an argument list for [[ProcessBuilder]].
    */
-  def toShellCommandArguments(file: Path, arguments: Seq[String] = Nil): immutable.Seq[String] = Vector(file.toString) ++ arguments
+  def toShellCommandArguments(file: Path, arguments: Seq[String] = Nil): immutable.Seq[String] =
+    Vector(file.toString) ++ arguments
 
 
   // Shortcuts for operating system specific methods
@@ -41,9 +48,11 @@ object Processes {
 
   val ShellFileAttributes: immutable.Seq[FileAttribute[java.util.Set[_]]] = OS.shellFileAttributes
 
-  def newTemporaryShellFile(name: String): Path = OS.newTemporaryShellFile(name)
+  def newTemporaryShellFile(name: String, user: Option[WindowsUserName] = None): Path =
+    OS.newTemporaryShellFile(name, user)
 
-  def newLogFile(directory: Path, name: String, outerr: StdoutStderrType): Path = OS.newLogFile(directory, name, outerr)
+  def newLogFile(directory: Path, name: String, outerr: StdoutStderrType, user: Option[WindowsUserName] = None): Path =
+    OS.newLogFile(directory, name, outerr, user)
 
   def directShellCommandArguments(argument: String): immutable.Seq[String] = OS.directShellCommandArguments(argument)
 
@@ -54,14 +63,33 @@ object Processes {
       * @see https://change.sos-berlin.com/browse/JS-1581
       * @see https://bugs.openjdk.java.net/browse/JDK-8068370
       */
-    def startRobustly(durations: Iterator[Duration] = RobustlyStartProcess.DefaultDurations.iterator): Process =
-      try delegate.start()
+    def startRobustly(
+      durations: Iterator[Duration] = RobustlyStartProcess.DefaultDurations.iterator,
+      start: ProcessBuilder ⇒ Process = startProcess)
+    : Process =
+      try start(delegate)
       catch {
         case TextFileBusyIOException(e) if durations.hasNext ⇒
           logger.warn(s"Retrying process start after error: $e")
           sleep(durations.next())
-          startRobustly(durations)
+          startRobustly(durations, start)
       }
+  }
+
+  def startProcess(processBuilder: ProcessBuilder): Process =
+    startProcess(processBuilder, logon = None)
+
+  /**
+    * @param logon
+    *   if isDefined, use `WindowsProcess` and CreateProcess or CreateProcessAsUser via JNA.
+    */
+  def startProcess(processBuilder: ProcessBuilder, logon: Option[Logon]): Process = {
+    if (logon.isDefined) {
+      require(isWindows, "A process with credential key (target) can only be started under Microsoft Windows")
+      WindowsProcess.start(processBuilder, logon = logon)
+    } else {
+      processBuilder.start()
+    }
   }
 
   private[process] object RobustlyStartProcess {

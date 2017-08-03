@@ -69,7 +69,8 @@ extends AgentTaskFactory {
       dotnet = agentConfiguration.dotnet,
       environment = agentConfiguration.environment,
       killScriptOption = agentConfiguration.killScript,
-      rpcKeepaliveDurationOption = agentConfiguration.rpcKeepaliveDuration)
+      rpcKeepaliveDurationOption = agentConfiguration.rpcKeepaliveDuration,
+      logon = command.logon)
     if (runInProcess) {
       // For debugging
       logger.warn(s"Due to system property $InProcessName, task runs in Agent process")

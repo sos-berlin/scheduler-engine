@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.agent.task
 import com.sos.scheduler.engine.agent.command.CommandMeta
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskResponse}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskFailed, StartTaskResponse, StartTaskSucceeded}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskHandlerView, TaskOverview}
 import com.sos.scheduler.engine.agent.task.TaskHandler._
@@ -11,7 +11,9 @@ import com.sos.scheduler.engine.base.exceptions.StandardPublicException
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.soslicense.LicenseKeyException
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.timer.TimerService
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.{Inject, Singleton}
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.util.control.NonFatal
 
 /**
  * @author Joacim Zschimmer
@@ -60,19 +63,37 @@ extends TaskHandlerView {
 
   private def executeStartTask(command: StartTask, meta: CommandMeta): Future[StartTaskResponse] =
     Future {
-      if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
-      val (removeLicensedTask, task) =
-        licensedTaskLimiter.countTask(meta.licenseKeyBunch) {
-          val task = newAgentTask(command, meta.clientIpOption)
-          for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
-          tasks.insert(task)
+      checkPreconditions(meta)  // Exception is here is like an HTTP exception, leading to Master's Agent bunch fail-over (trying another Agent)
+      try {
+        executeStartTask2(command, meta)
+      } catch {
+        case t: LicenseKeyException ⇒
+          throw t  // HTTP error, should trigger agent bunch fail-over
+        case NonFatal(t) ⇒
+          logger.debug(t.toString, t)
+          StartTaskFailed(t.toString)
+      }
+    }
+
+  private def checkPreconditions(meta: CommandMeta): Unit = {
+    if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
+  }
+
+  private def executeStartTask2(command: StartTask, meta: CommandMeta) = {
+    val (removeLicensedTask, task) =
+      licensedTaskLimiter.countTask(meta.licenseKeyBunch) {
+        val task = newAgentTask(command, meta.clientIpOption)
+        for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
+        tasks.insert(task)
+        closeOnError(task) {
           task.start()
-          task.onTunnelInactivity(killAfterTunnelInactivity(task))
-          task
         }
-      task.taskReleaseFuture onComplete { _ ⇒ removeLicensedTask() }
-      task.terminated onComplete { _ ⇒ removeLicensedTask() }   // Fallback, to be sure that free license is released
-      StartTaskResponse(task.id, task.tunnelToken)
+        task.onTunnelInactivity(killAfterTunnelInactivity(task))
+        task
+      }
+    task.taskReleaseFuture onComplete { _ ⇒ removeLicensedTask() }
+    task.terminated onComplete { _ ⇒ removeLicensedTask() }   // Fallback, to be sure that free license is released
+    StartTaskSucceeded(task.id, task.tunnelToken)
   }
 
   private def killAfterTunnelInactivity(task: AgentTask)(since: Instant): Unit = {

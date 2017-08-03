@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.client.agent
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.StartTaskResponse
+import com.sos.scheduler.engine.agent.data.commandresponses.StartTaskSucceeded
 import com.sos.scheduler.engine.tunnel.data.TunnelToken
 
 /**
@@ -12,5 +12,5 @@ import com.sos.scheduler.engine.tunnel.data.TunnelToken
 final case class ProcessDescriptor(agentTaskId: AgentTaskId, pid: Int, tunnelToken: TunnelToken)
 
 object ProcessDescriptor {
-  def fromStartProcessResponse(o: StartTaskResponse) = ProcessDescriptor(o.agentTaskId, pid = 0, o.tunnelToken)
+  def fromStartProcessResponse(o: StartTaskSucceeded) = ProcessDescriptor(o.agentTaskId, pid = 0, o.tunnelToken)
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+    warn_if_longer_than="3"
+>
+    <settings>
+        <log_mail_to>test@example.com</log_mail_to>
+    </settings>
+    <script language="shell">
+        @echo off
+        ping -n 7 127.0.0.1
+    </script>
+</job>

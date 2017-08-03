@@ -932,6 +932,8 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
             }
         }
         _call_register.call(Z_NEW(State_cmd_call(this, _enabled? sc_enable : sc_disable)));
+        _module->_credentials_key = element.getAttribute("credentials_key");
+        _module->_load_user_profile = element.bool_getAttribute("load_user_profile");
 
         if( order )  set_order_controlled();
 

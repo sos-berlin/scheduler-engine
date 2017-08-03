@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.modules.common
 
 import com.sos.scheduler.engine.agent.data.AgentTaskId
+import com.sos.scheduler.engine.agent.data.commands.StartTask
 import com.sos.scheduler.engine.taskserver.common.StdFiles
 import com.sos.scheduler.engine.taskserver.modules.monitor.{Monitor, MonitorProcessor}
 import com.sos.scheduler.engine.taskserver.spoolerapi.TypedNamedIDispatches
@@ -15,7 +16,8 @@ private[taskserver] final case class CommonArguments(
   namedIDispatches: TypedNamedIDispatches,
   monitors: immutable.Seq[Monitor],
   hasOrder: Boolean,
-  stdFiles: StdFiles)
+  stdFiles: StdFiles,
+  logon: Option[StartTask.KeyLogon])
 {
   def newMonitorProcessor(): MonitorProcessor =
     MonitorProcessor.create(monitors, namedIDispatches)

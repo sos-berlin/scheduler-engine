@@ -35,6 +35,8 @@ extends AutoCloseable {
         Some(agent.httpHeartbeatTiming getOrElse HttpHeartbeatTiming.Default))
       .appendCurrentStackTrace
       future map Success.apply recover {
+        case e: HttpRemoteProcessStarter.AgentException ⇒  // Error from Agent means the Agent is reachable
+          Failure(FailableSelector.ExpectedException(e))
         case e @ (_: spray.can.Http.ConnectionException | _: AskTimeoutException) ⇒
           warningCall.call(e)
           Failure(e)

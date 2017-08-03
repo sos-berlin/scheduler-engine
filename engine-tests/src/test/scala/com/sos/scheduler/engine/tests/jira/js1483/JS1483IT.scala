@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.tests.jira.js1483
 
-import com.sos.scheduler.engine.common.scalautil.Futures.implicits.RichFutures
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyParameterIsMissingException
+import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
@@ -46,6 +47,14 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       assert(job(TestJobPath).stateText contains "No license key provided by master to execute jobs in parallel")
       scheduler executeXml <kill_task job="/test-sleep" id={firstRun.taskId.string} immediately="true"/>
       awaitSuccess(firstRun.closed)
+    }
+  }
+
+  if (isWindows) "JS-861 Windows: Unknown credential key" in {
+    // After a start with an unknown credentials key, the Agent task should be removed and not counted to the licence limit.
+    controller.toleratingErrorCodes( _ ⇒ true) {
+      for (_ ← 1 to 10) yield
+        startJob(JobPath("/test-invalid-credentials")).result await TestTimeout
     }
   }
 }
