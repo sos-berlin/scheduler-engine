@@ -20,8 +20,12 @@ import scala.util.{Success, Try}
 final class ExceptionsTest extends FreeSpec {
 
   "repeatUntilNoException" in {
-    var i = 0
+    // Warm-up
+    var _i = 0
+    repeatUntilNoException(10.s, 10.ms) { _i += 1;if (_i < 2) sys.error("TEST") }
+
     val t = Instant.now()
+    var i = 0
     repeatUntilNoException(10.s, 10.ms) {
       i += 1
       if (i < 5) sys.error("TEST")
