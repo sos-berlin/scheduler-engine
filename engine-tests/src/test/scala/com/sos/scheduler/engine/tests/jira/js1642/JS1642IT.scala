@@ -13,12 +13,13 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
 import com.sos.scheduler.engine.common.sprayutils.JsObjectMarshallers._
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
-import com.sos.scheduler.engine.common.time.{Stopwatch, WaitForCondition}
+import com.sos.scheduler.engine.common.time.Stopwatch
+import com.sos.scheduler.engine.common.time.WaitForCondition.retryUntil
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
@@ -269,11 +270,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
     "orders query OrderKey, OrderDetailed" in {
       val query = OrderQuery.All.withOrderKey(b1OrderKey)
-      val orders: immutable.Seq[OrderDetailed] = fetchWebAndDirect {
-        _.ordersBy[OrderDetailed](query)
-      }
       val expectedStateText = "TestJob"
-      waitForCondition(99.s, 100.ms) { orders.map(_.stateText) == Vector(expectedStateText) }  // Wait for job
+      val orders: immutable.Seq[OrderDetailed] = retryUntil(99.s, 100.ms) {  // Wait for job
+        fetchWebAndDirect {
+          _.ordersBy[OrderDetailed](query)
+        } sideEffect { _.map(_.stateText) shouldEqual Vector(expectedStateText) }
+      }
       assert((orders map { o ⇒ o.copy(overview = o.overview.copy(startedAt = None)) }) == Vector(OrderDetailed(
         overview = b1OrderOverview,
         initialNodeId = Some(NodeId("100")),
