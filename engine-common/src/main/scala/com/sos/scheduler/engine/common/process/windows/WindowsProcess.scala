@@ -17,7 +17,6 @@ import com.sun.jna.{Structure, WString}
 import java.io.OutputStream
 import java.lang.Math.{max, min}
 import java.lang.ProcessBuilder.Redirect
-import java.lang.ProcessBuilder.Redirect.INHERIT
 import java.nio.charset.Charset
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit

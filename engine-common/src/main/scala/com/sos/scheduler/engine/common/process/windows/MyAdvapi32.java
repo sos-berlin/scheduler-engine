@@ -4,7 +4,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinBase.FILETIME;
-import com.sun.jna.platform.win32.WinDef.DWORD;
 import java.util.List;
 import static java.util.Arrays.asList;
 
@@ -17,15 +16,15 @@ public class MyAdvapi32 {
     public static final int CRED_TYPE_GENERIC = 1;
 
     public static final class CREDENTIAL extends Structure {
-        @SuppressWarnings("unused") public DWORD flags;
-        @SuppressWarnings("unused") public DWORD typ;
+        @SuppressWarnings("unused") public int flags;
+        @SuppressWarnings("unused") public int typ;
         @SuppressWarnings("unused") public WString targetName;
         @SuppressWarnings("unused") public WString comment;
         @SuppressWarnings("unused") public FILETIME lastWritten;
-        @SuppressWarnings("unused") public DWORD credentialBlobSize;
+        @SuppressWarnings("unused") public int credentialBlobSize;
         @SuppressWarnings("unused") public Pointer credentialBlob;
-        @SuppressWarnings("unused") public DWORD persist;
-        @SuppressWarnings("unused") public DWORD attributeCount;
+        @SuppressWarnings("unused") public int persist;
+        @SuppressWarnings("unused") public int attributeCount;
         @SuppressWarnings("unused") public Pointer attributes;
         @SuppressWarnings("unused") public WString targetAlias;
         @SuppressWarnings("unused") public WString userName;
