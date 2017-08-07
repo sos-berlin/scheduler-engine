@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.process.windows.WindowsApi.{call, myAdvap
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sun.jna.Structure
 import com.sun.jna.ptr.PointerByReference
+import java.nio.charset.StandardCharsets.UTF_16LE
 
 /**
   * @author Joacim Zschimmer
@@ -22,7 +23,8 @@ object WindowsProcessCredentials {
       }
       val credential = Structure.newInstance(classOf[MyAdvapi32.CREDENTIAL], ref.getValue).asInstanceOf[MyAdvapi32.CREDENTIAL]
       credential.read()
-      val password = SecretString(credential.credentialBlob.getWideString(0))
+      val passwordBytes = credential.credentialBlob.getByteArray(0, credential.credentialBlobSize)
+      val password = SecretString(new String(passwordBytes, UTF_16LE))
       val result = WindowsProcessCredentials(WindowsUserName(credential.userName.toString), password)
       myAdvapi32.CredFree(ref.getValue)
       result
