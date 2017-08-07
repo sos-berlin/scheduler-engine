@@ -17,14 +17,14 @@ final class StartTaskResponseTest extends FreeSpec {
   "StartTaskSucceeded" in {
     check(
       StartTaskSucceeded(AgentTaskId("1-2"), TunnelToken(TunnelId("TUNNEL-ID"), SecretString("SECRET"))),
+      // StartTaskResponse serializes to JSON without $TYPE, then deserializes to StartTaskSucceed (renamed from StartTaskResponse)
       """{
-        "$TYPE": "StartTaskSucceeded",
         "agentTaskId": "1-2",
         "tunnelToken": {
           "id": "TUNNEL-ID",
           "secret": "SECRET"
         }
-      }""")
+      }""".parseJson)
   }
 
   "StartTaskFailed" in {
@@ -33,12 +33,12 @@ final class StartTaskResponseTest extends FreeSpec {
       """{
         "$TYPE": "StartTaskFailed",
         "message": "FAILED"
-      }""")
+      }""".parseJson)
   }
 
-  private def check(o: StartTaskResponse, json: String): Unit = {
-    assert(o.toJson == json.parseJson)
-    assert((o: Response).toJson == json.parseJson)
-    assert(json.parseJson.convertTo[StartTaskResponse] == o)
+  private def check(o: StartTaskResponse, js: JsValue): Unit = {
+    assert(o.toJson == js)
+    assert((o: Response).toJson == js)
+    assert(js.convertTo[StartTaskResponse] == o)
   }
 }

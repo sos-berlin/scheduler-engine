@@ -54,18 +54,19 @@ extends TaskHandlerView {
 
   def execute(command: Command, meta: CommandMeta = CommandMeta()): Future[Response] =
     command match {
-      case o: StartTask ⇒ executeStartTask(o, meta)
+      case o: StartTask ⇒ checkedStartTask(o, meta)
       case CloseTask(id, kill) ⇒ executeCloseTask(id, kill)
       case SendProcessSignal(id, signal) ⇒ executeSendProcessSignal(id, signal)
       case o: Terminate ⇒ executeTerminate(o)
       case AbortImmediately ⇒ executeAbortImmediately()
     }
 
-  private def executeStartTask(command: StartTask, meta: CommandMeta): Future[StartTaskResponse] =
+  private def checkedStartTask(command: StartTask, meta: CommandMeta): Future[StartTaskResponse] =
     Future {
       checkPreconditions(meta)  // Exception is here is like an HTTP exception, leading to Master's Agent bunch fail-over (trying another Agent)
       try {
-        executeStartTask2(command, meta)
+        val response = executeStartTask(command, meta)  // Exception is here is return as StartTaskFailed, leading to Master Task failure
+        if (command.isLegacy) response.toLegacy else response  // May throw an exception
       } catch {
         case t: LicenseKeyException ⇒
           throw t  // HTTP error, should trigger agent bunch fail-over
@@ -79,7 +80,7 @@ extends TaskHandlerView {
     if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
   }
 
-  private def executeStartTask2(command: StartTask, meta: CommandMeta) = {
+  private def executeStartTask(command: StartTask, meta: CommandMeta): StartTaskResponse = {
     val (removeLicensedTask, task) =
       licensedTaskLimiter.countTask(meta.licenseKeyBunch) {
         val task = newAgentTask(command, meta.clientIpOption)
