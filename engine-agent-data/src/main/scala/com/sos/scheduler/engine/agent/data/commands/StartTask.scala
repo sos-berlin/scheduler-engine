@@ -14,6 +14,8 @@ trait StartTask extends TaskCommand {
   def meta: Option[Meta]
 
   def logon: Option[KeyLogon]
+
+  final def isLegacy = logon.isEmpty
 }
 
 object StartTask {

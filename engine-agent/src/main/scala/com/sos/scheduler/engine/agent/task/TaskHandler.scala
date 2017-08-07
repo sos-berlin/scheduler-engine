@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.agent.task
 import com.sos.scheduler.engine.agent.command.CommandMeta
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskFailed, StartTaskSucceeded}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, Response, StartTaskFailed, StartTaskResponse, StartTaskSucceeded}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.{TaskHandlerOverview, TaskHandlerView, TaskOverview}
 import com.sos.scheduler.engine.agent.task.TaskHandler._
@@ -48,17 +48,19 @@ extends TaskHandlerView {
 
   def execute(command: Command, meta: CommandMeta = CommandMeta()): Future[Response] =
     command match {
-      case o: StartTask ⇒ executeStartTask(o, meta)
+      case o: StartTask ⇒ checkedStartTask(o, meta)
       case CloseTask(id, kill) ⇒ executeCloseTask(id, kill)
       case SendProcessSignal(id, signal) ⇒ executeSendProcessSignal(id, signal)
       case o: Terminate ⇒ executeTerminate(o)
       case AbortImmediately ⇒ executeAbortImmediately()
     }
 
-  private def executeStartTask(command: StartTask, meta: CommandMeta) = Future {
-    checkAgentAvailability(meta)  // Exception is here is like an HTTP exception, leading to Master's Agent fail-over (trying another Agent)
-    executeStartTask2(command, meta)  // Exception is here is return as StartTaskFailed, leading to Master Task failure
-  }
+  private def checkedStartTask(command: StartTask, meta: CommandMeta): Future[Response] =
+    Future {
+      checkAgentAvailability(meta)  // Exception is here is like an HTTP exception, leading to Master's Agent fail-over (trying another Agent)
+      val response = executeStartTask(command, meta)  // Exception is here is return as StartTaskFailed, leading to Master Task failure
+      if (command.isLegacy) response.toLegacy else response  // May throw an exception
+    }
 
   private def checkAgentAvailability(meta: CommandMeta): Unit = {
     if (!(tasks.values forall { _.isReleasedCalled })) {
@@ -68,7 +70,7 @@ extends TaskHandlerView {
     if (isTerminating) throw new StandardPublicException("Agent is terminating and does no longer accept task starts")
   }
 
-  private def executeStartTask2(command: StartTask, meta: CommandMeta) = {
+  private def executeStartTask(command: StartTask, meta: CommandMeta): StartTaskResponse = {
     try {
       val task = newAgentTask(command, meta.clientIpOption)
       for (o ← crashKillScriptOption) o.add(task.id, task.pidOption, task.startMeta.taskId, task.startMeta.job)
