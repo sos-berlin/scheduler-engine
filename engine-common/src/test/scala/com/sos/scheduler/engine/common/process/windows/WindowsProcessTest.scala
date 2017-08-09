@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.process.windows
 
 import com.sos.scheduler.engine.common.process.windows.WindowsApi.windowsDirectory
-import com.sos.scheduler.engine.common.process.windows.WindowsProcess.{WindowsProcessTargetSystemProperty, execute}
+import com.sos.scheduler.engine.common.process.windows.WindowsProcess.WindowsProcessTargetSystemProperty
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import java.lang.ProcessBuilder.Redirect
@@ -78,7 +78,7 @@ final class WindowsProcessTest extends FreeSpec {
       val me = sys.env("USERNAME").toLowerCase(Locale.ROOT)
       logon match {
         case Some(Logon(WindowsProcessCredentials(WindowsUserName(user), _), _)) ⇒
-          assert(stdout contains s"ENV-USERNAME=$user")
+          assert(stdout.toLowerCase(Locale.ROOT) contains s"ENV-USERNAME=$user".toLowerCase(Locale.ROOT))
           assert(userNameLines forall { o ⇒ !o.endsWith("\\" ++ me) })
           // whoami outputs nothing, but quits whole command ???
           //assert(userNameLines forall { _ endsWith ("\\" + user) })  // whoami outputs domain backslash username
@@ -163,7 +163,7 @@ final class WindowsProcessTest extends FreeSpec {
         body(file)
         val icaclsOut = icacls(file)
         println(icaclsOut)
-        assert(icaclsOut.replace("\r\n", "\n") contains s"$user:$expected\n")
+        assert(icaclsOut.replace("\r\n", "\n").toLowerCase(Locale.ROOT) contains s"$user:$expected\n".toLowerCase(Locale.ROOT))
         delete(file)
       }
 
@@ -253,10 +253,9 @@ final class WindowsProcessTest extends FreeSpec {
     check("-a _ . , b")
     check("a b")
     check("user@domain")
-    check("domain\\user")
     check("漢字")
     check("片仮名")
-    def check(name: String) = assert(WindowsProcess.injectableUserName(WindowsUserName(name)) == s""""$name"""")
+    def check(name: String) = assert(WindowsProcess.injectableUserName(WindowsUserName(name)) == name)
     intercept[IllegalArgumentException] { WindowsProcess.injectableUserName(WindowsUserName("")) }
     intercept[IllegalArgumentException] { WindowsProcess.injectableUserName(WindowsUserName("a%")) }
   }

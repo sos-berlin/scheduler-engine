@@ -10,6 +10,7 @@ import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sun.jna.platform.win32.Advapi32Util.getEnvironmentBlock
 import com.sun.jna.platform.win32.Kernel32Util.closeHandle
 import com.sun.jna.platform.win32.WinBase._
+import com.sun.jna.platform.win32.WinError.ERROR_ACCESS_DENIED
 import com.sun.jna.platform.win32.WinNT._
 import com.sun.jna.platform.win32.Wincon.{STD_ERROR_HANDLE, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE}
 import com.sun.jna.ptr.IntByReference
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConversions._
 import scala.io.Codec
+import scala.util.Try
 import scala.util.control.NonFatal
 
 /**
@@ -107,7 +109,13 @@ extends Process with AutoCloseable {
     handleGuard {
       case Some(hProcess) ⇒
         call("TerminateProcess") {
-          kernel32.TerminateProcess(hProcess, TerminateProcessExitValue)
+          kernel32.TerminateProcess(hProcess, TerminateProcessExitValue) ||
+            kernel32.GetLastError == ERROR_ACCESS_DENIED && {
+              (Try { waitForProcess(0) } getOrElse false) || {
+                kernel32.SetLastError(ERROR_ACCESS_DENIED)
+                false
+              }
+            }
         }
       case None ⇒
     }
@@ -243,13 +251,13 @@ object WindowsProcess {
     grantFileAccess(file, s"${injectableUserName(user)}:M")
   }
 
-  private val AllowedUserNameCharacters = Set('_', '.', '-', ',', ' ', '\\', '@')  // Only for icacls syntactically irrelevant characters and domain separators
+  private val AllowedUserNameCharacters = Set('_', '.', '-', ',', ' ', '@')  // Only for icacls syntactically irrelevant characters and domain separators
 
   private[windows] def injectableUserName(user: WindowsUserName): String = {
     val name = user.string
     def isValid(c: Char) = c.isLetterOrDigit || AllowedUserNameCharacters(c)
     require(name.nonEmpty && name.forall(isValid), s"Unsupported character in Windows user name: '$name'")  // Avoid code injection
-    '"' + name + '"'
+    name
   }
 
   def makeDirectoryAccessibleForEverybody(directory: Path): directory.type =
@@ -259,7 +267,6 @@ object WindowsProcess {
     * @param grant syntax is weakly checked!
     */
   private def grantFileAccess(file: Path, grant: String): file.type = {
-    require(grant forall { o ⇒ !o.isSpaceChar }, s"Illegal syntax for argument grant='$grant'")  // Avoid code injection
     execute(windowsDirectory / "System32\\icacls.exe", '"' + file.toString + '"', "/q", "/grant", grant)
     file
   }
