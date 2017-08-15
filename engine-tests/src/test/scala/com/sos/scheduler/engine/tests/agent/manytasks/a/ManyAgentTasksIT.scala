@@ -4,8 +4,8 @@ import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
-import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
+import com.sos.scheduler.engine.data.order.OrderId
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
@@ -30,7 +30,7 @@ final class ManyAgentTasksIT extends FreeSpec with ScalaSchedulerTest with Agent
     (for (orderId ← orderIds) yield
       startOrder(OrderCommand(TestJobChainPath orderKey orderId)).result
     ) await 600.s
-    logger.info(stopwatch.itemsPerSecondString(n, "orders"))
+    logger.info(stopwatch.itemsPerSecondString(n, "order"))
   }
 }
 

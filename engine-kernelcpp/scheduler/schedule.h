@@ -440,7 +440,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
         void                        check                       ();                              
         bool                        is_filled                   () const;
-        Period                      call_function               ( Schedule_use*, const Time& beginning_time );
         Time                        next_time                   ( const Time& );
 
         Fill_zero                  _zero_;
@@ -455,8 +454,6 @@ struct Schedule : idispatch_implementation< Schedule, spooler_com::Ischedule>,
         bool                       _has_month;
         Holidays                   _holidays;
         xml::Document_ptr          _dom;
-        string                     _start_time_function;
-        bool                       _start_time_function_error;
         Absolute_path              _covered_schedule_path;
         Time                       _covered_schedule_begin;
         Time                       _covered_schedule_end;

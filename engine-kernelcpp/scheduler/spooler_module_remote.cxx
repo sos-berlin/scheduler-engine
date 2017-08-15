@@ -58,7 +58,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
 
     _idispatch = NULL;
 
-    if (_api_process)  
+    if (_api_process)
         return _api_process->close__start();
     else {
         _operation = Z_NEW(Sync_operation);
@@ -81,11 +81,11 @@ bool Remote_module_instance_proxy::kill(int unix_signal)
 
     return _api_process    ? _api_process->kill(unix_signal) :
          //_remote_instance? _remote_instance->kill_process() :
-           _operation      ? _operation->async_kill() 
+           _operation      ? _operation->async_kill()
                            : false;
 }
 
-//----------------------------------------------------------Remote_module_instance_proxy::exit_code 
+//----------------------------------------------------------Remote_module_instance_proxy::exit_code
 
 int Remote_module_instance_proxy::exit_code()
 {
@@ -103,9 +103,9 @@ int Remote_module_instance_proxy::termination_signal()
 
 //--------------------------------------------------------Remote_module_instance_proxy::stdout_path
 
-File_path Remote_module_instance_proxy::stdout_path()                                      
-{ 
-    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+File_path Remote_module_instance_proxy::stdout_path()
+{
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process))
         return local_api_process->stdout_path();
     else
         return File_path();
@@ -114,8 +114,8 @@ File_path Remote_module_instance_proxy::stdout_path()
 //--------------------------------------------------------Remote_module_instance_proxy::stderr_path
 
 File_path Remote_module_instance_proxy::stderr_path()
-{ 
-    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+{
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process))
         return local_api_process->stderr_path();
     else
         return File_path();
@@ -125,7 +125,7 @@ File_path Remote_module_instance_proxy::stderr_path()
 
 bool Remote_module_instance_proxy::try_delete_files( Has_log* log )
 {
-    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process))
         return local_api_process->try_delete_files(log);
     else
         return true;
@@ -135,7 +135,7 @@ bool Remote_module_instance_proxy::try_delete_files( Has_log* log )
 
 list<File_path> Remote_module_instance_proxy::undeleted_files()
 {
-    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process)) 
+    if (Local_api_process* local_api_process = dynamic_cast<Local_api_process*>(+_process))
         return local_api_process->undeleted_files();
     else
         return list<File_path>();
@@ -186,7 +186,7 @@ bool Remote_module_instance_proxy::begin__end()
 
     // *** Sonderfall, weil es keine _connection für pop_operation gibt ***
     Operation* op = dynamic_cast<Operation*>( +operation );
-    if( op  &&  op->_call_state == c_connect )  op->async_check_error();   
+    if( op  &&  op->_call_state == c_connect )  op->async_check_error();
     // ***
 
 
@@ -223,7 +223,7 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
     }
 
     _end_success = success;
-    _operation = _remote_instance->call__start( "end", success );    
+    _operation = _remote_instance->call__start( "end", success );
     return _operation;
 }
 
@@ -354,6 +354,8 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
         process_configuration._job_path = _task->job()->path();
         process_configuration._task_id = _task_id;
         process_configuration._is_thread = _module->_kind == Module::kind_java_in_process;
+        process_configuration._credentials_key = _module->_credentials_key;
+        process_configuration._load_user_profile = _module->_load_user_profile;
 
         bool ok = Module_instance::try_to_get_process(&process_configuration);
         if (ok) {
@@ -366,7 +368,7 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
     if (_api_process) {
         _api_process->check_exception();    // Exception, wenn Agent das Kommando nicht akzeptiert hat
         return _api_process->is_started();  // false, wenn Agent noch nicht geantwortet hat.
-    } else 
+    } else
         return false;
 }
 
@@ -382,7 +384,7 @@ void Remote_module_instance_proxy::detach_process() {
 //-------------------------------------------Remote_module_instance_proxy::continue_async_operation
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, Async_operation::Continue_flags )
-{ 
+{
 
 AGAIN:
     switch( operation->_call_state )
@@ -393,7 +395,7 @@ AGAIN:
         {
             ptr<Async_operation> connection_operation = _api_process->session()->connect_server__start();
             connection_operation->set_async_manager( _spooler->_connection_manager );
-            operation->set_async_child( connection_operation );            
+            operation->set_async_child( connection_operation );
             operation->_call_state = c_connect;
 
             #if defined Z_UNIX
@@ -409,13 +411,13 @@ AGAIN:
             operation->set_async_child( NULL );
             _api_process->session()->connect_server__end();
         }
-        
+
         // Nächste Operation
 
         {
             operation->_multi_qi.allocate( 1 );
             operation->_multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
-            
+
             operation->set_async_child(_api_process->session()->create_instance__start(spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi));
 
             operation->_call_state = c_create_instance;
@@ -459,7 +461,7 @@ AGAIN:
 
                 if( _has_order )
                 params_array[ nr++ ] = "has_order=1";
-                if (_task->stderr_log_level() != log_info) 
+                if (_task->stderr_log_level() != log_info)
                     params_array[nr++] = "stderr_log_level=" + as_string(_task->stderr_log_level());
 
                 // prefix is transferred only if it is set in scheduler.xml otherwise the remote side will work with the default
@@ -471,14 +473,14 @@ AGAIN:
                 for (int i = 0; i < module_monitors.size(); i++) {
                     Module_monitor* monitor = module_monitors[i];
                     params_array[ nr++ ] = "monitor.language="        + monitor->module()->_language;       // Muss der erste Parameter sein, legt den Module_monitor an
-                    params_array[ nr++ ] = "monitor.name="            + monitor->monitor_name();           
+                    params_array[ nr++ ] = "monitor.name="            + monitor->monitor_name();
                     params_array[ nr++ ] = "monitor.ordering="        + as_string(i);  // module_monitors() are ordered increasingly
                     params_array[ nr++ ] = "monitor.com_class="       + monitor->module()->_com_class_name;
                     params_array[ nr++ ] = "monitor.filename="        + monitor->module()->_filename;
                     params_array[ nr++ ] = "monitor.java_class="      + monitor->module()->_java_class_name;
+                    if (monitor->module()->_dotnet_class_name != "") params_array[ nr++ ] = "monitor.dotnet_class=" + monitor->module()->_dotnet_class_name;
+                    if (monitor->module()->_dll != "") params_array[ nr++ ] = "monitor.dll=" + monitor->module()->_dll;
                     params_array[ nr++ ] = "monitor.script="          + monitor->module()->_text_with_includes.includes_resolved().xml_string();    // JS-444  // Muss der letzte Parameter sein!
-                    if (monitor->module()->_dotnet_class_name != "") params_array[ nr++ ] = "dotnet_class=" + monitor->module()->_dotnet_class_name;
-                    if (monitor->module()->_dll != "") params_array[ nr++ ] = "dll=" + monitor->module()->_dll;
                 }
             }
 
@@ -494,16 +496,16 @@ AGAIN:
         case c_construct:
         {
             operation->set_async_child( NULL );
-            
+
             Variant ok = _remote_instance->call__end();
-            
+
             if( !check_result( ok ) )
             {
                 operation->_call_state = c_release_begin;
                 goto AGAIN;
             }
         }
-            
+
         // Nächste Operation
 
         {
@@ -571,7 +573,7 @@ string Remote_module_instance_proxy::process_name() const
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_
 
 bool Remote_module_instance_proxy::Operation::async_finished_() const
-{ 
+{
     if( _call_state == c_begin  &&  !_proxy->_api_process )
     {
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
@@ -592,7 +594,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_() const
 //---------------------------------------Remote_module_instance_proxy::Operation::async_state_text_
 
 string Remote_module_instance_proxy::Operation::async_state_text_() const
-{ 
+{
     string text = "Remote_module_instance_proxy(state=" + state_name();
     if( _call_state == c_begin  &&  !_proxy->_api_process )  text += ", waiting for available process in process class";
   //if( _operation )  text += "," + _operation->async_state_text();

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/master/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     process_class="/test-agent"
+     credentials_key="test-target"
+>
+    <script language="shell">
+        @echo off
+        echo THIS IS THE JOB /shell-logon
+        icacls %SCHEDULER_RETURN_VALUES%
+        echo JOB-VARIABLE=JOB-VALUE >>%SCHEDULER_RETURN_VALUES%
+        ping.exe 127.0.0.1
+        for /f "usebackq tokens=*" %%a in (`echo SELF-TEST`) do echo TEST-USERNAME=%%a
+        for /f "usebackq tokens=*" %%a in (`%WinDir%\system32\whoami.exe`) do echo TEST-USERNAME=%%a
+        rem whoami exits with error?
+        exit 0
+    </script>
+</job>

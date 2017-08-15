@@ -732,7 +732,11 @@ void Order_subsystem_impl::append_calendar_dom_elements( const xml::Element_ptr&
                 ptr<Order> order = _spooler->standing_order_subsystem()->new_order();
                 order->load_record( job_chain_path, record );
                 order->load_order_xml_blob( &ta );
-
+                order->load_run_time_blob(&ta);
+                order->schedule_use()->try_load();
+                if (order->schedule_use()->is_defined()) {
+                    order->schedule_use()->next_period(Time::now(), schedule::wss_next_any_start);
+                }
                 order->append_calendar_dom_elements( element, options );
             }
             catch( exception& x ) { Z_LOG2( "scheduler", Z_FUNCTION << "  " << x.what() << "\n" ); }  // Auftrag kann inzwischen gelöscht worden sein
@@ -1492,23 +1496,27 @@ bool Order_queue_node::is_ready_for_order_processing()
 
 bool Order_queue_node::request_order(const Time& now, const string& cause)
 {
-    bool result = order_queue()->request_order(now, cause);
-    if (!result && _job_chain->untouched_is_allowed()) {
-        Z_FOR_EACH(Order_source_list, _order_source_list, j) {
-            result = (*j)->request_order(cause);
-            if (result)  break;
-        }
-        // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
-        vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
-        Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
-            Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+    if (_job_chain->is_stopped()) 
+        return false;
+    else {
+        bool result = order_queue()->request_order(now, cause);
+        if (!result && _job_chain->untouched_is_allowed()) {
+            Z_FOR_EACH(Order_source_list, _order_source_list, j) {
                 result = (*j)->request_order(cause);
                 if (result)  break;
             }
-            if (result)  break;
+            // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
+            vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+            Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
+                Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
+                    result = (*j)->request_order(cause);
+                    if (result)  break;
+                }
+                if (result)  break;
+            }
         }
+        return result;
     }
-    return result;
 }
 
 //--------------------------------------------------------Order_queue_node::withdraw_order_requests
@@ -2082,6 +2090,10 @@ void Job_chain::set_order_id_space( Order_id_space* order_id_space )
     _order_id_space = order_id_space;
 }
 
+string Job_chain::order_id_space_name() const {
+    return _order_id_space ? _order_id_space->name() : "";
+}
+
 //------------------------------------------------------------------Job_chain::connected_job_chains
 
 String_set Job_chain::connected_job_chains()
@@ -2550,7 +2562,9 @@ vector<javabridge::Has_proxy*> Job_chain::java_orders() {
         }
     }
     Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, i) {
-        result.push_back(i->second);
+        if (!i->second->job()) {
+           result.push_back(i->second);
+        }
     }
     return result;
 }

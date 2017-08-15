@@ -275,6 +275,7 @@ object OrderRouteTest {
     A1OrderKey,
     FileBasedState.active,
     OrderSourceType.Permanent,
+    A1OrderKey.jobChainPath,
     NodeId("100"),
     OrderProcessingState.InTaskProcess(
       TaskId(3),
@@ -282,7 +283,7 @@ object OrderRouteTest {
       since = Instant.parse("2016-08-26T11:22:33.444Z"),
       agentUri = None),
     nextStepAt = Some(EPOCH))
-  private val A1OrderDetailed = OrderDetailed(A1OrderOverview, priority = 0, title = "")
+  private val A1OrderDetailed = OrderDetailed(A1OrderOverview, priority = 0, title = "", stateText = "")
 
   private val TestOrderOverviews = Vector(A1OrderOverview)
 

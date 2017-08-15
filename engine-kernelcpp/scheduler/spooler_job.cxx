@@ -932,6 +932,8 @@ void Standard_job::set_dom( const xml::Element_ptr& element )
             }
         }
         _call_register.call(Z_NEW(State_cmd_call(this, _enabled? sc_enable : sc_disable)));
+        _module->_credentials_key = element.getAttribute("credentials_key");
+        _module->_load_user_profile = element.bool_getAttribute("load_user_profile");
 
         if( order )  set_order_controlled();
 
@@ -3695,7 +3697,7 @@ Process_class* Standard_job::default_process_class() const {
 
 bool Standard_job::is_task_ready_for_order(Process_class* process_class) {
     if (!process_class) {
-        process_class == default_process_class_or_null();
+        process_class = default_process_class_or_null(); 
         if (!process_class) return false;
     }
     Z_FOR_EACH_CONST(Task_set, _running_tasks, i) {

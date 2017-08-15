@@ -4,17 +4,22 @@ import com.google.common.io.Closer
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPorts
 import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.scheduler.engine.data.event.KeyedEvent
 import com.sos.scheduler.engine.data.job.{JobPath, JobState, TaskId, TaskObstacle, TaskState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, WarningLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.{OrderFinished, OrderWaitingInTask}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
-import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
+import com.sos.scheduler.engine.data.xmlcommands.{OrderCommand, ProcessClassConfiguration}
 import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector
 import com.sos.scheduler.engine.kernel.settings.CppSettingName
+import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -26,6 +31,7 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import scala.Vector.fill
 import scala.collection.mutable
+import scala.concurrent.Promise
 
 /**
  * @author Joacim Zschimmer
@@ -33,15 +39,15 @@ import scala.collection.mutable
 @RunWith(classOf[JUnitRunner])
 final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  private lazy val tcpPort :: agentTcpPorts = findRandomFreeTcpPorts(1 + n)
+  private lazy val agentTcpPorts = findRandomFreeTcpPorts(n)
   private lazy val agentRefs = (0 until n).toList zip agentTcpPorts map { case (i, port) ⇒ AgentRef(('A' + i).toChar.toString, port) } ensuring { _.size == n }
   private lazy val runningAgents = mutable.Map[AgentRef, Agent]()
   private var waitingTaskRun: TaskRun = null
+  private val orderFinished = Promise[Unit]()
   private var waitingStopwatch: Stopwatch = null
 
   protected override lazy val testConfiguration = TestConfiguration(
     testClass = getClass,
-    mainArguments = List(s"-tcp-port=$tcpPort"),
     cppSettings = Map(CppSettingName.agentConnectRetryDelay → AgentConnectRetryDelay.getSeconds.toString))
 
   "ignoreExtraEntries" in {
@@ -79,6 +85,16 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     }
   }
 
+  "Starting an order for a not-running agent" in {
+    eventBus.on[OrderFinished] {
+      case KeyedEvent(TestOrderKey, OrderFinished(NodeId("END"))) ⇒
+        orderFinished.success(())
+    }
+    eventBus.awaiting[OrderWaitingInTask.type](TestOrderKey) {
+      startOrder(OrderCommand(TestOrderKey))
+    }
+  }
+
   "After starting 2 agents and after process class has waited the third cycle, the waiting task can be finished" in {
     withEventPipe { eventPipe ⇒
       startAndWaitForAgents(agentRefs(1), agentRefs(3)) // Start 2 out of n agents
@@ -92,6 +108,10 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       //  eventPipe.queued[WarningLogged] map { _.codeOption } filter { _ != Some(WaitingForAgentMessageCode) }
       //}
     }
+  }
+
+  "The order can be carried out now" in {
+    orderFinished.future await TestTimeout
   }
 
   "After agentConnectRetryDelay, more tasks start immediately before reaching next probe time, FixedPriority" in {
@@ -112,8 +132,8 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       val results = for (_ ← 1 to 2*n + 1) yield runJob(AgentsJobPath)
       val taskAgentNames = results flatMap taskResultToAgentName
       def alternatingAgentNames = (Iterator continually { List(agentRefs(1).name, agentRefs(3).name) }).flatten
-      assert(taskAgentNames == (alternatingAgentNames drop 0 take 2*n + 1).toList ||  // B D B D B D B D B or
-             taskAgentNames == (alternatingAgentNames drop 1 take 2*n + 1).toList)    // D B D B D B D B D
+      assert(taskAgentNames == alternatingAgentNames.slice(0, 2 * n + 1).toList ||  // B D B D B D B D B or
+             taskAgentNames == alternatingAgentNames.slice(1, 2 * n + 2).toList)    // D B D B D B D B D
       stopwatch.duration should be < TestTimeout
       eventPipe.queued[WarningLogged] map { _.event.codeOption } should contain (Some(InaccessibleAgentMessageCode))  // First Agent is still unreachable
     }
@@ -184,6 +204,8 @@ final class JS1188IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
 }
 
 private object JS1188IT {
+  private val TestOrderKey = JobChainPath("/test") orderKey "TEST"
+  private val TestJobPath = JobPath("/test")
   private val AgentConnectRetryDelay = 15.s
   private val n = 4
   private val AgentsProcessClassPath = ProcessClassPath("/agents")

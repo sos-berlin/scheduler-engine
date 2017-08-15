@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.taskserver.task.process
 
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.common.log.LazyScalaLogger.AsLazyScalaLogger
+import com.sos.scheduler.engine.common.process.windows.WindowsProcess
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.system.OperatingSystem._
@@ -31,6 +32,9 @@ final class ProcessKillScriptProvider extends HasCloser {
       }
       if (isUnix)  {
         setPosixFilePermissions(file, Set(OWNER_READ, OWNER_EXECUTE))
+      }
+      if (isWindows) {
+        WindowsProcess.makeFileExecutableForEverybody(file)
       }
     }
 

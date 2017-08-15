@@ -10,6 +10,7 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   def file_path: String
   def job_chain_path_string: String
   def job_chain: Job_chainC
+  def outer_job_chain_path: String
   def string_id: String
   def set_id(id: String): Unit
   def title: String
@@ -23,6 +24,7 @@ trait OrderC extends CppProxyWithSister[Order] with File_basedC[Order] {
   def set_priority(o: Int): Unit
   def string_state: String
   def initial_state_string: String
+  def state_text: String
   def set_end_state(order_state: String): Unit
   def end_state_string: String
   def java_remove(): Unit

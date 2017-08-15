@@ -1,6 +1,6 @@
 // mavenSettings.h
 
-/*  Die Variable (Dollar-Zeichen und geschweifte Klammern) werden von Maven ersetzt, siehe pom.xml. 
+/*  Die Variable (Dollar-Zeichen und geschweifte Klammern) werden von Maven ersetzt, siehe pom.xml.
     Die ersetzte mavenSettings.h steht dann in target/cpp/.
     Wenn auch VER_PRODUCTVERSION und VER_DATE gesetzt werden soll, muessen wir wohl ein Skript (oder ein Maven-PlugIn) schreiben.
     Das Skript koennte make/make-scheduler-phase sein, das die Ersetzungen mit sed oder dergleichen vornimmt.
@@ -21,4 +21,4 @@
 #   define VER_PRODUCTVERSION_DEBUG ""
 #endif
 
-#define VER_PRODUCTVERSION_TAIL  VER_PRODUCTVERSION_DEBUG 
+#define VER_PRODUCTVERSION_TAIL  VER_PRODUCTVERSION_DEBUG

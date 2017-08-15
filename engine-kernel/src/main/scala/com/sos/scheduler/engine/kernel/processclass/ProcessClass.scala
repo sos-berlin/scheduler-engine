@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.kernel.processclass
 
 import com.sos.scheduler.engine.agent.data.commands.StartTask
+import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.client.agent.ApiProcessConfiguration
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections._
@@ -186,6 +187,10 @@ object ProcessClass {
       meta = StartTask.Meta(JobPath(c._job_path), TaskId(c._task_id)),
       hasApi = c._has_api,
       javaOptions = c._java_options.trim,
-      javaClasspath = c._java_classpath.trim)
+      javaClasspath = c._java_classpath.trim,
+      logon = c._credentials_key.trim.nonEmpty option
+        StartTask.KeyLogon(
+          credentialsKey = c._credentials_key.trim,
+          withUserProfile = c._load_user_profile))
   }
 }

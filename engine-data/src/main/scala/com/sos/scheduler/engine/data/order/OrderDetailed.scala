@@ -8,16 +8,19 @@ import spray.json.DefaultJsonProtocol._
   */
 final case class OrderDetailed(
   overview: OrderOverview,
-  priority: Int,
+  priority: Int = 0,
   initialNodeId: Option[NodeId] = None,
   endNodeId: Option[NodeId] = None,
   title: String,
+  stateText: String,
   variables: Map[String, String] = Map())
 extends OrderView {
 
   def path = orderKey
 
   def orderKey = overview.orderKey
+
+  def outerJobChainPath = overview.outerJobChainPath
 
   private[engine] def occupyingClusterMemberId = overview.occupyingClusterMemberId
 
@@ -27,5 +30,5 @@ extends OrderView {
 }
 
 object OrderDetailed extends OrderView.Companion[OrderDetailed] {
-  implicit val jsonFormat = jsonFormat6(apply)
+  implicit val jsonFormat = jsonFormat7(apply)
 }

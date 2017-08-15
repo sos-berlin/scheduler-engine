@@ -288,6 +288,13 @@ void Task::close()
         _terminated_events.clear();
 
         _closed = true;
+        if (has_error() || _log->highest_level() >= log_error) {
+            try {
+                _history.start();
+            } catch (exception& x) {
+                log()->error(S() << "When starting task history after error: " << x.what());
+            }
+        }
         _history.end();    // DB-Operation, kann Exception auslösen
     }
 
@@ -1193,7 +1200,7 @@ bool Task::check_if_longer_than( const Time& now )
                 _log->warn( msg );
                 Scheduler_event scheduler_event(evt_task_step_too_long, log_error, this);
                 scheduler_event.set_message(msg);
-                Mail_defaults mail_defaults( _spooler );
+                Mail_defaults mail_defaults  = _log->_mail_defaults;
                 mail_defaults.set( "subject", S() << obj_name() << ": " << msg );
                 mail_defaults.set( "body"   , S() << obj_name() << ": " << msg << "\n"
                                               "Task step time: " << step_time << "\n" <<

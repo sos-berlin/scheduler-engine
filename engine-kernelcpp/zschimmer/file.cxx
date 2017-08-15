@@ -1313,10 +1313,41 @@ string extension_of_path( const string& path )
 
 //-------------------------------------------------------------------------------------------------
 
+#if defined Z_WINDOWS
+static int getFileTime(HANDLE handle, OS_specific_file_stat* stat_buf) {
+    errno = 0;
+    FILETIME creation_time, last_access_time, last_write_time;
+    if (GetFileTime(handle, &creation_time, &last_access_time, &last_write_time)) {
+        stat_buf->st_ctime = windows::time_t_from_filetime(creation_time);
+        stat_buf->st_atime = windows::time_t_from_filetime(last_access_time);
+        stat_buf->st_mtime = windows::time_t_from_filetime(last_write_time);
+        return 0;
+    } else
+        return 1;
+}
+#endif
+
 int file_status(const char* path, OS_specific_file_stat* stat_buf)
 {
     #if defined Z_WINDOWS
-        return ::_stati64(path, stat_buf);
+    {
+        int ret = ::_stati64(path, stat_buf);
+        if (ret == 0 && (stat_buf->st_mode & S_IFREG/*regular file*/)) {
+            HANDLE handle = CreateFile(path, 0, 0, NULL, OPEN_EXISTING, 0, 0);
+            if (handle == INVALID_HANDLE_VALUE) {
+                switch (GetLastError()) {
+                    case ERROR_FILE_NOT_ENCRYPTED:  // In case the file has been deleted after _stati64 
+                        errno = ENOENT; 
+                    default: 
+                        throw_mswin("CreateFile after _stati64", path);
+                }
+            } else {
+                ret = getFileTime(handle, stat_buf);
+                CloseHandle(handle);
+            }
+        }
+        return ret;
+    }
     #else
         return ::stat(path, stat_buf);
     #endif
@@ -1329,16 +1360,7 @@ int file_status(int file_des, OS_specific_file_stat* stat_buf)
         int ret = ::_fstati64(file_des, stat_buf);
         if (ret == 0) {
             // JS-1141 _fstati64 verrechnet nach Sommerzeitumstellung eine Stunde. Wir rechnen selbst, ohne Sommerzeitumstellung.
-            errno = 0;
-            FILETIME creation_time, last_access_time, last_write_time;
-            int ok = GetFileTime((HANDLE)_get_osfhandle(file_des), &creation_time, &last_access_time, &last_write_time);
-            if (!ok) {
-                ret = 1;
-            } else {
-                stat_buf->st_ctime = windows::time_t_from_filetime(creation_time);
-                stat_buf->st_atime = windows::time_t_from_filetime(last_access_time);
-                stat_buf->st_mtime = windows::time_t_from_filetime(last_write_time);
-            }
+            ret = getFileTime((HANDLE)_get_osfhandle(file_des), stat_buf);
         }
         return ret;
     #else

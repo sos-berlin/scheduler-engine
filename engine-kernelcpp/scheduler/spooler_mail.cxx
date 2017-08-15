@@ -51,6 +51,15 @@ string Mail_defaults::value( const string& name ) const
     return result == "-"? "" : result;
 }
 
+ListJ Mail_defaults::to_java() const {
+    ListJ result;
+    result = ArrayListJ::new_instance(int_cast(_map.size()));
+    Z_FOR_EACH_CONST(Map, _map, i) {
+        result.add((StringJ)(i->first + "=" + i->second));
+    }
+    return result;
+}
+
 //-------------------------------------------------------------------------------Com_mail::_methods
 #ifdef Z_COM
 

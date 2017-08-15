@@ -1447,7 +1447,7 @@ void Order::set_dom( const xml::Element_ptr& element )
     assert_is_not_initialized();
     subsystem()->assert_xml_element_name( element );
 
-    set_dom( element, (Variable_set_map*)NULL );
+    set_dom(element, &_spooler->_variable_set_map);
 
     //if( !job_chain_path().empty() )  z::throw_xc( "SCHEDULER-437", job_chain_path(), _file_based_job_chain_path );     // Order->set_dom() liest Attribut job_chain nicht!
 
@@ -1488,7 +1488,9 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
 
     if( title            != "" )  set_title   ( title );
     if( state_name       != "" )  set_state   ( state_name.c_str() );
-    if( element.hasAttribute( "end_state" ) ) set_end_state( element.getAttribute( "end_state" ) );
+    bool has_original_end_state = element.hasAttribute("original_end_state");
+    if (has_original_end_state) set_end_state(element.getAttribute("original_end_state"), true);
+    if (element.hasAttribute("end_state")) set_end_state(element.getAttribute("end_state"), /*with_original=*/!has_original_end_state);
     if( web_service_name != "" )  set_web_service( _spooler->_web_services->web_service_by_name( web_service_name ), true );
     _is_touched = element.bool_getAttribute( "touched" );
     if (_is_touched) {
@@ -1770,7 +1772,8 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& dom_document, cons
         e2.setAttribute( "state"    , _outer_job_chain_state.as_string() );
     }
 
-    result.setAttribute_optional( "end_state", _end_state.as_string() );
+    result.setAttribute_optional("original_end_state", _original_end_state.as_string());
+    result.setAttribute_optional("end_state", _end_state.as_string());
 
     if (show_what.is_set(show_log) || show_what.is_set(show_for_database_only)) {
         // Append <log> at end such that all more relevant informations can be parsed before this potentially big element (JS-1642)
@@ -2317,13 +2320,16 @@ void Order::reset()
 
 //-----------------------------------------------------------------------------Order::set_end_state
 
-void Order::set_end_state( const State& end_state )
+void Order::set_end_state(const State& end_state, bool with_original)
 {
     if( !end_state.is_null_or_empty_string() )
     {
         if( Job_chain* job_chain = this->job_chain() )  job_chain->referenced_node_from_state( end_state );       // Prüfen
     }
 
+    if (with_original) {
+        _original_end_state = end_state;
+    }
     _end_state = end_state;
     _order_xml_modified = true;
 }
@@ -2751,7 +2757,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )
                 set_suspended();  // Like processing_error()
             else
-            if (_is_success_state && _outer_job_chain_path == ""  &&  _state == _end_state) {
+            if (_outer_job_chain_path == ""  &&  _state == _end_state) {
                 log()->info( message_string( "SCHEDULER-704", _end_state ) );
                 set_end_state_reached();
                 handle_end_state();
@@ -3035,6 +3041,7 @@ void Order::check_for_replacing_or_removing_with_distributed(When_to_act when_to
 
 void Order::prepare_for_next_roundtrip() {
     _last_error = "";
+    _end_state = _original_end_state;
     if (is_in_folder()) {
         if (!_spooler->settings()->_keep_order_content_on_reschedule) {
             restore_initial_settings();
@@ -3299,13 +3306,13 @@ Time Order::next_start_time()
         Time now = Time::now();
         _schedule_use->log_changed_active_schedule(now);
 
-        if (_period.end() < now) _period = _schedule_use->next_period(Time::now(), schedule::wss_next_any_start);
+        if (_period.end() < now) _period = _schedule_use->next_period(now, schedule::wss_next_any_start);
         result = _period.next_repeated_allow_after_end(now);
 
         if (result >= _period.end())       // Periode abgelaufen?
         {
             bool period_not_initialized = _period.end().is_never(); // JS-957
-            Period next_period = _schedule_use->next_period(period_not_initialized ? Time::now() : _period.end(), schedule::wss_next_any_start);
+            Period next_period = _schedule_use->next_period(period_not_initialized ? now : _period.end(), schedule::wss_next_any_start);
 
             if (result.is_never())
                 result = next_period.begin();  // SOS1219 next_period.begin() kann never sein!??

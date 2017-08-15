@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.common.process
 
 import com.sos.scheduler.engine.common.process.StdoutStderr.StdoutStderrType
+import com.sos.scheduler.engine.common.process.windows.{WindowsProcess, WindowsUserName}
 import com.sos.scheduler.engine.common.system.OperatingSystem._
 import java.nio.file.Files._
 import java.nio.file.Path
@@ -21,12 +22,21 @@ private[process] sealed trait OperatingSystemSpecific {
 
   def shellFileAttributes: immutable.Seq[FileAttribute[java.util.Set[_]]]
 
-  def newTemporaryShellFile(name: String) = createTempFile(filenamePrefix(name), shellFileExtension, shellFileAttributes: _*)
+  def newTemporaryShellFile(name: String, user: Option[WindowsUserName]): Path = {
+    val file = createTempFile(filenamePrefix(name), shellFileExtension, shellFileAttributes: _*)
+    for (u ← user) {
+      WindowsProcess.makeFileExecutableForUser(file, u)
+    }
+    file
+  }
 
-  def newLogFile(directory: Path, name: String, outerr: StdoutStderrType) = {
+  def newLogFile(directory: Path, name: String, outerr: StdoutStderrType, windowsUserName: Option[WindowsUserName]) = {
     val file = directory resolve s"$name-$outerr.log"
     if (!exists(file)) {
       createFile(file, outputFileAttributes: _*)
+      for (u ← windowsUserName) {
+        WindowsProcess.makeFileAppendableForUser(file, u)
+      }
     }
     file
   }

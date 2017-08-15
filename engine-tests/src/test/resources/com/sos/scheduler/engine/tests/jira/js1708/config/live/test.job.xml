@@ -1,0 +1,17 @@
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     tasks="2"
+     process_class="/test-agent"
+>
+    <script language="shell">
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        sleep 0.1
+        exit
+
+        :WINDOWS
+        powershell -NonInteractive -noprofile -executionpolicy bypass -command "Start-Sleep -s 0.1"
+    </script>
+</job>

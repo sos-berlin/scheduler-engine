@@ -396,7 +396,7 @@ void Module::init()
 // JS-498: Vorhandensein von Scriptcode prüfen
         case kind_scripting_engine_java: break;
         
-        case kind_scripting_engine:     if( !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
+        case kind_scripting_engine:     if( _dotnet_class_name.empty() && !has_source_script() )  z::throw_xc( "SCHEDULER-173" );
                                         break;
 
         case kind_process:              if (!has_source_script()) z::throw_xc("SCHEDULER-173");
@@ -670,6 +670,9 @@ void Module_instance::fill_process_environment()
 
     if( _module->kind() == Module::kind_process )
     {
+        Z_FOR_EACH_CONST(Com_variable_set::Map, _spooler->_variables->_map, v) {
+            _process_environment->set_var(ucase(_module->_process_shell_variable_prefix + v->second->name()), v->second->string_value());
+        }
         string dir = _spooler->_configuration_directories[ confdir_local ];
         
         if( string_ends_with( dir, "/" ) ||

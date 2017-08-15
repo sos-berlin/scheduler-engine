@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <job_chain_node state="100" error_state="200" next_state="FAILED" job="test"/>
+    <job_chain_node state="200" error_state="ERROR" job="test"/>
+    <job_chain_node state="300" job="test"/>
+    <job_chain_node.end state="END"/>
+    <job_chain_node.end state="ERROR"/>
+    <job_chain_node.end state="FAILED"/>
+</job_chain>

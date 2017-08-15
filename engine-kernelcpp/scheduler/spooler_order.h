@@ -203,6 +203,10 @@ struct Order : Com_order,
         return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched; 
     }
 
+    const Absolute_path& outer_job_chain_path() const {
+        return _outer_job_chain_path;
+    }
+
     void                    set_delay_storing_until_processing( bool b )                            { _delay_storing_until_processing = b; }
 
     Job_chain*                  job_chain               () const;
@@ -237,12 +241,12 @@ struct Order : Com_order,
     string                      initial_state_string    () const                                    { return _initial_state.as_string(); }
     void                        reset                   ();
 
-    void                    set_end_state               ( const State& );
+    void                    set_end_state               (const State&, bool with_original = false);
     const State&                end_state               ()                                          { return _end_state; }
     string                      end_state_string        ()                                          { return _end_state.as_string(); }
 
     void                    set_state_text              ( const string& state_text )                { _state_text = state_text,  _state_text_modified = true; }
-    string                      state_text              ()                                          { return _state_text; }
+    const string&               state_text              () const                                    { return _state_text; }
 
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
@@ -437,6 +441,7 @@ struct Order : Com_order,
     string                     _last_error;
     bool                       _is_success_state;       // Rückgabe des letzten Prozessschritts
     State                      _end_state;
+    State                      _original_end_state;
 
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     string                     _state_text;
@@ -1015,6 +1020,7 @@ struct Job_chain : Com_job_chain,
     // Für verschachtelte Jobketten, deren Auftragskennungsräume verbunden sind:
     void                        disconnect_nested_job_chains_and_rebuild_order_id_space();
     Order_id_space*             order_id_space              () const                                    { return _order_id_space; }
+    string                      order_id_space_name         () const;
     void                    set_order_id_space              ( Order_id_space* );
     bool                        order_id_space_contains_order_id(const string& order_id);
 

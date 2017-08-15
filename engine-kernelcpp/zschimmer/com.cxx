@@ -1453,6 +1453,18 @@ HRESULT SafeArrayCopy( SAFEARRAY* src, SAFEARRAY** dest )
       //    memcpy( (*dest)->pvData, src->pvData, n * 4 );  
       //    break;
 
+        case VT_BSTR:
+            for (int i = 0; i < n; i++) {
+                BSTR s = ((BSTR*)src->pvData)[i];
+                BSTR copy = SysAllocStringLen(s, SysStringLen(s));
+                if (!copy) {
+                    hr = E_FAIL;
+                    break;
+                }
+                ((BSTR*)(*dest)->pvData)[i] = copy;
+            }
+            break;
+
         case VT_VARIANT:    
             for( int i = 0; i < n; i++ )
             {

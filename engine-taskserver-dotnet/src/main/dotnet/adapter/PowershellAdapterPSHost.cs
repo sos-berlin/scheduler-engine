@@ -3,6 +3,7 @@
     using System;
     using System.Globalization;
     using System.Management.Automation.Host;
+    using System.Text.RegularExpressions;
     using System.Threading;
 
     internal class PowershellAdapterPSHost : PSHost
@@ -22,8 +23,20 @@
         {
             this.hostId = Guid.NewGuid();
             this.ui = new PowershellAdapterPSHostUserInterface(log);
-            this.currentCulture = Thread.CurrentThread.CurrentCulture;
-            this.currentUiCulture = Thread.CurrentThread.CurrentUICulture;
+            var culture = Thread.CurrentThread.CurrentCulture;
+            var uiCulture = Thread.CurrentThread.CurrentUICulture;
+            if (culture != null && culture.Name != null)
+            {
+                if (Regex.IsMatch(culture.Name, "^ja-|^zh-|^ko-|^ar-", RegexOptions.IgnoreCase))
+                {
+                    culture = CultureInfo.InvariantCulture;
+                    uiCulture = CultureInfo.InvariantCulture;
+                    Thread.CurrentThread.CurrentCulture = culture;
+                    Thread.CurrentThread.CurrentUICulture = uiCulture;
+                }
+            }
+            this.currentCulture = culture;
+            this.currentUiCulture = uiCulture;
         }
 
         #endregion

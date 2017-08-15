@@ -6,7 +6,7 @@ import com.google.inject.{Guice, Provides}
 import com.sos.scheduler.engine.agent.command.CommandMeta
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.AgentTaskId
-import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, StartTaskResponse}
+import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, StartTaskSucceeded}
 import com.sos.scheduler.engine.agent.data.commands._
 import com.sos.scheduler.engine.agent.data.views.TaskHandlerOverview
 import com.sos.scheduler.engine.agent.task.TaskHandlerTest._
@@ -56,8 +56,8 @@ final class TaskHandlerTest extends FreeSpec with BeforeAndAfterAll {
     import testContext.{taskHandler, taskServers, tasks}
     def startTask() = awaitResult(taskHandler.execute(TestStartApiTask), 3.s)
     startTask()
-    taskServers(0).mockedTerminate()
     intercept[LicenseKeyParameterIsMissingException] { startTask() }
+    taskServers(0).mockedTerminate()
     awaitResult(taskHandler.execute(CloseTask(tasks(0).id, kill = false)), 3.s)
     startTask()
   }
@@ -70,7 +70,7 @@ final class TaskHandlerTest extends FreeSpec with BeforeAndAfterAll {
       assert(!taskHandler.terminated.isCompleted)
       for (nextAgentTaskId ← AgentTaskIds) {
         val response = awaitResult(taskHandler.execute(TestStartApiTask, CommandMeta(licenseKeyBunch = TestLicenseKeyBunch)), 3.s)
-        inside(response) { case StartTaskResponse(id, TestTunnelToken) ⇒ id shouldEqual nextAgentTaskId }
+        inside(response) { case StartTaskSucceeded(id, TestTunnelToken) ⇒ id shouldEqual nextAgentTaskId }
       }
       for (o ← taskServers) {
         assert(o.started)
@@ -178,7 +178,8 @@ private object TaskHandlerTest {
   private val JavaClasspath = "JAVA-CLASSPATH"
   private val TestMasterPort = 9999
   private val TestStartApiTask = StartApiTask(javaOptions = JavaOptions, javaClasspath = JavaClasspath,
-    meta = Some(StartTask.Meta(taskId = TaskId(1), job = JobPath("/test-job"))))
+    meta = Some(StartTask.Meta(taskId = TaskId(1), job = JobPath("/test-job"))),
+    logon = None)
   private val TestLicenseKeyBunch = LicenseKeyBunch("SOS-DEMO-1-D3Q-1AWS-ZZ-ITOT9Q6")
   private val TestTunnelToken = TunnelToken(TunnelId("1"), SecretString("SECRET"))
 
@@ -191,6 +192,7 @@ private object TaskHandlerTest {
         def tunnel = mockTunnelHandle
         def taskServer = taskServer_
         def taskArgumentsFuture = NoFuture
+        def taskReleaseFuture = NoFuture
         def close() = closeTunnelAndTaskServer()
       }
     }

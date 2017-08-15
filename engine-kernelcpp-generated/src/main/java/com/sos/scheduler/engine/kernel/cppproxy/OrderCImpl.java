@@ -396,6 +396,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     private static native long next_time_millis__native(long cppReference);
 
 
+    @Override public java.lang.String outer_job_chain_path() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = outer_job_chain_path__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String outer_job_chain_path__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -567,6 +580,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.OrderC {
     }
 
     private static native long startTimeMillis__native(long cppReference);
+
+
+    @Override public java.lang.String state_text() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = state_text__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String state_text__native(long cppReference);
 
 
     @Override public java.lang.String string_id() {

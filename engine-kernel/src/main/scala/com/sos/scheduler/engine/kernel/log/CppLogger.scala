@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 
 object CppLogger {
-  private val logger = LoggerFactory.getLogger("JobScheduler")
+  private lazy val logger = LoggerFactory.getLogger("JobScheduler")
   private val schedulerToLogLevel = Array(
     LogLevel.LogNone,   // none
     LogLevel.Trace,  // debug9

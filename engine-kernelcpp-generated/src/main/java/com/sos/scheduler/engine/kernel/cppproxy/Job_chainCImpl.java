@@ -254,6 +254,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order__native(long cppReference, java.lang.String p0);
 
 
+    @Override public java.lang.String order_id_space_name() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = order_id_space_name__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String order_id_space_name__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order_or_null(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

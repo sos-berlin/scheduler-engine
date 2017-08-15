@@ -28,6 +28,7 @@ struct Mail_defaults
     string                      operator[]                  ( const string& name ) const;
     string                      value                       ( const string& name ) const;               // Liefert nicht "-", sondern ""
     void                        set                         ( const string& name, const string& value )  { _map[ name ] = value; }
+    ListJ to_java() const;
 
     typedef map<string,string>  Map;
     Map                        _map;

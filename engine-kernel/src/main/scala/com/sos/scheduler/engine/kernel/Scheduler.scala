@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.common.maven.MavenProperties
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
 import com.sos.scheduler.engine.common.scalautil.xmls.SafeXML
-import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger, SetOnce}
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyString
 import com.sos.scheduler.engine.common.system.SystemInformations.systemInformation
 import com.sos.scheduler.engine.common.time.ScalaTime.MaxDuration
@@ -82,7 +82,8 @@ with HasCloser {
 
   private var closed = false
   private val callRunner = new CallRunner(schedulerThreadCallQueue.delegate)
-
+  private val mailDefaultsOnce = new SetOnce[Map[String, String]]
+  lazy val mailDefaults: Map[String, String] = mailDefaultsOnce()
   private val startedAt = now()
 
   onClose { injector.instance[DependencyInjectionCloser].closer.close() }
@@ -172,6 +173,7 @@ with HasCloser {
 
   @ForCpp private def onLoad(): Unit = {
     // Actually, we are called at Scheduler::activate() - after onSchedulerLoaded
+    mailDefaultsOnce := (cppProxy.mailDefaults map { _.split("=", 2) } map { case Array(k, v) ⇒ k → v }).toMap
     controllerBridge.onSchedulerStarted(this)
   }
 

@@ -67,6 +67,7 @@ with UnmodifiableJobChain {
     fileBasedState = fileBasedState,
     isDistributed = isDistributed,
     orderLimit = orderLimitOption,
+    orderIdSpaceName = orderIdSpaceNameOption,
     obstacles = {
       import JobChainObstacle._
       val builder = Set.newBuilder[JobChainObstacle]
@@ -165,9 +166,6 @@ with UnmodifiableJobChain {
   private[order] def orderIterator: Iterator[Order] =
     cppProxy.java_orders.toIterator map { _.asInstanceOf[OrderC].getSister }
 
-  private[order] def orderIterator(orderIds: Iterable[OrderId]): Iterator[Order] =
-    orderIds.toIterator flatMap orderOption
-
   private[kernel] def state: JobChainState =
     JobChainState.values()(cppProxy.state)
 
@@ -177,11 +175,17 @@ with UnmodifiableJobChain {
     cppProxy.remove()
   }
 
+  private def orderIdSpaceNameOption: Option[String] =
+    emptyToNone(cppProxy.order_id_space_name)
+
   private[kernel] lazy val isDistributed: Boolean = cppProxy.is_distributed
 
   private[order] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private[kernel] def fileWatchingProcessClassPathOption = emptyToNone(cppProxy.file_watching_process_class_path) map ProcessClassPath.apply
+
+  private[kernel] def isNestingJobChain: Boolean =
+    nodes exists { _.isInstanceOf[NestedJobChainNode] }
 
   private def messageCodeHandler = subsystem.messageCodeHandler
 }

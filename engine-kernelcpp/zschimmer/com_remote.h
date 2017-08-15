@@ -446,6 +446,9 @@ struct Connection_to_own_server_process : Connection
         int                    _exit_code;
 #   endif
 
+    void                        set_ld_library_path     (const string& value)                       { _ld_library_path_set = true; _ld_library_path = value; }
+    bool                       _ld_library_path_set;
+    string                     _ld_library_path;
 #   ifdef Z_HPUX
         void                    set_ld_preload          ( const string& value )                     { _ld_preload = value; }
         string                 _ld_preload;

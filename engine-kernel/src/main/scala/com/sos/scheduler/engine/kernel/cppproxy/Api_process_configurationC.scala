@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxy
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppExpression, CppClass, CppField}
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppField}
 
 /**
  * @author Joacim Zschimmer
@@ -36,8 +36,11 @@ trait Api_process_configurationC extends CppProxy {
   @CppField
   def _environment: Variable_setC
 
-  //@CppField
-  //def _login: CppLogin
+  @CppField
+  def _credentials_key: String
+
+  @CppField
+  def _load_user_profile: Boolean
 
   @CppField
   def _java_options: String

@@ -11,7 +11,9 @@ import com.sos.scheduler.engine.newkernel.utils.{ThreadService, TimedCallHolder}
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.Charset.defaultCharset
+import java.util.concurrent.TimeUnit.SECONDS
 import org.joda.time.Instant
+import scala.concurrent.blocking
 
 final class ShellProcess(
     callQueue: CallQueue,
@@ -51,12 +53,7 @@ extends AutoCloseable {
     }
   }
 
-  def isTerminated =
-    try {
-      process.exitValue
-      true
-    }
-    catch { case _: IllegalThreadStateException => false }
+  def isTerminated = process.waitFor(0, SECONDS)
 
   def kill(): Unit = {
     process.destroy()
@@ -67,8 +64,10 @@ extends AutoCloseable {
       if (process != null) {
         process.destroy()
         process.waitFor()
-        for (o <- stdLoggers) {
-          o.thread.join() // Sollte asynchron sein
+        for (o ← stdLoggers) {
+          blocking {
+            o.thread.join() // Sollte asynchron sein
+          }
           o.close()
         }
     }
@@ -79,9 +78,6 @@ extends AutoCloseable {
 
 object ShellProcess {
   private val logger = Logger(getClass)
-
-  def startShellScript(shellScript: ShellScript) = {
-  }
 
   trait Starter {
     def file: File

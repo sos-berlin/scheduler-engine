@@ -81,6 +81,8 @@ extern const Duration           delete_temporary_files_retry;
 
 const int                       max_processes                 = 10000;    // kein Limit (HP-UX erlaubt 64 aktive fork())
 
+extern bool                     static_ld_library_path_changed;
+extern string                   static_original_ld_library_path;                   // Inhalt der Umgebungsvariablen LD_LIBRARY_PATH
 #ifdef Z_HPUX
     extern string               static_ld_preload;                        // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
@@ -469,7 +471,7 @@ struct Spooler : Object,
   //void                        create_window               ();
     void                        update_console_title        ( int level = 1 );
     void                        start                       ();
-    void                        activate                    ();
+    void                        activate                    (State);
     void                        execute_config_commands     ();
     void                        run_check_ctrl_c            ();
     void                        stop                        ( const exception* = NULL );

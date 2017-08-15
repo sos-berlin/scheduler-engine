@@ -36,19 +36,16 @@ private[order] final class DatabaseOrders @Inject private(
 
   def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
     databaseSubsystem.toInClauseSql(
-      column = "job_chain",
+      column = "JOB_CHAIN",
       jobChainPaths map { o ⇒ quoteSqlString(o.withoutStartingSlash) })
 
   def nodeKeysToSql(nodeKeys: TraversableOnce[NodeKey]): String =
     (for ((jobChainPath, nodeKeys) ← nodeKeys.toSeq groupBy { _.jobChainPath }) yield {
       nodeKeys.nonEmpty option
-        "(" +
-          quoteSqlName("job_chain") +
-          "=" +
-          quoteSqlString(jobChainPath.withoutStartingSlash) +
-          " and " +
-          databaseSubsystem.toInClauseSql(column = "state", nodeKeys map { o ⇒ quoteSqlString(o.nodeId.string) }) +
-        ")"
+        """("JOB_CHAIN" = """ + quoteSqlString(jobChainPath.withoutStartingSlash) +
+            " and " +
+            databaseSubsystem.toInClauseSql(column = "STATE", nodeKeys map { o ⇒ quoteSqlString(o.nodeId.string) }) +
+          ")"
     }).flatten mkString " and "
 
   def queryToSql(query: JobChainNodeQuery, conditionSql: String, ordered: Boolean = false): String = {
@@ -56,17 +53,17 @@ private[order] final class DatabaseOrders @Inject private(
     select ++= "select "
     val limit = Int.MaxValue
     if (limit < Int.MaxValue) select ++= s"%limit($limit) "
-    select ++= "`ID`, `JOB_CHAIN`, `STATE`, `DISTRIBUTED_NEXT_TIME`, `OCCUPYING_CLUSTER_MEMBER_ID`, `ORDER_XML`"
+    select ++= """"ID", "JOB_CHAIN", "STATE", "DISTRIBUTED_NEXT_TIME", "OCCUPYING_CLUSTER_MEMBER_ID", "ORDER_XML""""
     select ++= " from "
     select ++= schedulerConfiguration.ordersTableName
-    select ++= "  where `SPOOLER_ID`="
+    select ++= """  where "SPOOLER_ID"="""
     select ++= DatabaseSubsystem.quoteSqlString(schedulerId.string.substitute("", "-"))
-    select ++= " and `DISTRIBUTED_NEXT_TIME` is not null"
+    select ++= """ and "DISTRIBUTED_NEXT_TIME" is not null"""
     if (conditionSql.nonEmpty) {
       select ++= s" and ($conditionSql)"
     }
     if (ordered) {
-        select ++= " order by `JOB_CHAIN`, `STATE`, `DISTRIBUTED_NEXT_TIME`, `PRIORITY`, `ORDERING`"
+        select ++= """ order by "JOB_CHAIN", "STATE", "DISTRIBUTED_NEXT_TIME", "PRIORITY", "ORDERING""""
     }
     select.toString
   }

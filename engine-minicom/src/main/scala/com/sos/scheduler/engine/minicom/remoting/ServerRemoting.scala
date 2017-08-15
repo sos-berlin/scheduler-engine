@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.minicom.types.{CLSID, IID, IUnknown}
 import java.time.{Duration, Instant}
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.blocking
 import scala.util.control.NonFatal
 
 /**
@@ -68,7 +69,9 @@ extends Remoting
     try body
     finally {
       keepaliveThread.interrupt()
-      keepaliveThread.join()
+      blocking {
+        keepaliveThread.join()
+      }
     }
   }
 

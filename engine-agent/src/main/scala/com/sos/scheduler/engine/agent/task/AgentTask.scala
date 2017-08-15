@@ -31,6 +31,11 @@ with HasKey {
 
   protected def taskArgumentsFuture: Future[TaskArguments]
 
+  /**
+    * ReleaseCall has been called on RemoteModuleInstanceServer.
+    */
+  def taskReleaseFuture: Future[Unit]
+
   def tunnel: TunnelHandle
 
   protected def taskServer: TaskServer

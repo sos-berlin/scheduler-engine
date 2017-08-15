@@ -349,6 +349,9 @@ struct Dummy_process : Abstract_process {
     public: xml::Element_ptr dom_element(const xml::Document_ptr& document, const Show_what& show_what) {
         xml::Element_ptr process_element = Abstract_process::dom_element(document, show_what);
         process_element.setAttribute("running_since", _running_since.xml_value());
+        if (int pid = process_id()) {
+            process_element.setAttribute("pid", pid);
+        }
         return process_element;
     }
 
@@ -383,6 +386,9 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         ptr<object_server::Connection_to_own_server_process> connection = _spooler->_connection_manager->new_connection_to_own_server_process();
         connection->open_stdout_stderr_files();      //Nicht in einem remote_scheduler (File_logger übernimmt stdout): 
         fill_connection(connection);
+        if (static_ld_library_path_changed) {
+            connection->set_ld_library_path(static_original_ld_library_path);
+        }
         #ifdef Z_HPUX
             connection->set_ld_preload( static_ld_preload );
         #endif
@@ -409,6 +415,11 @@ struct Standard_local_api_process : Local_api_process, virtual Abstract_api_proc
         parameters.push_back(object_server::Parameter("program", _spooler->_my_program_filename));
         if (_spooler->settings()->_classic_agent_keep_alive_duration < INT_MAX) {
             parameters.push_back(object_server::Parameter("keep-alive", as_string(_spooler->settings()->_classic_agent_keep_alive_duration)));
+        }
+        if (static_ld_library_path_changed) {
+            if (const char* o = getenv("LD_LIBRARY_PATH")) {
+                parameters.push_back(object_server::Parameter("param", string("-env=LD_LIBRARY_PATH=") + o));
+            }
         }
         return parameters;
     }

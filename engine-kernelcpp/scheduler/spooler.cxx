@@ -96,6 +96,8 @@ volatile int                    ctrl_c_pressed_handled              = 0;
     volatile int                last_signal                         = 0;                // Signal für ctrl_c_pressed
 #endif
 
+bool                            static_ld_library_path_changed      = false;
+string                          static_original_ld_library_path     = "";               // Inhalt der Umgebungsvariablen LD_LIBRARY_PATH
 #ifdef Z_HPUX
     string                      static_ld_preload                   = "";               // Inhalt der Umgebungsvariablen LD_PRELOAD
 #endif
@@ -896,6 +898,7 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute_optional( "version_commit_hash", SchedulerJ::versionCommitHash() );    
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _configuration_file_path );
+    state_element.setAttribute( "configuration_directory", local_configuration_directory());
     state_element.setAttribute( "host"                 , _short_hostname );
     state_element.setAttribute_optional("http_port", _settings->_http_port);
     state_element.setAttribute_optional("https_port", _settings->_https_port);
@@ -1344,6 +1347,14 @@ void Spooler::set_state( State state )
     {
         log_show_state();
     }
+    if (_cluster) {
+        if (_state == s_paused) {
+            _cluster->set_paused(true);
+        } else
+        if (_state == s_running) {
+            _cluster->set_paused(false);
+        }
+    }
     Scheduler_object::report_event(CppEventFactoryJ::newSchedulerStateChanged(_state));
 }
 
@@ -1533,6 +1544,11 @@ void Spooler::read_ini_file()
     _mail_defaults.set( "cc"       ,            read_profile_string( _factory_ini, "spooler", "log_mail_cc"      ) );
     _mail_defaults.set( "bcc"      ,            read_profile_string( _factory_ini, "spooler", "log_mail_bcc"     ) );
     _mail_defaults.set( "subject"  ,            read_profile_string( _factory_ini, "spooler", "log_mail_subject" ) );
+    _mail_defaults.set("mail_on_error", _mail_on_error ? "1" : "0");  // Only for Java
+    _mail_defaults.set("mail_on_warning", _mail_on_warning ? "1" : "0");  // Only for Java
+    _mail_defaults.set("mail.smtp.port",        read_profile_string(_factory_ini, "smtp", "mail.smtp.port"    ));  // Only for Java
+    _mail_defaults.set("mail.smtp.user",        read_profile_string(_factory_ini, "smtp", "mail.smtp.user"    ));  // Only for Java
+    _mail_defaults.set("mail.smtp.password",    read_profile_string(_factory_ini, "smtp", "mail.smtp.password"));  // Only for Java
 
     _subprocess_own_process_group_default = read_profile_bool( _factory_ini, "spooler", "subprocess.own_process_group", _subprocess_own_process_group_default );
     _log_collect_within = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 ));
@@ -1641,6 +1657,8 @@ void Spooler::read_command_line_arguments()
             if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._orders_are_distributed = opt.set();
             else
             if( opt.with_value( "env"                    ) )  ;  // Bereits von spooler_main() erledigt
+            else
+            if( opt.with_value( "test-env"               ) )  ;  // Bereits von spooler_main() erledigt
             else
             if( opt.flag      ( "zschimmer"              ) )  _zschimmer_mode = opt.set();
             else
@@ -2131,7 +2149,7 @@ void Spooler::start()
 
 //--------------------------------------------------------------------------------Spooler::activate
 
-void Spooler::activate()
+void Spooler::activate(State state)
 {
     load_subsystems();
     activate_subsystems();
@@ -2145,7 +2163,7 @@ void Spooler::activate()
 
     execute_config_commands();                                                                          
 
-    set_state( s_running );
+    set_state(state);
     _java_subsystem->on_scheduler_activated();
 
     if (settings()->_pause_after_failure) {
@@ -2516,7 +2534,7 @@ void Spooler::run()
                 ( !_cluster_configuration._demand_exclusiveness  ||  _cluster && _cluster->has_exclusiveness() ) )
             {
                 _is_activated = true;
-                activate();
+                activate(_cluster && _cluster->is_paused() ? s_paused : s_running);
                 _assert_is_active = true;
             }
             else
@@ -3556,6 +3574,9 @@ void spooler_restart( Log* log, bool is_service )
                         int n = sysconf( _SC_OPEN_MAX );
                         for( int i = 3; i < n; i++ )  close(i);
                         ::sleep( 1 );     // Warten bis Aufrufer sich beendet hat
+                        if (static_ld_library_path_changed) {
+                            set_environment_variable("LD_LIBRARY_PATH", static_original_ld_library_path);
+                        }
                         execv( _argv[0], _argv ); 
                         fprintf( stderr, "Error in execv %s: %s\n", _argv[0], strerror(errno) ); 
                         _exit(99);
@@ -3937,14 +3958,28 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 else
                 if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
                 else
-                if( opt.with_value( "env"              ) )  
+                if( opt.with_value( "test-env"         ) )  // To allow the JVM test framework to change the process' environment variable LD_LIBRARY_PATH
                 {
                     string value = opt.value();
                     size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
                     string name = value.substr( 0, eq );
                     value = value.substr( eq + 1 );
                     set_environment_variable( name, value );
-
+                }
+                else
+                if( opt.with_value( "env"              ) )  
+                {
+                    string value = opt.value();
+                    size_t eq = value.find( '=' ); if( eq == string::npos )  z::throw_xc( "SCHEDULER-318", value );
+                    string name = value.substr( 0, eq );
+                    value = value.substr( eq + 1 );
+                    if (name == "LD_LIBRARY_PATH" && !scheduler::static_ld_library_path_changed) {
+                        scheduler::static_ld_library_path_changed = true;
+                        if (const char* value = getenv("LD_LIBRARY_PATH")) {
+                            scheduler::static_original_ld_library_path = value;  // This is the original environment variable
+                        }
+                    }
+                    set_environment_variable( name, value );
 #                   ifdef Z_HPUX
                         if( name == "LD_PRELOAD" )  scheduler::static_ld_preload = value;
 #                   endif
@@ -4150,6 +4185,13 @@ int sos_main( int argc, char** argv )
     _argc = argc;
     _argv = argv;
 
+    bool has_ld_library_path = false;
+    string ld_library_path;
+    if (const char* o = getenv("LD_LIBRARY_PATH")) {
+        ld_library_path = o;
+        has_ld_library_path = true;
+    }
+
     int ret = sos::spooler_main( argc, argv, "", (jobject)NULL );
 
 
@@ -4169,6 +4211,17 @@ int sos_main( int argc, char** argv )
 
 #   endif
 
+    if (has_ld_library_path) {
+        // Restore for multiple calls by integration tests
+        set_environment_variable("LD_LIBRARY_PATH", ld_library_path);
+    } else {
+        #if defined Z_WINDOWS
+            set_environment_variable("LD_LIBRARY_PATH", "");
+        #else
+            unsetenv("LD_LIBRARY_PATH");
+        #endif
+    }
+ 
     return ret;
 }
 

@@ -1,7 +1,6 @@
 package com.sos.scheduler.engine.agent.data.commands
 
 import com.sos.scheduler.engine.agent.data.commands.StartTask.Meta
-import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
 import spray.json.DefaultJsonProtocol._
 
 /**
@@ -9,11 +8,12 @@ import spray.json.DefaultJsonProtocol._
  */
 final case class StartApiTask(
   meta: Option[Meta],
+  logon: Option[StartTask.KeyLogon],
   javaOptions: String,
   javaClasspath: String)
 extends StartTask
 
 object StartApiTask {
   val SerialTypeName = "StartApiTask"
-  implicit val MyJsonFormat = jsonFormat3(apply)
+  implicit val MyJsonFormat = jsonFormat4(apply)
 }

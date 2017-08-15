@@ -50,8 +50,11 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
         KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderFinishedEvent` ⇒
-        val order: Order = eventSource.asInstanceOf[Order]
+        val order = eventSource.asInstanceOf[Order]
         KeyedEvent(OrderFinished(order.nodeId))(eventSource.asInstanceOf[Order].orderKey)
+
+      case `orderWaitingInTask` ⇒
+        KeyedEvent(OrderWaitingInTask)(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderNestedTouchedEvent` ⇒
         KeyedEvent(OrderNestedStarted)(eventSource.asInstanceOf[Order].orderKey)
@@ -70,11 +73,8 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
         KeyedEvent(OrderSetBack(order.nodeId))(order.orderKey)
 
       case `orderStepStartedEvent` ⇒
-        val order: Order = eventSource.asInstanceOf[Order]
+        val order = eventSource.asInstanceOf[Order]
         KeyedEvent(OrderStepStarted(order.nodeId, order.taskIdOption getOrElse TaskId.Null))(order.orderKey)
-
-      case o ⇒
-        sys.error(s"Not implemented cppEventCode=$o")
     }
   }
 
