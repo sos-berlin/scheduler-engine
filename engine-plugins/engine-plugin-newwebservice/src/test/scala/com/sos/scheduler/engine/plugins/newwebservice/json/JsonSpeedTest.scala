@@ -64,7 +64,7 @@ private object JsonSpeedTest {
 
   private def toYaml(orderOverviews: immutable.Seq[OrderOverview]): Unit = {
     val stopwatch = new Stopwatch
-    orderOverviews.toYamlString: String
+    orderOverviews.toYaml: String
     logger.info(stopwatch.itemsPerSecondString(n, "OrderOverview.toYamlString"))
   }
 }
