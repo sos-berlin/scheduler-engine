@@ -1,16 +1,19 @@
 package com.sos.scheduler.engine.agent.client.tests
 
 import com.sos.scheduler.engine.agent.Agent
-import com.sos.scheduler.engine.agent.client.AgentClient
+import com.sos.scheduler.engine.agent.client.{AgentClient, SimpleAgentClient}
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.configuration.Akkas.newActorSystem
 import com.sos.scheduler.engine.agent.data.commandresponses.{EmptyResponse, LoginResponse}
 import com.sos.scheduler.engine.agent.data.commands.{Login, Logout, NoOperation}
+import com.sos.scheduler.engine.base.generic.SecretString
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAny
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.data.agent.AgentAddress
+import com.sos.scheduler.engine.data.session.SessionToken
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
@@ -23,6 +26,18 @@ import spray.httpx.UnsuccessfulResponseException
   */
 @RunWith(classOf[JUnitRunner])
 final class LoginIT extends FreeSpec with BeforeAndAfterAll {
+
+  private lazy val agent = new Agent(AgentConfiguration.forTest())
+
+  override protected def beforeAll() = {
+    agent.start() await 5.s
+    super.beforeAll()
+  }
+
+  override protected def afterAll() = {
+    agent.close()
+    super.afterAll()
+  }
 
   "Login and Logout" in {
     val agentConf = AgentConfiguration.forTest()
@@ -55,4 +70,47 @@ final class LoginIT extends FreeSpec with BeforeAndAfterAll {
       }
     }
   }
+
+  "Use of discarded SessionToken is forbidden, clearSession" in {
+    // This applies to all commands, also Login and Logout.
+    // With Unauthorized or Forbidden, the client learns about the invalid session.
+    withClient { client ⇒
+      client.setSessionToken(SessionToken.apply(SecretString("DISCARDED")))
+      val throwable = intercept[UnsuccessfulResponseException] {
+        client.executeCommand(NoOperation) await 99.s
+      }
+      throwable.response.status should (equal(Unauthorized) or equal(Forbidden))
+      assert(AgentClient.sessionIsPossiblyLost(throwable))
+
+      client.clearSession()
+      client.executeCommand(Login) await 99.s
+      assert(client.hasSession)
+      client.executeCommand(Logout) await 99.s
+    }
+  }
+
+  "Second Login invalidates first Login" in {
+    withClient { client ⇒
+      val LoginResponse(aSessionToken) = client.executeCommand(Login) await 99.s
+      assert(client.hasSession)
+      client.executeCommand(Login) await 99.s
+      assert(client.hasSession)
+
+      withClient { otherClient ⇒
+        // Using old SessionToken is Unauthorized
+        otherClient.setSessionToken(aSessionToken)
+        val throwable = intercept[UnsuccessfulResponseException] {
+          otherClient.executeCommand(NoOperation) await 99.s
+        }
+        throwable.response.status should (equal(Unauthorized) or equal(Forbidden))
+        assert(AgentClient.sessionIsPossiblyLost(throwable))
+      }
+
+      client.executeCommand(Logout) await 99.s shouldEqual EmptyResponse
+      assert(!client.hasSession)
+    }
+  }
+
+  private def withClient(body: AgentClient ⇒ Unit): Unit =
+    autoClosing(SimpleAgentClient(AgentAddress(agent.localUri.toString)))(body)
 }

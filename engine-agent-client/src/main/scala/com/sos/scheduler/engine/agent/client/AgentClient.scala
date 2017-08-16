@@ -82,7 +82,7 @@ trait AgentClient {
           sessionTokenRef.compareAndSet(tokenOption, None)  // Changes nothing in case of a concurrent successful Login
           response
         }
-      case (_: DeleteFile | _: MoveFile | NoOperation | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
+      case (_: DeleteFile | Logout | _: MoveFile | NoOperation | _: SendProcessSignal | _: CloseTask | _: Terminate | AbortImmediately) ⇒
         unmarshallingPipeline[EmptyResponse.type](RequestTimeout).apply(Post(agentUris.command, command: Command))
     }
     response map { _.asInstanceOf[command.Response] } recover {
@@ -168,6 +168,10 @@ trait AgentClient {
 
   private[agent] final def setSessionToken(sessionToken: SessionToken): Unit =
     sessionTokenRef.set(Some(sessionToken))
+
+  final def clearSession(): Unit = {
+    sessionTokenRef.set(None)
+  }
 
   final def hasSession: Boolean =
     sessionTokenRef.get.nonEmpty
