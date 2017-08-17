@@ -51,7 +51,7 @@ trait SchedulerHtmlPage extends HtmlPage {
       tags2.title(pageTitle, " · ", schedulerOverview.schedulerId.string),
       css,
       javascript,
-      link(rel := "icon", "sizes".attr := "64x64", `type` := "image/vnd.microsoft.icon",
+      link(rel := "icon", attr("sizes") := "64x64", `type` := "image/vnd.microsoft.icon",
         href := (uris / "api/frontend/common/images/jobscheduler.ico").toString))
 
   private def css: Frag =
@@ -98,7 +98,7 @@ trait SchedulerHtmlPage extends HtmlPage {
         tbody(
           tr(
             td(rowspan := 2, paddingRight := 1.ex)(
-              img("width".attr := 40, "height".attr := 40, alt := "Rabbit",
+              img(attr("width") := 40, attr("height") := 40, alt := "Rabbit",
                 src := uris.uriString(RabbitPicturePath))),
             td(
               span(" JobScheduler \u00a0'", schedulerOverview.schedulerId.string, "'"))),
@@ -136,7 +136,7 @@ trait SchedulerHtmlPage extends HtmlPage {
 }
 
 private[simplegui] object SchedulerHtmlPage {
-  private lazy val nav = "nav".tag[String]
+  private lazy val nav = tag("nav")
   val OurZoneId = DefaultZoneId
 
   private val CssPaths = Vector(
