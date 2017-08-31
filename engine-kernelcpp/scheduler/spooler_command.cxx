@@ -9,6 +9,7 @@
 #include "spooler.h"
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
+#include "../kram/sleep.h"
 #include "../zschimmer/z_sql.h"
 #include "../zschimmer/z_gzip.h"
 
@@ -98,9 +99,9 @@ struct Remote_task_close_command_response : File_buffered_command_response
 //---------------------------Remote_task_close_command_response::Remote_task_close_command_response
 
 Remote_task_close_command_response::Remote_task_close_command_response( Api_process* p, Communication::Connection* c )
-: 
-    _zero_(this+1), 
-    _process(p), 
+:
+    _zero_(this+1),
+    _process(p),
     _connection(c),
     _hold_self(c? NULL : this)
 {
@@ -156,7 +157,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
 
                     double now = double_from_gmtime();
 
-                    if( !_trying_deleting_files_until )  
+                    if( !_trying_deleting_files_until )
                     {
                         string paths = join( ", ", local_api_process->undeleted_files() );
                         if( _process->log() )  _process->log()->debug( message_string( "SCHEDULER-876", paths ) );  // Nur beim ersten Mal
@@ -187,7 +188,7 @@ bool Remote_task_close_command_response::async_continue_( Continue_flags continu
 
         if( _state != s_responding )  break;
 
-        case s_responding: {    // XML-Anwort 
+        case s_responding: {    // XML-Anwort
             if (_connection) {
                 begin_standard_response();
                 _xml_writer.begin_element( "ok" );
@@ -259,7 +260,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 
     e.setAttribute( "code", x->code() );
     e.setAttribute( "text", remove_password( x->what() ) );
-    
+
     if( !empty( x->_pos.filename() ) )  e.setAttribute( "source", x->_pos.filename() );
     if( x->_pos._line >= 0           )  e.setAttribute( "line"  , as_string( x->_pos._line + 1 ) );
     if( x->_pos._col  >= 0           )  e.setAttribute( "col"   , as_string( x->_pos._col + 1  ) );
@@ -303,10 +304,10 @@ Xc_copy xc_from_dom_error( const xml::Element_ptr& element )
 
 //------------------------------------------------------------------------------how_what::Show_what
 
-Show_what::Show_what( Show_what_enum what ) 
-: 
-    _zero_(this+1), 
-    _what(what), 
+Show_what::Show_what( Show_what_enum what )
+:
+    _zero_(this+1),
+    _what(what),
     _max_orders(INT_MAX),
     _max_task_history(10),
     _folder_path( root_path )
@@ -417,12 +418,12 @@ void Show_what::set_what(const string& what) {
 
 //--------------------------------------------------------------------------------Show_what::set_subsystems
 void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsystems_string) {
-    
+
     vector<string> subsystems = vector_split(" +",subsystems_string);
     Z_FOR_EACH(vector<string>, subsystems, it)
     {
         string subsystem_name = *it;
-        Subsystem* s = scheduler._subsystem_register.get(subsystem_name); 
+        Subsystem* s = scheduler._subsystem_register.get(subsystem_name);
         _subsystem_set.insert(s);
     }
 
@@ -430,7 +431,7 @@ void Show_what::set_subsystems(const Scheduler& scheduler, const string& subsyst
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, const Host& client_host, Communication::Operation* cp) : 
+Command_processor::Command_processor( Spooler* spooler, Security::Level security_level, const Host& client_host, Communication::Operation* cp) :
     _zero_(this+1),
     _spooler(spooler),
     _communication_operation( cp ),
@@ -486,6 +487,16 @@ xml::Element_ptr Command_processor::execute_job_why( const xml::Element_ptr& ele
     return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> why_dom_element( _answer );
 }
 
+//-----------------------------------------------------------Command_processor::execute_test_delay
+
+xml::Element_ptr Command_processor::execute_test_delay( const xml::Element_ptr& element )
+{
+    if (_security_level < Security::seclev_all) z::throw_xc("SCHEDULER-121");
+    _spooler->log()->warn("Command <test_delay> is delaying execution ...");
+    sos_sleep(element.int_getAttribute("delay"));
+    return _answer.createElement( "ok" );
+}
+
 //----------------------------------------------------------Command_processor::execute_show_threads
 /*
 xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show )
@@ -535,7 +546,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         result = _answer.createElement( "log_categories" );
         result.setAttribute( "categories", static_log_categories.to_string() );
 
-        if( _spooler->_log_categories_reset_operation )  
+        if( _spooler->_log_categories_reset_operation )
             result.setAttribute( "reset_at", Time(_spooler->_log_categories_reset_operation->async_next_gmtime()).xml_value());
 
         Z_DEBUG_ONLY( result.setAttribute( "debug", static_log_categories.debug_string() ) );
@@ -570,7 +581,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
               //if( e->second._children_too_derived                  )  cat_element.setAttribute( "children_too_derived", "yes" );
                 if( e->second._has_default                           )  cat_element.setAttribute( "has_default", "yes" );
                 cat_element.setAttribute( "default", e->second._default_value? "yes" : "no" );
-            #endif            
+            #endif
 
             result.appendChild( cat_element );
         }
@@ -589,7 +600,7 @@ xml::Element_ptr Command_processor::execute_scheduler_log( const xml::Element_pt
         z::static_log_categories.set( element.getAttribute_mandatory( "category" ), element.bool_getAttribute( "value", true ) );
         result = _answer.createElement( "ok" );
     }
-    else 
+    else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
 
     return result;
@@ -633,7 +644,7 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
     {
         sos_static_ptr()->_licence->read_key( element.getAttribute_mandatory( "key" ) );
     }
-    else 
+    else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
 
     return _answer.createElement( "ok" );
@@ -643,7 +654,7 @@ xml::Element_ptr Command_processor::execute_licence( const xml::Element_ptr& ele
 
 /**
 * \brief JS-507: Informationen zu den Subsystemen in XML-Struktur ausgeben
-* \detail 
+* \detail
 * Diese Methode liefert Informationen zu den Subsystemen in einer XML-Struktur.
 *
 * \version 2.1.1 - 2010-05-28
@@ -674,7 +685,7 @@ xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& e
 
         return result;
     }
-    else 
+    else
         z::throw_xc( Z_FUNCTION, element.nodeName() );
 }
 
@@ -682,7 +693,7 @@ xml::Element_ptr Command_processor::execute_subsystem( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
 {
-    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" ); 
+    if( _security_level < Security::seclev_info )  z::throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
     if( show.is_set( show_all_ ) )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
@@ -702,7 +713,7 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
     string prev_str = element.getAttribute( "prev" );
 
     *next = prev_str == ""   ? ( *id == -1? -10 : 0 ) :
-            prev_str == "all"? -INT_MAX 
+            prev_str == "all"? -INT_MAX
                              : -as_int(prev_str);
 
     string next_str = element.getAttribute( "next" );
@@ -753,7 +764,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 
     int id, next;
     get_id_and_next( element, &id, &next );
-    
+
     ptr<Job> job = _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) );
 
     return job->read_history( _answer, id, next, show );
@@ -769,7 +780,7 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
 
     int id, next;
     get_id_and_prev( element, &id, &next );
-    
+
     Sos_ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( element.getAttribute( "job_chain" ) );
 
     return job_chain->read_order_history( _answer, id, next, show );
@@ -814,13 +825,13 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "let_run_terminate_and_restart" )  _spooler->cmd_let_run_terminate_and_restart();
         else
-        if( cmd == "abort_immediately"             )  _spooler->abort_immediately(); 
+        if( cmd == "abort_immediately"             )  _spooler->abort_immediately();
         else
         if( cmd == "abort_immediately_and_restart" )  _spooler->abort_immediately( true );
         else
             z::throw_xc( "SCHEDULER-105", cmd );
     }
-    
+
     return _answer.createElement( "ok" );
 }
 
@@ -847,7 +858,7 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
     int    timeout        = element. int_getAttribute( "timeout"                     , INT_MAX );
     string member_id      = element.     getAttribute( "cluster_member_id"           );
     bool   delete_dead    = element.bool_getAttribute( "delete_dead_entry"           , false );
-    string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::continue_exclusive_any 
+    string continue_excl  = element.bool_getAttribute( "continue_exclusive_operation" )? cluster::continue_exclusive_any
                                                                                        : "non_backup";
     if( member_id == ""  ||  member_id == _spooler->cluster_member_id() )
     {
@@ -887,9 +898,9 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
 
     Job_chain*    job_chain      = NULL;
     Absolute_path job_chain_path = Absolute_path( root_path, element.getAttribute( "job_chain" ) );
-    
+
     if( job_chain_path != "" )  job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-    
+
     return _spooler->job_subsystem()->job( Absolute_path( root_path, element.getAttribute( "job" ) ) ) -> dom_element( _answer, show, job_chain );
 }
 
@@ -903,7 +914,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     Absolute_path job_path = Absolute_path( root_path, element.getAttribute( "job" ) );
     string        cmd_name =                     element.getAttribute( "cmd" );
 
-    Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
+    Job::State_cmd cmd = cmd_name.empty()? Job::sc_none
                                          : Job::as_state_cmd( cmd_name );
 
     Job* job = _spooler->job_subsystem()->job( job_path );
@@ -916,7 +927,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
 
     if( cmd )  job->set_state_cmd( cmd );
-    
+
     return _answer.createElement( "ok" );
 }
 
@@ -931,7 +942,7 @@ xml::Element_ptr Command_processor::execute_show_cluster( const xml::Element_ptr
     if( _spooler->_cluster )  result.appendChild( _spooler->_cluster->dom_element( _answer, show ) );
 
     result.appendChild( _spooler->_supervisor->dom_element( _answer, show ) );
-    
+
     return result;
 }
 
@@ -966,7 +977,7 @@ xml::Element_ptr Command_processor::execute_check_folders( const xml::Element_pt
 
     if( _spooler->_supervisor_client )  _spooler->_supervisor_client->start_update_configuration();
     _spooler->folder_subsystem()->handle_folders();
-    
+
     return _answer.createElement( "ok" );
 }
 
@@ -989,7 +1000,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
     }
 
     _spooler->job_subsystem()->job( Absolute_path( root_path, job_path ) )->kill_task( id, immediately, timeout);
-    
+
     return _answer.createElement( "ok" );
 }
 
@@ -1005,7 +1016,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     string after_str       = element.getAttribute( "after" );
     string at_str          = element.getAttribute( "at"    );
     string web_service_name= element.getAttribute( "web_service" );
-    bool   force           = element.bool_getAttribute( "force", true ); 
+    bool   force           = element.bool_getAttribute( "force", true );
 
     Time start_at;
 
@@ -1028,7 +1039,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     ptr<Task> task = _spooler->job_subsystem()->job(Absolute_path(root_path, job_path))->start_task(params, environment, start_at, force, task_name, web_service_name);
 
-    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    xml::Element_ptr result = _answer.createElement( "ok" );
     if (task)  result.appendChild( task->dom_element( _answer, Show_what() ) );
     return result;
 }
@@ -1065,10 +1076,10 @@ xml::Element_ptr Command_processor::execute_remote_scheduler_start_remote_task( 
     } else {
         _spooler->register_api_process(process);
     }
-    
+
     if (_log) _log->info(message_string("SCHEDULER-848", process->pid(), api_process_configuration._controller_address.as_string()));
 
-    xml::Element_ptr result = _answer.createElement( "process" ); 
+    xml::Element_ptr result = _answer.createElement( "process" );
     result.setAttribute( "process_id", process->process_id() );
     if( process->pid() )  result.setAttribute( "pid", process->pid() );
     Z_LOG2("Z-REMOTE-118", Z_FUNCTION << " result=" << result.xml_string() << "\n");
@@ -1199,23 +1210,23 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     if( history_id == "" )
     {
         Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-        
+
         order = job_chain->order_or_null( id );
 
-        if( !order  &&  job_chain->is_distributed() ) 
+        if( !order  &&  job_chain->is_distributed() )
             order = _spooler->order_subsystem()->try_load_distributed_order_from_database( (Transaction*)NULL, job_chain_path, id, Order_subsystem::lo_allow_occupied);
     }
 
     if( !order  &&  _spooler->db()->opened() )
     {
         Read_transaction ta ( _spooler->db() );
-    
+
         if( history_id == "" )
         {
             Any_file sel = ta.open_result_set(
                            " select max(`history_id`) as history_id_max "
                            "  from " + _spooler->db()->_order_history_tablename +
-                           "  where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) + 
+                           "  where `spooler_id`=" + sql::quoted( _spooler->id_for_db() ) +
                             " and `job_chain`="   + sql::quoted( job_chain_path.without_slash() ) +
                             " and `order_id`="    + sql::quoted( id_string ),
                             Z_FUNCTION );
@@ -1223,17 +1234,17 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
             if( !sel.eof() )  history_id = sel.get_record().as_string( "history_id_max" );
         }
 
-        if( history_id != "" )  
+        if( history_id != "" )
         {
             S select_sql;
             select_sql <<  "select `order_id`, `start_time`, `title`, `state`, `state_text`"
                            "  from " << _spooler->db()->_order_history_tablename <<
                            "  where `history_id`=" << history_id;
-            if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string ); 
+            if( id_string != "" )  select_sql << " and `order_id`=" << sql::quoted( id_string );
 
             Any_file sel = ta.open_result_set( S() << select_sql, Z_FUNCTION );
 
-            if( !sel.eof() ) 
+            if( !sel.eof() )
             {
                 Record record = sel.get_record();
 
@@ -1248,14 +1259,14 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
                 if( show.is_set( show_log ) )
                 {
-                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->db()->db_name() << " -table=" + _spooler->db()->_order_history_tablename << " -blob=log" 
+                    log = file_as_string( S() << "-binary " GZIP_AUTO << _spooler->db()->db_name() << " -table=" + _spooler->db()->_order_history_tablename << " -blob=log"
                                              " where `history_id`=" << history_id );
                 }
 
                 /* Payload steht nicht in der Historie
                 if( show & show_payload )
                 {
-                    string payload = file_as_string( GZIP_AUTO + _spooler->db()->db_name() + " -table=" + db()->_order_history_tablename + " -clob=\"PAYLOAD\"" 
+                    string payload = file_as_string( GZIP_AUTO + _spooler->db()->db_name() + " -table=" + db()->_order_history_tablename + " -clob=\"PAYLOAD\""
                                                      " where \"HISTORY_ID\"=" + history_id );
                     if( payload != "" )  order->set_payload( payload );
                 }
@@ -1289,13 +1300,13 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
         if( replace )  order->place_or_replace_in_job_chain( job_chain );
                  else  order->place_in_job_chain( job_chain );
     //}
-    //else 
+    //else
     //{
     //    order->add_to_job( job_name );
     //}
 
 
-    xml::Element_ptr result = _answer.createElement( "ok" ); 
+    xml::Element_ptr result = _answer.createElement( "ok" );
     result.appendChild( order->dom_element( _answer, Show_what() ) );
     return result;
 }
@@ -1314,7 +1325,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     string        at             = modify_order_element.getAttribute( "at"        );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-    ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id ) 
+    ptr<Order> order = job_chain->is_distributed()? job_chain->order_or_null( id )
                                                   : job_chain->order( id );
     if (!order  &&  job_chain->is_distributed()) {
         string occupying_cluster_member_id;
@@ -1323,8 +1334,8 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
             order = _spooler->order_subsystem()->load_distributed_order_from_database((Transaction*)NULL, job_chain_path, id, (Order_subsystem::Load_order_flags)0, &occupying_cluster_member_id);  // Exception, wenn von einem Scheduler belegt
         } catch (const Xc& x) {
             if (string(x.code()) == "SCHEDULER-379") {  // Order is occupied? (in cluster)
-                _spooler->_cluster->post_command_to_cluster_member(modify_order_element, occupying_cluster_member_id); 
-            } 
+                _spooler->_cluster->post_command_to_cluster_member(modify_order_element, occupying_cluster_member_id);
+            }
             throw;  // Fehler trotzdem melden
         }
     }
@@ -1398,7 +1409,7 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
     Order::Id     id             = modify_order_element.getAttribute( "order"     );
 
     ptr<Job_chain> job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
-    ptr<Order>     order     = job_chain->is_distributed()? job_chain->order_or_null( id ) 
+    ptr<Order>     order     = job_chain->is_distributed()? job_chain->order_or_null( id )
                                                           : job_chain->order( id );
 
     if( order )
@@ -1416,18 +1427,18 @@ xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr
 
             delete_stmt.add_where( _spooler->order_subsystem()->order_db_where_condition( job_chain_path, id.as_string() ) );
           //delete_stmt.and_where_condition( "occupying_cluster_member_id", sql::null_value );
-            
+
             ta.execute( delete_stmt, Z_FUNCTION );
             ok = ta.record_count() == 1;
-            
+
             //if( ta.record_count() == 0 )
             //{
             //    // Sollte Exception auslösen: nicht da oder belegt
             //    _spooler->order_subsystem()->load_distributed_order_from_database( job_chain_path, id );
-            //    
+            //
             //    // Der Auftrag ist gerade freigegeben oder hinzugefügt worden
             //    delete_stmt.remove_where_condition( "occupying_cluster_member_id" );
-            //    ta.execute_single( delete_stmt, Z_FUNCTION ); 
+            //    ta.execute_single( delete_stmt, Z_FUNCTION );
             //}
 
             ta.commit( Z_FUNCTION );
@@ -1481,7 +1492,7 @@ xml::Element_ptr Command_processor::execute_service_request( const xml::Element_
     order->set_state( Web_service::forwarding_job_chain_forward_state );
     order->set_payload(Variant(service_request_element.xml_string()));
     order->place_in_job_chain( _spooler->root_folder()->job_chain_folder()->job_chain( Web_service::forwarding_job_chain_name ) );
-    
+
     return _answer.createElement( "ok" );
 }
 
@@ -1552,7 +1563,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 {
     xml::Element_ptr result;
 
-    if( _log ) 
+    if( _log )
     {
         Message_string m ( "SCHEDULER-965" );
         //m.set_max_insertion_length( INT_MAX );
@@ -1564,7 +1575,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     show.set_dom(*_spooler, element);
 
     string element_name = element.nodeName();
-    
+
     if( string_begins_with( element_name, "job_chain_node." ) )
     {
        result = execute_job_chain_node_command(element,show);
@@ -1610,8 +1621,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( string_begins_with( element_name, "supervisor." ) )  _response = _spooler->_supervisor->execute_xml( element, this );
     else
-    if( element.nodeName_is( "show_state"       ) 
-     || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );  
+    if( element.nodeName_is( "show_state"       )
+     || element.nodeName_is( "s"                ) )  result = execute_show_state( element, show );
     else
     if( element.nodeName_is( "show_calendar"    ) )  result = execute_show_calendar( element, show );
     else
@@ -1669,7 +1680,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "param"            ) ) { _spooler->_variables->set_variable( element );  result = _answer.createElement( "ok" ); }
     else
     if( element.nodeName_is( "param.get"        ) ) { Com_variable* v = _spooler->_variables->variable_or_null( element.getAttribute( "name" ) );
-                                                      result = v? v->dom_element( _answer, "param" ) 
+                                                      result = v? v->dom_element( _answer, "param" )
                                                                 : _answer.createElement( "ok" ); }
     else
     if( element.nodeName_is( "params"           ) ) { _spooler->_variables->set_dom( element );  result = _answer.createElement( "ok" ); }
@@ -1689,6 +1700,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "events.get" ) )  result = execute_get_events( element );   // Nicht offiziell, nur Test
     else
     if( element.nodeName_is( "job.why"          ) )  result = execute_job_why( element );
+    else
+    if( element.nodeName_is( "test_delay"       ) )  result = execute_test_delay(element);
     else
         result = execute_command_in_java(element);
 
@@ -1710,7 +1723,7 @@ string xml_as_string( const xml::Document_ptr& document)
 {
     string result;
 
-    try 
+    try
     {
         result = document.xml_string();
         //if( indent_string != "" && result.find('\r') == string::npos)  result = replace_regex( result, "\n", "\r\n" );      // Für Windows-telnet
@@ -1794,14 +1807,14 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                         Absolute_path job_chain_path = Absolute_path( root_path, http_request->parameter( "job_chain" ) );
                         string        order_id       = http_request->parameter( "order" );
                         string        history_id     = http_request->parameter( "history_id" );
-                        
+
 
                         if( history_id == "" )
                         {
                             Job_chain* job_chain = _spooler->order_subsystem()->job_chain( job_chain_path );
                             ptr<Order> order     = job_chain->order_or_null( order_id );
 
-                            if( !order  &&  job_chain->is_distributed() ) 
+                            if( !order  &&  job_chain->is_distributed() )
                             {
                                 order = _spooler->order_subsystem()->try_load_distributed_order_from_database((Transaction*)NULL, job_chain_path, order_id, Order_subsystem::lo_allow_occupied);
 
@@ -1828,7 +1841,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                                 S select_sql;
                                 select_sql << "select max( `history_id` ) as history_id_max "
                                                "  from " + _spooler->db()->_order_history_tablename +
-                                               "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) + 
+                                               "  where `spooler_id`=" << sql::quoted( _spooler->id_for_db() ) +
                                                  " and `job_chain`="   << sql::quoted( job_chain_path.without_slash() ) +
                                                  " and `order_id`="    << sql::quoted( order_id );
                                 if( order_id != "" )  select_sql << " and `order_id`=" << sql::quoted( order_id );
@@ -1843,7 +1856,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
                             if( history_id != "" )
                             {
-                                string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->db()->db_name() + " -table=" + _spooler->db()->_order_history_tablename + " -blob=\"LOG\"" 
+                                string log_text = file_as_string( "-binary " GZIP_AUTO + _spooler->db()->db_name() + " -table=" + _spooler->db()->_order_history_tablename + " -blob=\"LOG\""
                                                                   " where `history_id`=" + history_id );
                                 string title = "Auftrag " + order_id;
                                 //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
@@ -1871,7 +1884,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
                 if( string_ends_with( path, "/job_description?" ) )
                 {
                     Job* job = _spooler->job_subsystem()->job( Absolute_path( root_path, http_request->parameter( "job" ) ) );
-                    
+
                     string description = job->description();
                     if (description == "") throw http::Http_exception( http::status_404_bad_request, "Der Job hat keine Beschreibung" );
 
@@ -1937,8 +1950,8 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 */
 
                 string extension = extension_of_path( filename );
-             
-                if( extension == "html"  
+
+                if( extension == "html"
                  || extension == "htm"  )  response_content_type = "text/html";
                 else
                 if( extension == "xml"  )  response_content_type = "text/xml";
@@ -1988,7 +2001,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
         _spooler->log()->debug( message_string( "SCHEDULER-311", http_request->http_method() + " " + path, x ) );
         http_response->set_status( http::status_404_bad_request, x.what() );
         http_response->set_ready();
-        //throw http::Http_exception( http::status_404_bad_request, x.what() );  
+        //throw http::Http_exception( http::status_404_bad_request, x.what() );
     }
 }
 
@@ -1996,7 +2009,7 @@ void Command_processor::execute_http( http::Request* http_request, http::Respons
 
 ptr<Command_response> Command_processor::response_execute( const string& xml_text_par, bool is_bytes, const string& indent_string )
 {
-    try 
+    try
     {
         _error = NULL;
 
@@ -2019,7 +2032,7 @@ ptr<Command_response> Command_processor::response_execute( const string& xml_tex
         ptr<Synchronous_command_response> r = Z_NEW( Synchronous_command_response( _answer.xml_bytes(string_encoding, indent_string != "") ) );
         result = +r;
     }
-    
+
     return +result;
 }
 
@@ -2041,10 +2054,10 @@ string Command_processor::execute_xml_bytes(const string& xml_text_par, const st
 
 xml::Document_ptr Command_processor::execute( const xml::Document_ptr& command_document )
 {
-    try 
+    try
     {
         _error = NULL;
-        execute_2( command_document ); 
+        execute_2( command_document );
     }
     catch( const Xc& x        ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
     catch( const exception& x ) { append_error_to_answer( x );  if( _log ) _log->error( x.what() ); }
@@ -2105,14 +2118,14 @@ xml::Document_ptr Command_processor::dom_from_xml( const string& xml_text, bool 
 
 void Command_processor::execute_2( const xml::Document_ptr& command_doc )
 {
-    try 
+    try
     {
         if( !_dont_log_command )  {
             string line = replace_regex(command_doc.xml_string(), "\\?\\>\n", "?>", 1);
             string nl = !line.empty() && *line.rbegin() == '\n' ? "" : "\n";
             Z_LOG2( "scheduler", "Execute " << line << nl);
         }
-        if( _spooler->_validate_xml  &&  _validate )  
+        if( _spooler->_validate_xml  &&  _validate )
         {
             _spooler->_schema.validate( command_doc );
         }
@@ -2131,9 +2144,9 @@ void Command_processor::execute_2( const xml::Element_ptr& element )
 {
     xml::Element_ptr e = element;
 
-    if( e.nodeName_is( "spooler" ) ) 
+    if( e.nodeName_is( "spooler" ) )
     {
-        xml::Node_ptr n = e.firstChild(); 
+        xml::Node_ptr n = e.firstChild();
         while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
         e = n;
     }
@@ -2146,17 +2159,17 @@ void Command_processor::execute_2( const xml::Element_ptr& element )
         }
         else
         {
-            xml::Element_ptr response_element = execute_command( e );  
-            
+            xml::Element_ptr response_element = execute_command( e );
+
             if( !response_element  &&  !_response )  z::throw_xc( "SCHEDULER-353", e.nodeName() );
         }
-        
+
         if( e != element )  // In einer Verschachtelung von <spooler>?
         {
-            xml::Node_ptr n = e.nextSibling(); 
+            xml::Node_ptr n = e.nextSibling();
             while( n  &&  n.nodeType() != xml::ELEMENT_NODE )  n = n.nextSibling();
             e = n;
-            if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() ); 
+            if( e )  z::throw_xc( "SCHEDULER-319", e.nodeName() );
         }
     }
 }
@@ -2191,7 +2204,7 @@ void Command_processor::begin_answer()
 void Command_processor::append_error_to_answer( const exception& x )
 {
     _error = x;
-    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() )
         append_error_element( _answer.documentElement().firstChild(), x );
 }
 
@@ -2200,7 +2213,7 @@ void Command_processor::append_error_to_answer( const exception& x )
 void Command_processor::append_error_to_answer( const Xc& x )
 {
     _error = x;
-    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() ) 
+    if( _answer  &&  _answer.documentElement()  &&  _answer.documentElement().firstChild() )
         append_error_element( _answer.documentElement().firstChild(), x );
 }
 
@@ -2240,21 +2253,21 @@ void Command_response::end_standard_response()
 //-----------------------------------File_buffered_command_response::File_buffered_command_response
 
 File_buffered_command_response::File_buffered_command_response()
-: 
-    _zero_(this+1), 
+:
+    _zero_(this+1),
     _buffer_size(recommended_response_block_size)
 {
     _buffer.reserve( _buffer_size );
 }
 
 //----------------------------------File_buffered_command_response::~File_buffered_command_response
-    
+
 File_buffered_command_response::~File_buffered_command_response()
 {
 }
 
 //------------------------------------------------------------File_buffered_command_response::close
-                                                                                                
+
 void File_buffered_command_response::close()
 {
     if( _state == s_ready  &&  _buffer == "" )  _state = s_finished;
@@ -2305,14 +2318,14 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
 
     if( _state == s_congested )
     {
-        if( !_congestion_file.opened() )  
+        if( !_congestion_file.opened() )
         {
             _congestion_file.open_temporary( File::open_unlink );
             _congestion_file.print( _buffer );
             _congestion_file_write_position += _buffer.length();
             _buffer = "";
         }
-        
+
         if( _last_seek_for_read )
         {
             _congestion_file.seek( _congestion_file_write_position );
@@ -2320,14 +2333,14 @@ void File_buffered_command_response::write( const io::Char_sequence& seq )
         }
 
         _congestion_file.print( seq );
-        
+
         _congestion_file_write_position += seq.length();
     }
 }
 
 //----------------------------------------------------File_buffered_command_response::complete_text
 
-string File_buffered_command_response::complete_text() 
+string File_buffered_command_response::complete_text()
 {
     if (_state == s_congested)
         return _congestion_file.read_all();
@@ -2345,7 +2358,7 @@ string File_buffered_command_response::get_part()
     {
         case s_ready:
         {
-            if( _buffer == "" ) 
+            if( _buffer == "" )
             {
                 // Leeren String zurückgeben bedeutet, dass noch keine neuen Daten da sind
             }
@@ -2369,7 +2382,7 @@ string File_buffered_command_response::get_part()
             result = _congestion_file.read_string( _buffer_size );
 
             _congestion_file_read_position += result.length();
-            
+
             if( _congestion_file_read_position == _congestion_file_write_position )
             {
                 _congestion_file.seek( 0 );
