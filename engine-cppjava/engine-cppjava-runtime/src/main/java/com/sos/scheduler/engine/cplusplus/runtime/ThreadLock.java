@@ -1,16 +1,13 @@
 package com.sos.scheduler.engine.cplusplus.runtime;
 
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 
@@ -19,7 +16,6 @@ public class ThreadLock {
     private static final Logger logger = LoggerFactory.getLogger(ThreadLock.class);
 
     private final SimpleLock myLock = new LoggingLock();
-//    private final AtomicInteger counter = new AtomicInteger(0);
 
     public final void lock() {
         myLock.lock();
@@ -37,7 +33,7 @@ public class ThreadLock {
         return myLock.toString();
     }
 
-    private class SimpleLock {
+    private static class SimpleLock {
         private final ReentrantLock lock = new ReentrantLock();
 
         void lock() {
@@ -57,8 +53,9 @@ public class ThreadLock {
 
         protected void onLocked() {}
 
-        void unlock() {
+        boolean unlock() {
             lock.unlock();
+            return !lock.isHeldByCurrentThread();
         }
 
         @Override public String toString() {
@@ -67,16 +64,15 @@ public class ThreadLock {
     }
 
 
-    private final class LoggingLock extends SimpleLock {
-        @Nullable private final AtomicReference<Thread> lockingThread = new AtomicReference<Thread>();  // Ungenau wegen race condition
-//        private Locked locked = null;
-//        private final WatchdogThread watchdogThread = new WatchdogThread(this);
+    private static final class LoggingLock extends SimpleLock {
+        private final AtomicReference<Thread> lockingThread = new AtomicReference<>();  // Ungenau wegen race condition
 
         @Override void lock() {
             long t = currentTimeMillis();
             boolean locked = tryLock(logTimeoutMillis, TimeUnit.MILLISECONDS);
             if (!locked) {
-                logger.warn("Waiting for Scheduler ThreadLock, currently acquired by "+lockingThreadString());
+                logger.warn("Waiting for Scheduler ThreadLock, currently acquired by "+lockingThreadString() + "\n" +
+                    "Own stack:\n" + stackTraceToString(currentThread()));
                 super.lock();
                 logger.warn("Scheduler ThreadLock acquired after waiting {}ms", currentTimeMillis() - t);
             }
@@ -84,58 +80,31 @@ public class ThreadLock {
 
         private String lockingThreadString() {
             Thread t = lockingThread.get();
-            if (t == null) {
-                return "(unknown)";
-            } else {
-                StringWriter stringWriter = new StringWriter();
-                PrintWriter w = new PrintWriter(stringWriter);
-                w.print(t);
-                w.print(", current stack trace:\n");
-                Exception x = new Exception() {};
-                x.setStackTrace(t.getStackTrace());
-                x.printStackTrace(w);
-                w.flush();
-                return stringWriter.toString();
-            }
+            return t == null? "(unknown)" : stackTraceToString(t);
         }
 
-        protected void onLocked() {
+        @Override protected void onLocked() {
             lockingThread.set(currentThread());
-            //locked = new Locked(counter.addAndGet(1));
         }
 
-        @Override void unlock() {
-            lockingThread.set(null);
-            super.unlock();
+        @Override boolean unlock() {
+            boolean unlocked = super.unlock();
+            if (unlocked) {  // Not in case of nested calls to lock
+                lockingThread.compareAndSet(currentThread(), null);
+            }
+            return unlocked;
         }
+    }
 
-//        private class Locked {
-//            private final int id;
-//            private final long since;
-//
-//            private Locked(int id) {
-//                this.id = id;
-//                since = currentTimeMillis();
-//            }
-//        }
-
-//        private final class WatchdogThread extends Thread {
-//            private final LoggingLock loggingLock;
-//
-//            private WatchdogThread(LoggingLock l) {
-//                loggingLock = l;
-//            }
-//
-//            @Override public void run() {
-//                try {
-//                    while (true) {
-//                        sleep(1000);
-//                        Locked locked = loggingLock.locked;
-//                        if (locked != null && locked.since + logTimeoutMillis > currentTimeMillis())
-//                            logger.warn("Scheduler ThreadLock acquired since {}ms by {}", currentTimeMillis() - locked.since, loggingLock.callersData);
-//                    }
-//                } catch (InterruptedException ignore) {}
-//            }
-//        }
+    private static String stackTraceToString(Thread t) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter w = new PrintWriter(stringWriter);
+        w.print(t);
+        w.print(", current stack trace:\n");
+        Exception x = new Exception() {};
+        x.setStackTrace(t.getStackTrace());
+        x.printStackTrace(w);
+        w.flush();
+        return stringWriter.toString();
     }
 }
