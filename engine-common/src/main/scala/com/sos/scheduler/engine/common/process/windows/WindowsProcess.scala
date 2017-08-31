@@ -18,6 +18,7 @@ import com.sun.jna.{Structure, WString}
 import java.io.OutputStream
 import java.lang.Math.{max, min}
 import java.lang.ProcessBuilder.Redirect
+import java.lang.ProcessBuilder.Redirect.Type.{INHERIT, PIPE, WRITE}
 import java.nio.charset.Charset
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -128,44 +129,7 @@ object WindowsProcess {
   private val logger = Logger(getClass)
 
   def start(processBuilder: ProcessBuilder, logon: Option[Logon] = None): WindowsProcess = {
-    def logonUser(logon: Logon): LoggedOn = {
-      import logon.{credentials, user, withUserProfile}
-      logger.debug(s"LogonUser '$user'")
-      val userToken = handleCall("LogonUser")(
-        advapi32.LogonUser(user.string, null, credentials.password.string, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, _))
-      LoggedOn(
-        userToken,
-        profileHandle =
-          if (withUserProfile)
-            loadUserProfile(userToken, user)
-          else
-            INVALID_HANDLE_VALUE)
-    }
-
-    def redirectToHandle(stdFile: Int, redirect: Redirect): Redirection =
-      redirect.`type` match {
-        case Redirect.Type.INHERIT ⇒
-          new Redirection(kernel32.GetStdHandle(stdFile), false, INVALID_HANDLE_VALUE)
-
-        case Redirect.Type.PIPE ⇒
-          stdFile match {
-            case STD_INPUT_HANDLE ⇒
-              Redirection.forStdinPipe
-
-            case STD_OUTPUT_HANDLE | STD_ERROR_HANDLE ⇒
-              new Redirection(new HANDLE, false, INVALID_HANDLE_VALUE)  // We do not support the default PIPE, so we return empty values
-          }
-
-        case Redirect.Type.WRITE ⇒
-          Redirection.forDirectFile(redirect.file)
-
-        case t ⇒ throw new IllegalArgumentException(s"Unsupported Redirect $t")
-    }
-
-    val loggedOn = logon match {
-      case Some(o) ⇒ logonUser(o)
-      case _ ⇒ LoggedOn(openProcessToken(kernel32.GetCurrentProcess, TOKEN_ALL_ACCESS))
-    }
+    val loggedOn = LoggedOn.logon(logon)
     val inRedirection = redirectToHandle(STD_INPUT_HANDLE, processBuilder.redirectInput)
     val outRedirection = redirectToHandle(STD_OUTPUT_HANDLE, processBuilder.redirectOutput)
     val errRedirection = redirectToHandle(STD_ERROR_HANDLE, processBuilder.redirectError)
@@ -178,15 +142,23 @@ object WindowsProcess {
     val application = processBuilder.command().head
     val commandLine = argsToCommandLine(processBuilder.command.toIndexedSeq)
     val creationFlags = CREATE_UNICODE_ENVIRONMENT
-    val env = getEnvironmentBlock(usersEnvironment(loggedOn.userToken) ++ processBuilder.environment)
+    val env = logon match {
+      case Some(o) if o.withUserProfile ⇒
+        usersEnvironment(loggedOn.userToken)  // Only reliable if user profile has been loaded (see JS-1725)
+      case Some(o) ⇒
+        usersEnvironment(null) ++  // Default system environment
+          Some("USERNAME" → o.user.withoutDomain) ++ // Default system environment contains default USERNAME and USERDOMAIN. We change this..
+          (o.user.domain orElse sys.env.get("USERDOMAIN") map "USERDOMAIN".→)
+      case None ⇒
+        sys.env
+    }
     val directory = windowsDirectory.getRoot.toString  // Need a readable directory, ignoring ProcessBuilder#directory
     val processInformation = new PROCESS_INFORMATION
     call("CreateProcessAsUser", application, commandLine, s"directory=$directory") {
-      advapi32.CreateProcessAsUser(loggedOn.userToken,
-        application, commandLine,
-        null: SECURITY_ATTRIBUTES, null: SECURITY_ATTRIBUTES,
-        /*inheritHandles=*/true,
-        creationFlags, env, directory, startupInfo, processInformation)
+      advapi32.CreateProcessAsUser(loggedOn.userToken, application, commandLine,
+        null: SECURITY_ATTRIBUTES, null: SECURITY_ATTRIBUTES, /*inheritHandles=*/true, creationFlags,
+        getEnvironmentBlock(env ++ processBuilder.environment),
+        directory, startupInfo, processInformation)
     }
     inRedirection.releaseStartupInfoHandle()
     outRedirection.releaseStartupInfoHandle()
@@ -196,7 +168,7 @@ object WindowsProcess {
     new WindowsProcess(processInformation, inRedirection, outRedirection, errRedirection, loggedOn)
   }
 
-  private case class LoggedOn(userToken: HANDLE, profileHandle: HANDLE = INVALID_HANDLE_VALUE)
+  private class LoggedOn(val userToken: HANDLE, val profileHandle: HANDLE = INVALID_HANDLE_VALUE)
   extends AutoCloseable {
     private val closed = new AtomicBoolean
 
@@ -212,6 +184,28 @@ object WindowsProcess {
     }
   }
 
+  private object LoggedOn {
+    def logon(logonOption: Option[Logon]): LoggedOn =
+      logonOption match {
+        case Some(o) ⇒ logon(o)
+        case None ⇒ new LoggedOn(openProcessToken(kernel32.GetCurrentProcess, TOKEN_ALL_ACCESS))
+      }
+
+    private def logon(logon: Logon): LoggedOn = {
+      import logon.{credentials, user, withUserProfile}
+      logger.debug(s"LogonUser '$user'")
+      val userToken = handleCall("LogonUser")(
+        advapi32.LogonUser(user.string, null, credentials.password.string, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, _))
+      new LoggedOn(
+        userToken,
+        profileHandle =
+          if (withUserProfile)
+            loadUserProfile(userToken, user)
+          else
+            INVALID_HANDLE_VALUE)
+    }
+  }
+
   private def loadUserProfile(userToken: HANDLE, user: WindowsUserName): HANDLE = {
     val profileInfo = Structure.newInstance(classOf[MyUserenv.PROFILEINFO]).asInstanceOf[MyUserenv.PROFILEINFO]
     profileInfo.dwSize = profileInfo.size
@@ -222,6 +216,26 @@ object WindowsProcess {
     }
     profileInfo.read()
     profileInfo.hProfile
+  }
+
+  private def redirectToHandle(stdFile: Int, redirect: Redirect): Redirection =
+    redirect.`type` match {
+      case INHERIT ⇒
+        new Redirection(kernel32.GetStdHandle(stdFile), false, INVALID_HANDLE_VALUE)
+
+      case PIPE ⇒
+        stdFile match {
+          case STD_INPUT_HANDLE ⇒
+            Redirection.forStdinPipe
+
+          case STD_OUTPUT_HANDLE | STD_ERROR_HANDLE ⇒
+            new Redirection(new HANDLE, false, INVALID_HANDLE_VALUE)  // We do not support the default PIPE, so we return empty values
+        }
+
+      case WRITE ⇒
+        Redirection.forDirectFile(redirect.file)
+
+      case t ⇒ throw new IllegalArgumentException(s"Unsupported Redirect $t")
   }
 
   private def getExitCodeProcess(hProcess: HANDLE): Int = {
