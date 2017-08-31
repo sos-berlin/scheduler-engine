@@ -27,7 +27,7 @@ final class ExceptionsTest extends FreeSpec {
     }
     assert(i == 5)
     val duration = Instant.now() - t
-    assert(duration >= 40.ms && duration <= 200.ms)
+    assert(duration >= 40.ms && duration <= 500.ms)
     intercept[IOException] {
       repeatUntilNoException(100.ms, 10.ms) { throw new IOException }
     }
