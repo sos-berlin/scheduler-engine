@@ -60,9 +60,10 @@ private class TestEnvironmentFiles(
 
   private def urlToDestinationRelativePath(u: URL): String = {
     def packagePath = s"/${configPackageResource.path stripSuffix "/"}/"
-    val relativePath = u.getPath lastIndexOf packagePath match {
+    val path = u.getPath.replace("%20", " ")
+    val relativePath = path lastIndexOf packagePath match {
       case -1 ⇒ throw new RuntimeException(s"'$u' does not contain $packagePath")
-      case i ⇒ u.getPath.substring(i + packagePath.length)
+      case i ⇒ path.substring(i + packagePath.length)
     }
     renameFile.applyOrElse(relativePath, identity[String])
   }

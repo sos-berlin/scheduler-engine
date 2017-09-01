@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <run_time>
+        <date date="2030-12-31">
+            <period single_start="12:00:00"/>
+        </date>
+    </run_time>
+</order>
