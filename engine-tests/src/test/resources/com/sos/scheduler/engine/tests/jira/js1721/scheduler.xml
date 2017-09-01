@@ -1,16 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
->
+<?xml version="1.0" encoding="UTF-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <config>
-        <params>
-            <param name="scheduler.cluster.restart_after_emergency_abort" value="false"/>
-        </params>
         <plugins>
-            <plugin java_class="com.sos.scheduler.engine.plugins.jetty.JettyPlugin">
-                <plugin.config port="TEST"/>
-            </plugin>
-            <plugin java_class="com.sos.scheduler.engine.plugins.webservice.WebServicePlugin"/>
+            <plugin java_class="com.sos.scheduler.engine.plugins.newwebservice.NewWebServicePlugin"/>
         </plugins>
     </config>
 </spooler>
