@@ -36,7 +36,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
   private lazy val httpPort = findRandomFreeTcpPort()
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-http-port=127.0.0.1:$httpPort"))
-  private val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
+  private lazy val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   private lazy val eventIdGenerator = instance[EventIdGenerator]
   private lazy val beforeTestEventId = eventIdGenerator.lastUsedEventId
 
