@@ -22,7 +22,7 @@ xml::Element_ptr                create_error_element        ( const xml::Documen
 enum Show_what_enum
 {
     show_standard           = 0,
-    
+
     show_task_queue         = 0x01,     // Task Queue zeigen
     show_job_orders         = 0x02,     // Jede Order in der Order_queue zeigen, nur unter <job>
     show_job_chain_orders   = 0x04,     // Jede Order in der Order_queue zeigen, nur unter <job_chain>
@@ -58,29 +58,29 @@ enum Show_what_enum
     show_for_database_only  = 0x80000000,   // XML-Element nur für Datenbank
 };
 
-inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
-inline Show_what_enum operator & ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a & (int)b ); } 
-inline Show_what_enum operator ~ ( Show_what_enum a )                    { return (Show_what_enum) ~(int)a; } 
+inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); }
+inline Show_what_enum operator & ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a & (int)b ); }
+inline Show_what_enum operator ~ ( Show_what_enum a )                    { return (Show_what_enum) ~(int)a; }
 
 //----------------------------------------------------------------------------------------Show_what
 
 struct Show_what
 {
-    typedef stdext::hash_set<Subsystem*> Subsystem_set;  
+    typedef stdext::hash_set<Subsystem*> Subsystem_set;
 
                                 Show_what                   ( Show_what_enum = show_standard );
 
-    void                        set_dom                     ( const Scheduler&, const xml::Element_ptr&  ); 
+    void                        set_dom                     ( const Scheduler&, const xml::Element_ptr&  );
 
     Show_what                   operator |                  ( Show_what_enum w ) const              { Show_what ww = *this; ww |= w; return ww;; }
     void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
     void                        operator &=                 ( Show_what_enum w )                    { _what = _what & w; }
     bool                        is_set                      ( Show_what_enum w ) const              { return ( _what & w ) != 0; }
-    bool                        is_subsystem_set            ( Subsystem* s) const                   { return _subsystem_set.find(s) != _subsystem_set.end(); } 
+    bool                        is_subsystem_set            ( Subsystem* s) const                   { return _subsystem_set.find(s) != _subsystem_set.end(); }
     bool                        is_subsystem_set_empty      () const                                { return _subsystem_set.empty(); }
 
 private:
-    void                       set_what(const string&); 
+    void                       set_what(const string&);
     void                       set_subsystems(const Scheduler&, const string&);
 
 public:
@@ -92,7 +92,7 @@ public:
     string                     _job_name;
     int                        _task_id;
     Absolute_path              _folder_path;
-    stdext::hash_set<Subsystem*> _subsystem_set;  
+    stdext::hash_set<Subsystem*> _subsystem_set;
 
 };
 
@@ -157,7 +157,7 @@ struct Synchronous_command_response : Command_response
 //{
 //    enum State
 //    {
-//        s_ready, 
+//        s_ready,
 //        s_congested,
 //        s_finished
 //    };
@@ -175,7 +175,7 @@ struct Synchronous_command_response : Command_response
 //
 //    void                        close                       ();
 //
-//  private:   
+//  private:
 //    Fill_zero                  _zero_;
 //    State                      _state;
 //    int                        _buffer_size;
@@ -193,7 +193,7 @@ struct File_buffered_command_response : Command_response
 {
     enum State
     {
-        s_ready, 
+        s_ready,
         s_congested,
         s_finished
     };
@@ -218,7 +218,7 @@ struct File_buffered_command_response : Command_response
   protected:
     Fill_zero                  _zero_;
 
-  private:   
+  private:
     State                      _state;
     int                        _buffer_size;
     string                     _buffer;
@@ -295,6 +295,7 @@ struct Command_processor
     xml::Element_ptr            execute_job_chain           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_job_why             ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_test_delay          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_remote_scheduler_start_remote_task( const xml::Element_ptr& );
