@@ -281,6 +281,7 @@ struct Itask : IDispatch
     virtual HRESULT         Call_me_again_when_locks_available()                                = 0;
     virtual HRESULT     get_Params_xml                  ( BSTR* )                               = 0;
     virtual HRESULT     get_Order_params_xml            ( BSTR* )                               = 0;
+    virtual HRESULT     get_Agent_url                   (BSTR*)                                 = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy

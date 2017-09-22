@@ -2647,6 +2647,13 @@ void Task::do_release__end()
     _module_instance->release__end();
 }
 
+string Task::agent_url() const {
+    if (Module_instance* mi = _module_instance) 
+        if (Process* p = mi->_process) 
+            return p->agent_url();
+    return "";
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

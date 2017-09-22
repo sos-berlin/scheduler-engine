@@ -787,6 +787,10 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         }
     }
 
+    public: string agent_url() const { 
+        return _configuration._remote_scheduler_address;
+    };
+
     private: Process_class* const _process_class;
     private: CppHttpRemoteApiProcessClientJ _clientJ;
     private: ptr<Waiting_callback> const _waiting_callback;

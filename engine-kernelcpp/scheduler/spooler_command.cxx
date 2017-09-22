@@ -800,6 +800,9 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     string cmd = element.getAttribute( "cmd" );
   //if( !cmd.empty() )
     {
+        if (cmd == "rotate_logs")
+            _spooler->log()->start_new_file();
+        else
         if( cmd == "pause"                 )  _spooler->cmd_pause();
         else
         if( cmd == "continue"              )  _spooler->cmd_continue();

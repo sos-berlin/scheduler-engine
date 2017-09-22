@@ -162,6 +162,10 @@ public final class TaskBean implements Bean<Task> {
         delegate.call_me_again_when_locks_available();
     }
 
+    public String getAgent_url() {
+        return delegate.agent_url();
+    }
+
     @Override public Task getDelegate() {
         return delegate;
     }

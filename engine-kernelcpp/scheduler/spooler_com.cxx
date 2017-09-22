@@ -2351,6 +2351,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 35, "Params_xml"                , (Com_method_ptr)&Com_task::put_Params_xml         , VT_EMPTY      , { VT_BSTR } }, /* JS-1026 get => put */
     { DISPATCH_PROPERTYGET, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Order_params_xml   , VT_BSTR       },
     { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::put_Order_params_xml   , VT_EMPTY      , { VT_BSTR } }, /* JS-421 get => put */
+    { DISPATCH_PROPERTYGET, 37, "agent_url"                 , (Com_method_ptr)&Com_task::get_Agent_url          , VT_BSTR       },
     //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
     //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
@@ -3187,6 +3188,18 @@ STDMETHODIMP Com_task::put_Order_params_xml( BSTR xml_bstr )
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
     return hr;
+}
+
+STDMETHODIMP Com_task::get_Agent_url(BSTR* result) {
+    if (!_task ) 
+        return E_POINTER;
+    else
+        try {
+            return String_to_bstr(_task->agent_url(), result);
+        }
+        catch (const exception& x) { 
+            return _set_excepinfo( x, Z_FUNCTION );
+        }
 }
 
 //-------------------------------------------------------------------------Com_task_proxy::_methods
