@@ -107,6 +107,27 @@ final class FileOrderSinkIT extends FreeSpec with ScalaSchedulerTest with AgentW
         // ??? Pausenlose RequestFileOrderSource, wenn wir die Datei nicht löschen.
         Files.delete(file)
       }
+
+      "File not being deleted is put on the blacklist (JS-1731)" in {
+        deleteAndWriteConfigurationFile(TestJobChainPath,
+          <job_chain distributed={isDistributed.toString} process_class={TestProcessClassPath.withoutStartingSlash}>
+            <file_order_source directory={directory.toString} regex="MATCHING-" repeat="1"/>
+            <job_chain_node state="100" job="/test-dont-delete"/>
+            <job_chain_node.end state="END"/>
+          </job_chain>)
+        val file = newMatchingFile()
+        sleep(1.s)  // Delay until file order source has started next directory poll, to check directory change notification
+        val orderKey = TestJobChainPath orderKey file.toString
+        controller.toleratingErrorCodes(Set(MessageCode("SCHEDULER-340"))) {  // "File still exists. Order has been set on the blacklist"
+          eventBus.awaitingKeyedEvent[OrderFinishedEvent](orderKey) {
+            touch(file)
+          }
+        }
+        assert(orderIsOnBlacklist(orderKey))
+        scheduler executeXml RemoveOrderCommand(orderKey)
+        assert(Files.exists(file))
+        Files.delete(file)
+      }
     }
   }
 
