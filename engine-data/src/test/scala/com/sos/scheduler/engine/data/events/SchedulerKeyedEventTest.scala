@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.data.events
 import com.sos.scheduler.engine.data.events.custom.{CustomEvent, VariablesCustomEvent}
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedEvent, FileBasedRemoved, FileBasedReplaced}
-import com.sos.scheduler.engine.data.job.{JobEvent, JobStateChanged, JobUnstopped, TaskClosed, TaskEnded, TaskEvent, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobEvent, JobStateChanged, JobTaskQueueChanged, JobUnstopped, TaskClosed, TaskEnded, TaskEvent, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.InfoLogged
 import com.sos.scheduler.engine.data.order._
@@ -61,6 +61,7 @@ final class SchedulerKeyedEventTest extends FreeSpec {
         "JobEvent" → classOf[JobEvent],
           "JobStateChanged" → classOf[JobStateChanged],
           "JobUnstopped" → JobUnstopped.getClass,
+          "JobTaskQueueChanged" → JobTaskQueueChanged.getClass,
         "JocOrderStatisticsChanged" → classOf[JocOrderStatisticsChanged],
         "OrderEvent" → classOf[OrderEvent],
           "OrderStarted" → OrderStarted.getClass,

@@ -1531,13 +1531,15 @@ void Standard_job::load_tasks_from_db( Read_transaction* ta )
             {
                 try{ z::throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
             }
-
             _task_queue->enqueue_task( task );
         }
         catch( exception& x )
         {
             _log->error( message_string( "SCHEDULER-283", task_id, x ) );
         }
+    }
+    if (!_task_queue->_queue.empty()) {
+        report_event_code(jobTaskQueueChanged, java_sister());
     }
 }
 
@@ -1657,6 +1659,9 @@ bool Standard_job::Task_queue::remove_task( int task_id, Why_remove )
         }
     }
 
+    if (result) {
+        _job->report_event_code(jobTaskQueueChanged, _job->java_sister());
+    }
     return result;
 }
 
@@ -1888,6 +1893,7 @@ void Standard_job::enqueue_taskPersistentState(const TaskPersistentStateJ& taskP
     }
 
     _task_queue->enqueue_task( task );
+    report_event_code(jobTaskQueueChanged, java_sister());
 }
 
 //-----------------------------------------------------------------------Standard_job::enqueue_task
@@ -1911,6 +1917,7 @@ void Standard_job::enqueue_task( Task* task )
     task->_let_run = true;
 
     _task_queue->enqueue_task( task );
+    report_event_code(jobTaskQueueChanged, java_sister());
     _call_register.call_at<Start_queued_task_call>(_task_queue->next_start_time());
 }
 

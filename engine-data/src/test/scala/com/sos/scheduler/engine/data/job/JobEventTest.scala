@@ -32,6 +32,14 @@ final class JobEventTest extends FreeSpec {
       }""")
   }
 
+  "JobTaskQueueChanged" in {
+    check(KeyedEvent(JobTaskQueueChanged)(jobPath),
+      """{
+        "key": "/JOB",
+        "TYPE": "JobTaskQueueChanged"
+      }""")
+  }
+
   private def check(event: AnyKeyedEvent, json: String): Unit = {
     val jsValue = json.parseJson
     assert(event.toJson == jsValue)
