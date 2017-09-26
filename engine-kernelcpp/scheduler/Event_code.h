@@ -15,6 +15,7 @@ enum Event_code {
     jobChainNodeActionChanged,
     jobChainStateChanged,
     jobStateChanged,
+    jobUnstopped,
 
     taskStartedEvent,
     taskClosedEvent,

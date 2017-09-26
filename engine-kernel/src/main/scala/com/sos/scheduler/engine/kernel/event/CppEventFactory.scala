@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.event
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
-import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, JobUnstopped, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.{SchedulerState, SchedulerStateChanged}
@@ -37,6 +37,10 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
       case `jobStateChanged` ⇒
         val job = eventSource.asInstanceOf[Job]
         KeyedEvent(JobStateChanged(job.state))(job.path)
+
+      case `jobUnstopped` ⇒
+        val job = eventSource.asInstanceOf[Job]
+        KeyedEvent(JobUnstopped)(job.path)
 
       case `taskStartedEvent` ⇒
         val task = eventSource.asInstanceOf[Task]

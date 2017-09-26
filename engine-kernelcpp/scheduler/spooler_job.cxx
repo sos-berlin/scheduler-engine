@@ -3168,6 +3168,9 @@ void Standard_job::set_state( State new_state )
 
     database_record_store();
     report_event_code(jobStateChanged, java_sister());
+    if (old_state == s_stopped && new_state != s_stopped) {
+        report_event_code(jobUnstopped, java_sister());
+    }
 }
 
 //----------------------------------------------------------------------Standard_job::set_state_cmd

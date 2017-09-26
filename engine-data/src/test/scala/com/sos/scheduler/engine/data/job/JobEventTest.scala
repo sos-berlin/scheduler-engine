@@ -23,6 +23,15 @@ final class JobEventTest extends FreeSpec {
         "state": "stopped"
       }""")
   }
+
+  "JobUnstopped" in {
+    check(KeyedEvent(JobUnstopped)(jobPath),
+      """{
+        "key": "/JOB",
+        "TYPE": "JobUnstopped"
+      }""")
+  }
+
   private def check(event: AnyKeyedEvent, json: String): Unit = {
     val jsValue = json.parseJson
     assert(event.toJson == jsValue)
