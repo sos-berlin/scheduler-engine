@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.9.13-SNAPSHOT</version>
+        <version>1.10.9-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -31,7 +31,7 @@
             <properties>
                 <setup.platform>${engine.platform}</setup.platform>
             </properties>
-            
+
             <repositories>
                 <repository>
                     <id>sos</id>
@@ -129,7 +129,7 @@
                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
-          
+
                     <execution>
                         <id>unpack-resources</id>
                         <phase>process-resources</phase>

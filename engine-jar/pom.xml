@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.9.13-SNAPSHOT</version>
+        <version>1.10.9-SNAPSHOT</version>
     </parent>
 
     <packaging>pom</packaging>
@@ -14,7 +14,7 @@
 
     <build>
         <finalName>${project.groupId}</finalName>
-        
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -45,10 +45,10 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <dependencies>
         <!-- Artefakte, deren Jars in einem Jar zusammengefasst werden. -->
-        
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>engine-kernel</artifactId>
@@ -68,14 +68,14 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-cppjava-runtime</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.sos-berlin.jobscheduler.engine</groupId>
             <artifactId>engine-data</artifactId>

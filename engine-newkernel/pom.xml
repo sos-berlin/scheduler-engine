@@ -6,9 +6,9 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.9.13-SNAPSHOT</version>
+        <version>1.10.9-SNAPSHOT</version>
     </parent>
-    
+
     <name>${project.artifactId}</name>
     <inceptionYear>2013</inceptionYear>
     <description>New Scala JobScheduler kernel</description>

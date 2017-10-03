@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.9.13-SNAPSHOT</version>
+        <version>1.10.9-SNAPSHOT</version>
     </parent>
 
     <name>${project.artifactId}</name>
@@ -33,7 +33,7 @@
                         <configuration>
                             <killAfter>-1</killAfter>
                             <includeProjectDependencies>false</includeProjectDependencies>
-                            <includePluginDependencies>true</includePluginDependencies>                            
+                            <includePluginDependencies>true</includePluginDependencies>
                             <mainClass>com.sos.scheduler.engine.cplusplus.generator.main.Main</mainClass>
                             <arguments>
                                 <argument>-java-output-directory=${project.build.sourceDirectory}</argument>
@@ -58,7 +58,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            
+
             <!--plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>

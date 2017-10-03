@@ -6,9 +6,9 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine-cppjava</artifactId>
-        <version>1.9.13-SNAPSHOT</version>
+        <version>1.10.9-SNAPSHOT</version>
     </parent>
-    
+
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
 
@@ -27,7 +27,7 @@
             <organizationUrl>https://www.sos-berlin.com/</organizationUrl>
         </developer>
     </developers>
-    
+
     <build>
         <plugins>
             <plugin>
