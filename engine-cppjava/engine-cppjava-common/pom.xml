@@ -11,7 +11,7 @@
 
     <name>${project.artifactId}</name>
     <inceptionYear>2010</inceptionYear>
-    
+
     <build>
         <plugins>
             <plugin>

@@ -493,6 +493,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            put_Params_xml                  ( BSTR );
     STDMETHODIMP            get_Order_params_xml            ( BSTR* );
     STDMETHODIMP            put_Order_params_xml            ( BSTR );
+    STDMETHODIMP            get_Agent_url                   (BSTR*);
     //STDMETHODIMP            Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* );
     //STDMETHODIMP            Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* );
 

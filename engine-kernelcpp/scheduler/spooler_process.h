@@ -55,7 +55,7 @@ struct Process : zschimmer::Object, Scheduler_object {
     virtual double async_next_gmtime() = 0;
     virtual object_server::Connection* connection() const = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;
-    
+
     virtual bool async_continue() = 0;
 };
 

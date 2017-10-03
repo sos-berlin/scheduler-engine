@@ -9,7 +9,7 @@
         <artifactId>engine-plugins</artifactId>
         <version>1.10.9-SNAPSHOT</version>
     </parent>
-    
+
     <inceptionYear>2015</inceptionYear>
     <description>JobScheduler Plugin to create an order at a jobchain node</description>
 
