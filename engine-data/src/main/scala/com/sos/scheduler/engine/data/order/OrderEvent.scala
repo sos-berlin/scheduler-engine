@@ -37,6 +37,8 @@ sealed trait OrderEvent extends Event {
 
 object OrderEvent {
   implicit val OrderEventJsonFormat = TypedJsonFormat[OrderEvent](
+    Subtype(jsonFormat1(OrderAdded)),
+    Subtype(jsonFormat0(() ⇒ OrderRemoved)),
     Subtype(jsonFormat1(OrderFinished)),
     Subtype(jsonFormat0(() ⇒ OrderNestedFinished)),
     Subtype(jsonFormat0(() ⇒ OrderNestedStarted)),
@@ -49,6 +51,12 @@ object OrderEvent {
     Subtype(jsonFormat0(() ⇒ OrderStarted)),
     Subtype(jsonFormat0(() ⇒ OrderWaitingInTask)))
 }
+
+final case class OrderAdded(nodeId: NodeId)
+extends OrderEvent
+
+case object OrderRemoved
+extends OrderEvent
 
 /**
   * Order has finished.

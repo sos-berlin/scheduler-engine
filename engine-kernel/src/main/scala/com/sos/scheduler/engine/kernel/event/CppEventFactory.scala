@@ -54,6 +54,9 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
         val task = eventSource.asInstanceOf[Task]
         KeyedEvent(TaskClosed)(task.taskKey)
 
+      case `orderRemovedEvent` ⇒
+        KeyedEvent(OrderRemoved)(eventSource.asInstanceOf[Order].orderKey)
+
       case `orderStartedEvent` ⇒
         KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
 
@@ -88,6 +91,9 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 
   @ForCpp def newJobChainNodeActionChangedEvent(jobChainPath: String, nodeId: String, action: Int): AnyKeyedEvent =
     KeyedEvent(JobChainNodeActionChanged(NodeId(nodeId), JobChainNodeAction.values()(action)))(JobChainPath(jobChainPath))
+
+  @ForCpp def newOrderAddedEvent(jobChainPath: String, orderId: String, nodeId: String): AnyKeyedEvent =
+    KeyedEvent(OrderAdded(NodeId(nodeId)))(OrderKey(jobChainPath, orderId))
 
   @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AnyKeyedEvent =
     KeyedEvent(OrderNodeChanged(nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId)))(OrderKey(jobChainPath, orderId))

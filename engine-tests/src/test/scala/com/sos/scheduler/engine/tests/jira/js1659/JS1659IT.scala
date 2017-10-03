@@ -13,12 +13,12 @@ import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobEvent, JobPath, JobState, JobStateChanged, JobUnstopped, ReturnCode, TaskClosed, TaskEnded, TaskEvent, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, JobChainState, NodeId}
 import com.sos.scheduler.engine.data.order.OrderNodeTransition.Success
-import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}
+import com.sos.scheduler.engine.data.order.{JobChainEvent, JobChainNodeActionChanged, JobChainStateChanged, OrderAdded, OrderNodeChanged, OrderNodeTransition, OrderStarted, OrderStepEnded, OrderStepStarted, OrderSuspended}
 import com.sos.scheduler.engine.data.queries.PathQuery
 import com.sos.scheduler.engine.data.scheduler.{SchedulerEvent, SchedulerInitiated, SchedulerState, SchedulerStateChanged}
 import com.sos.scheduler.engine.data.xmlcommands.{ModifyJobCommand, ModifyOrderCommand, OrderCommand}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.SchedulerTestUtils
+import com.sos.scheduler.engine.test.SchedulerTestUtils.jobOverview
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1659.JS1659IT._
@@ -65,7 +65,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       scheduler executeXml <job_chain_node.modify job_chain={TestJobChainPath} state="100" action="process"/>
       scheduler executeXml OrderCommand(TestOrderKey)
     }
-    waitForCondition(10.s, 10.ms)(SchedulerTestUtils.jobOverview(TestJobPath).state == JobState.pending)
+    waitForCondition(10.s, 10.ms)(jobOverview(TestJobPath).state == JobState.pending)
     val Snapshot(aEventId, EventSeq.NonEmpty(eventSnapshots)) = client.events(EventRequest.singleClass[Event](after = beforeTestEventId, TestTimeout)) await TestTimeout
     assert(aEventId >= eventSnapshots.last.eventId)
     val events: Seq[KeyedEvent[Event]] = eventSnapshots map { _.value }
@@ -74,6 +74,7 @@ final class JS1659IT extends FreeSpec with ScalaSchedulerTest {
       KeyedEvent(JobChainStateChanged(JobChainState.running))(TestJobChainPath),
       KeyedEvent(JobChainNodeActionChanged(NodeId("100"), JobChainNodeAction.next_state))(TestJobChainPath),
       KeyedEvent(JobChainNodeActionChanged(NodeId("100"), JobChainNodeAction.process))(TestJobChainPath),
+      KeyedEvent(OrderAdded(NodeId("100")))(TestOrderKey),
       KeyedEvent(OrderStarted)(TestOrderKey),
       KeyedEvent(JobStateChanged(JobState.running))(TestJobPath),
 

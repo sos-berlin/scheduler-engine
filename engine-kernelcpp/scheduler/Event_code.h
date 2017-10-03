@@ -21,6 +21,7 @@ enum Event_code {
     taskStartedEvent,
     taskClosedEvent,
 
+    orderRemovedEvent,
     orderStartedEvent,
     orderFinishedEvent,
     orderSuspendedEvent,

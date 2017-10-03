@@ -64,6 +64,8 @@ final class SchedulerKeyedEventTest extends FreeSpec {
           "JobTaskQueueChanged" → JobTaskQueueChanged.getClass,
         "JocOrderStatisticsChanged" → classOf[JocOrderStatisticsChanged],
         "OrderEvent" → classOf[OrderEvent],
+          "OrderAdded" → classOf[OrderAdded],
+          "OrderRemoved" → OrderRemoved.getClass,
           "OrderStarted" → OrderStarted.getClass,
           "OrderFinished" → classOf[OrderFinished],
           "OrderStepStarted" → classOf[OrderStepStarted],

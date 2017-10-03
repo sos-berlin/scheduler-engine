@@ -2435,6 +2435,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
     assert( !_is_db_occupied );
 
+    report_event_code(orderRemovedEvent, java_sister());  // Before effective removal, to let Scala resolve OrderKey via jobChain.path
     if( _job_chain )  _job_chain->remove_order( this );
 
     _setback_count = 0;
@@ -2590,6 +2591,9 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( is_new  &&  !_is_distributed )
         {
             job_chain->add_order( this );
+        }
+        if (is_new) {
+            report_event(CppEventFactoryJ::newOrderAddedEvent(_job_chain_path, string_id(), string_state()));
         }
     }
 

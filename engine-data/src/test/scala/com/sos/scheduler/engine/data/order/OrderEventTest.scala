@@ -17,6 +17,23 @@ final class OrderEventTest extends FreeSpec {
 
   private val orderKey = JobChainPath("/JOB-CHAIN") orderKey "ORDER-ID"
 
+  "OrderAdded" in {
+    check(KeyedEvent(OrderAdded(NodeId("START")))(orderKey),
+      """{
+        "TYPE": "OrderAdded",
+        "key": "/JOB-CHAIN,ORDER-ID",
+        "nodeId": "START"
+      }""")
+  }
+
+  "OrderRemoved" in {
+    check(KeyedEvent(OrderRemoved)(orderKey),
+      """{
+        "TYPE": "OrderRemoved",
+        "key": "/JOB-CHAIN,ORDER-ID"
+      }""")
+  }
+
   "OrderFinished" in {
     check(KeyedEvent(OrderFinished(NodeId("END")))(orderKey),
       """{
