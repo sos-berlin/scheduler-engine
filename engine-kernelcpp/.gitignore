@@ -33,6 +33,11 @@ Release/
 /*.psess
 /*.vspx
 
+# CLion
+/.idea
+/cmake-build-debug/
+/CMakeLists.txt
+
 # Eclipse
 /.classpath
 /.project

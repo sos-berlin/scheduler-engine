@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     process_class="/test-agent"
+>
+    <script language="java:javascript">
+        function spooler_process() {
+           spooler_log.info("AGENT_URL=" + spooler_task.agent_url);
+           return false;
+        }
+    </script>
+</job>

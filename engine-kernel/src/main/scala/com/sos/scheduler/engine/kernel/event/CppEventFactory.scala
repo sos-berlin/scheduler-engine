@@ -3,7 +3,7 @@ package com.sos.scheduler.engine.kernel.event
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.data.event.{AnyKeyedEvent, KeyedEvent}
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedRemoved, FileBasedReplaced}
-import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, JobStateChanged, JobTaskQueueChanged, JobUnstopped, ReturnCode, TaskClosed, TaskEnded, TaskId, TaskKey, TaskStarted}
 import com.sos.scheduler.engine.data.jobchain.{JobChainNodeAction, JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.order._
 import com.sos.scheduler.engine.data.scheduler.{SchedulerState, SchedulerStateChanged}
@@ -38,6 +38,14 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
         val job = eventSource.asInstanceOf[Job]
         KeyedEvent(JobStateChanged(job.state))(job.path)
 
+      case `jobUnstopped` ⇒
+        val job = eventSource.asInstanceOf[Job]
+        KeyedEvent(JobUnstopped)(job.path)
+
+      case `jobTaskQueueChanged` ⇒
+        val job = eventSource.asInstanceOf[Job]
+        KeyedEvent(JobTaskQueueChanged)(job.path)
+
       case `taskStartedEvent` ⇒
         val task = eventSource.asInstanceOf[Task]
         KeyedEvent(TaskStarted)(task.taskKey)
@@ -45,6 +53,9 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
       case `taskClosedEvent` ⇒
         val task = eventSource.asInstanceOf[Task]
         KeyedEvent(TaskClosed)(task.taskKey)
+
+      case `orderRemovedEvent` ⇒
+        KeyedEvent(OrderRemoved)(eventSource.asInstanceOf[Order].orderKey)
 
       case `orderStartedEvent` ⇒
         KeyedEvent(OrderStarted)(eventSource.asInstanceOf[Order].orderKey)
@@ -80,6 +91,9 @@ import com.sos.scheduler.engine.kernel.order.jobchain.JobChain
 
   @ForCpp def newJobChainNodeActionChangedEvent(jobChainPath: String, nodeId: String, action: Int): AnyKeyedEvent =
     KeyedEvent(JobChainNodeActionChanged(NodeId(nodeId), JobChainNodeAction.values()(action)))(JobChainPath(jobChainPath))
+
+  @ForCpp def newOrderAddedEvent(jobChainPath: String, orderId: String, nodeId: String): AnyKeyedEvent =
+    KeyedEvent(OrderAdded(NodeId(nodeId)))(OrderKey(jobChainPath, orderId))
 
   @ForCpp def newOrderStateChangedEvent(jobChainPath: String, orderId: String, previousNodeId: String, nodeId: String): AnyKeyedEvent =
     KeyedEvent(OrderNodeChanged(nodeId = NodeId(nodeId), fromNodeId = NodeId(previousNodeId)))(OrderKey(jobChainPath, orderId))

@@ -49,7 +49,7 @@ const int                           dispid_log_log          = 14;           // S
 
 //------------------------------------------------------------------------------------Typbibliothek
 
-Typelib_ref                         typelib;  
+Typelib_ref                         typelib;
 
 Com_spooler_proxy::Class_descriptor Com_spooler_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy", Com_spooler_proxy::_methods );
 Com_task_proxy   ::Class_descriptor Com_task_proxy   ::class_descriptor ( &typelib, "Spooler.Task_proxy"   , Com_task_proxy   ::_methods );
@@ -83,7 +83,7 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
         }
     }
 
-    if( !iorder )  
+    if( !iorder )
     {
         //iorder = new Order( spooler, order_or_payload );
         ptr<Order> order = new Order( spooler->standing_order_subsystem() );
@@ -99,12 +99,12 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 #ifdef Z_COM
 
 const Com_method Com_error::_methods[] =
-{ 
+{
    // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
     { DISPATCH_PROPERTYGET, 1, "Java_class_name" , (Com_method_ptr)&Com_error::get_Java_class_name, VT_BSTR },
     { DISPATCH_PROPERTYGET, 0, "Is_error"        , (Com_method_ptr)&Com_error::get_Is_error       , VT_BOOL },
-    { DISPATCH_PROPERTYGET, 3, "Code"            , (Com_method_ptr)&Com_error::get_Code           , VT_BSTR }, 
-    { DISPATCH_PROPERTYGET, 4, "Text"            , (Com_method_ptr)&Com_error::get_Text           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 3, "Code"            , (Com_method_ptr)&Com_error::get_Code           , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 4, "Text"            , (Com_method_ptr)&Com_error::get_Text           , VT_BSTR },
     {}
 };
 
@@ -112,9 +112,9 @@ const Com_method Com_error::_methods[] =
 //-----------------------------------------------------------------------------Com_error::Com_error
 
 Com_error::Com_error( const Xc_copy& x )
-: 
+:
     Sos_ole_object( error_class_ptr, (Ierror*)this ),
-    _xc(x) 
+    _xc(x)
 {
 }
 
@@ -130,8 +130,8 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 //---------------------------------------------------------------------------------Com_error::close
 
 void Com_error::close()
-{ 
-    _xc = NULL; 
+{
+    _xc = NULL;
 }
 
 //------------------------------------------------------------------------------Com_error::is_error
@@ -180,7 +180,7 @@ STDMETHODIMP Com_error::get_Text( BSTR* text_bstr )
 #ifdef Z_COM
 
 const Com_method Com_variable::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable::put_Value          , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_Value          , VT_VARIANT    },
@@ -200,7 +200,7 @@ void get_variable_name_and_value( const xml::Element_ptr& element, string* name,
     *value = element.getAttribute( "value" );
 
     if( *value == "" )  *value = string_from_hex( element.getAttribute( "hex_value" ) );    // Jedes Hexbyte ein Unicode-Zeichen 00..FF
-}                
+}
 
 //-----------------------------------------------------------------------Com_variable::Com_variable
 
@@ -217,7 +217,7 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 }
 
 //-----------------------------------------------------------------------Com_variable::string_value
-    
+
 string Com_variable::string_value() const
 {
     try
@@ -241,11 +241,11 @@ STDMETHODIMP Com_variable::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------------------------Com_variable::Clone
 
-STDMETHODIMP Com_variable::Clone( Ivariable** result ) 
-{ 
-    HRESULT hr = NOERROR; 
-    
-    *result = new Com_variable(_name,_value); 
+STDMETHODIMP Com_variable::Clone( Ivariable** result )
+{
+    HRESULT hr = NOERROR;
+
+    *result = new Com_variable(_name,_value);
     (*result)->AddRef();
 
     return hr;
@@ -265,7 +265,7 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
     result.setAttribute( "name" , string_from_bstr( name ) );
 
     string string_value = this->string_value();
-    
+
     if( io::is_valid_latin1( string_value ) )  result.setAttribute( "value"    , string_value );
                                          else  result.setAttribute( "hex_value", lcase_hex_from_string( string_value ) );   // Jedes Hexbyte ein Unicode-Zeichen 00..FF
 
@@ -275,29 +275,29 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
      || value.vt == VT_NULL
      || value.vt == VT_I2
      || value.vt == VT_I4
-     || value.vt == VT_R4       
-     || value.vt == VT_R8       
-     || value.vt == VT_CY       
-     || value.vt == VT_DATE     
+     || value.vt == VT_R4
+     || value.vt == VT_R8
+     || value.vt == VT_CY
+     || value.vt == VT_DATE
   // || value.vt == VT_BSTR          // VT_BSTR müssen wir nicht besonders kennzeichnen. Das ist Default.
-  // || value.vt == VT_DISPATCH 
-     || value.vt == VT_ERROR    
-     || value.vt == VT_BOOL     
-  // || value.vt == VT_VARIANT  
-  // || value.vt == VT_UNKNOWN  
-     || value.vt == VT_DECIMAL  
-     || value.vt == VT_I1       
-     || value.vt == VT_UI1      
-     || value.vt == VT_UI2      
-     || value.vt == VT_UI4      
-     || value.vt == VT_I8       
-     || value.vt == VT_UI8      
-     || value.vt == VT_INT      
-     || value.vt == VT_UINT     
-  // || value.vt == VT_VOID     
+  // || value.vt == VT_DISPATCH
+     || value.vt == VT_ERROR
+     || value.vt == VT_BOOL
+  // || value.vt == VT_VARIANT
+  // || value.vt == VT_UNKNOWN
+     || value.vt == VT_DECIMAL
+     || value.vt == VT_I1
+     || value.vt == VT_UI1
+     || value.vt == VT_UI2
+     || value.vt == VT_UI4
+     || value.vt == VT_I8
+     || value.vt == VT_UI8
+     || value.vt == VT_INT
+     || value.vt == VT_UINT
+  // || value.vt == VT_VOID
      || value.vt == VT_HRESULT )
     {
-        vt = value.vt; 
+        vt = value.vt;
     }
 /*
     else
@@ -309,7 +309,7 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
     }
 */
     if( vt != (VARTYPE)-1 )  result.setAttribute( "vt", vt );
-                       else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
+                       else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.
 
 
     return result;
@@ -319,7 +319,7 @@ xml::Element_ptr Com_variable::dom_element( const xml::Document_ptr& doc, const 
 #ifdef Z_COM
 
 const Com_method Com_variable_set::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::Set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_Value      , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
@@ -392,23 +392,23 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------------------Com_variable_set::set_dom
 
-void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets, 
+void Com_variable_set::set_dom( const xml::Element_ptr& params, Variable_set_map* variable_sets,
                                 const string& variable_element_name )
 {
     register_include_and_set_dom( (Scheduler*)NULL, (File_based*)NULL, params, variable_sets, variable_element_name );
 }
-    
+
 //---------------------------------------------------Com_variable_set::register_include_and_set_dom
 
 void Com_variable_set::register_include_and_set_dom( Scheduler* scheduler, File_based* source_file_based,
-                                                     const xml::Element_ptr& params, Variable_set_map* variable_sets, 
+                                                     const xml::Element_ptr& params, Variable_set_map* variable_sets,
                                                      const string& variable_element_name )
 {
     if( !params )  return;
 
     DOM_FOR_EACH_ELEMENT( params, e )
     {
-        if( e.nodeName_is( variable_element_name ) ) 
+        if( e.nodeName_is( variable_element_name ) )
         {
             set_variable( e, variable_sets );
         }
@@ -457,7 +457,7 @@ void Com_variable_set::set_variable( const xml::Element_ptr& element, Variable_s
     string value;
 
     get_variable_name_and_value( element, &name, &value );
-    
+
     if( variable_sets )
     {
         Variable_set_map::iterator it = variable_sets->find( variable_set_name_for_substitution );
@@ -470,7 +470,7 @@ void Com_variable_set::set_variable( const xml::Element_ptr& element, Variable_s
     Bstr    name_bstr = name;
     Variant value_vt = value;
 
-    HRESULT hr = put_Var( name_bstr, &value_vt );                       
+    HRESULT hr = put_Var( name_bstr, &value_vt );
     if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
 }
 
@@ -486,10 +486,10 @@ STDMETHODIMP Com_variable_set::put_Value( VARIANT* name, VARIANT* value )
     if( name->vt == VT_ERROR )
     {
         if( value->vt != VT_BSTR )  return DISP_E_TYPEMISMATCH;
-        
+
         return put_Xml( V_BSTR(value) );
     }
-    else 
+    else
         return DISP_E_TYPEMISMATCH;
 }
 
@@ -511,7 +511,7 @@ STDMETHODIMP Com_variable_set::get_Value( VARIANT* name, VARIANT* value )
         //if( !FAILED(hr) )  Z_LOG2( "scheduler", "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
         return hr;
     }
-    else 
+    else
         return DISP_E_TYPEMISMATCH;
 }
 
@@ -544,8 +544,8 @@ string Com_variable_set::get_string( const string& name ) const
 int Com_variable_set::get_int(const string& name, int deflt) const {
     int result = deflt;
     string s = get_string(name);
-    if (!s.empty()) 
-        try { result = as_int(s); } 
+    if (!s.empty())
+        try { result = as_int(s); }
         catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
         catch (Xc& x) { x.insert("parameter " + name); throw; }
     return result;
@@ -556,8 +556,8 @@ int Com_variable_set::get_int(const string& name, int deflt) const {
 int64 Com_variable_set::get_int64(const string& name, int64 deflt) const {
     int64 result = deflt;
     string s = get_string(name);
-    if (!s.empty()) 
-        try { result = as_int64(s.c_str()); } 
+    if (!s.empty())
+        try { result = as_int64(s.c_str()); }
         catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
         catch (Xc& x) { x.insert("parameter " + name); throw; }
     return result;
@@ -568,8 +568,8 @@ int64 Com_variable_set::get_int64(const string& name, int64 deflt) const {
 bool Com_variable_set::get_bool(const string& name, bool deflt) const {
     bool result = deflt;
     string s = get_string(name);
-    if (!s.empty()) 
-        try { result = as_bool(s); } 
+    if (!s.empty())
+        try { result = as_bool(s); }
         catch (z::Xc& x) { x.append_text("parameter " + name); throw; }
         catch (Xc& x) { x.insert("parameter " + name); throw; }
     return result;
@@ -580,7 +580,7 @@ bool Com_variable_set::get_bool(const string& name, bool deflt) const {
 string Com_variable_set::get_string_by_name( const string& name, bool* name_found ) const
 {
     Variant result;
-    
+
     get_var( Bstr(name), &result );
 
     *name_found = !result.is_empty();
@@ -609,7 +609,7 @@ void Com_variable_set::merge( const Ivariable_set* other )
 
 STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
 {
-    // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig. 
+    // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig.
     // Com_variable_set_enumerator müsste dann ungültig werden. Aber wir benutzen erase() nicht.
 
     HRESULT hr = NOERROR;
@@ -693,7 +693,7 @@ static const int memory_overhead = 8;
 inline int aligned(int i) { return (i + 7) & ~7; }
 int bstr_bytes(BSTR b) { return memory_overhead + aligned(4 + SysStringLen(b) + 1); }
 
-int Com_variable_set::estimated_byte_count() const 
+int Com_variable_set::estimated_byte_count() const
 {
     int result = 0;
 
@@ -718,15 +718,15 @@ STDMETHODIMP Com_variable_set::get_Count( int* result )
 
 //------------------------------------------------------------------------Com_variable_set::get_dom
 
-STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )  
-{ 
+STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )
+{
 #   ifdef SPOOLER_HAS_MSXML
-        
+
         HRESULT hr = NOERROR;
 
         try
         {
-            *doc = dom()._ptr; 
+            *doc = dom()._ptr;
             (*doc)->AddRef();
         }
         catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
@@ -745,7 +745,7 @@ STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )
 xml::Document_ptr Com_variable_set::dom( const string& element_name, const string& subelement_name )
 {
     xml::Document_ptr doc;
-    
+
     doc.create();
   //doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\"" ) );
   //doc.appendChild( dom_element( doc, xml_element_name(), "variable" ) );
@@ -895,21 +895,21 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 
     *iunknown = e;
     (*iunknown)->AddRef();
-    return NOERROR;                                            
+    return NOERROR;
 }
 
 //-----------------------------------------------------------------Com_variable_set::set_xml_string
 
-void Com_variable_set::set_xml_string( const string& xml_text )  
-{ 
+void Com_variable_set::set_xml_string( const string& xml_text )
+{
     HRESULT hr = put_Xml( Bstr( xml_text ) );
     if( FAILED(hr) )  throw_ole( hr, "Variable_set::xml" );
 }
 
 //------------------------------------------------------------------------Com_variable_set::put_Xml
 
-STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )  
-{ 
+STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
+{
     HRESULT hr = NOERROR;
 
     try
@@ -948,8 +948,8 @@ STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )
 
 //------------------------------------------------------------------------Com_variable_set::get_xml
 
-STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )  
-{ 
+STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
+{
     HRESULT hr = NOERROR;
 
     try
@@ -971,7 +971,7 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
     try
     {
         int length = int_cast(_map.size()) - 1;  // Anzahl der Semikolons
-        
+
         if( length < 0 )
         {
             *result = NULL;
@@ -979,7 +979,7 @@ STDMETHODIMP Com_variable_set::get_Names( BSTR* result )
         else
         {
             Z_FOR_EACH( Map, _map, m )  length += m->first.length();
-            
+
             OLECHAR* p = *result = SysAllocStringLen( NULL, length );
             if( !*result )  return E_OUTOFMEMORY;
 
@@ -1032,7 +1032,7 @@ ptr<Com_variable_set> operator+( const ptr<Com_variable_set>& a, Com_variable_se
 #ifdef Z_COM
 /*
 const Com_method Com_variable_set_enumerator::_methods[] =
-{ 
+{
    // _flags         , dispid, _name    , _method                                               , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     , 1, "Next"   , (Com_method_ptr)&Com_variable_set_enumerator::Next    , VT_LONG       , { VT_LONG, VT_BYREF|VT_VARIANT } },
     { DISPATCH_METHOD     , 2, "Skip"   , (Com_method_ptr)&Com_variable_set_enumerator::Skip    , VT_EMPTY      , { VT_LONG } },
@@ -1053,7 +1053,7 @@ Com_variable_set_enumerator::Com_variable_set_enumerator()
 //------------------------------------------------------Com_variable_set_enumerator::QueryInterface
 
 STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** result )
-{                                                                    
+{
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IEnumVARIANT            , result );
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ivariable_set_enumerator, result );
 
@@ -1073,7 +1073,7 @@ STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** res
     }
 */
     return Sos_ole_object::QueryInterface( iid, result );
-}                                                                                                                                       
+}
 
 //----------------------------------------------------------Com_variable_set_enumerator::initialize
 
@@ -1139,7 +1139,7 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** )
 #ifdef Z_COM
 
 const Com_method Com_log::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log::Debug9                  , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log::Debug8                  , VT_EMPTY      , { VT_BSTR } },
@@ -1191,7 +1191,7 @@ Com_log::Com_log( Prefix_log* log )
     Sos_ole_object( log_class_ptr, (Ilog*)this ),
     _zero_(this+1),
     _log(log)
-{ 
+{
 }
 
 //--------------------------------------------------------------------------Com_log::QueryInterface
@@ -1212,7 +1212,7 @@ ptr<object_server::Reference_with_properties> Com_log::get_reference_with_proper
 
     //if( iid != IID_Ilog )  return E_NOINTERFACE;
 
-    
+
     {
         if( !_log )  throw_com( E_POINTER, "Com_log::get_reference_with_properties" );
 
@@ -1228,12 +1228,12 @@ ptr<object_server::Reference_with_properties> Com_log::get_reference_with_proper
 //---------------------------------------------------------------------------------Com_log::set_log
 
 void Com_log::set_log( Prefix_log* log )
-{ 
-    _log = log; 
+{
+    _log = log;
 }
 
 //----------------------------------------------------------------------------------------Com_log::
-    
+
 STDMETHODIMP Com_log::Debug9( BSTR line )                       { return Log( spooler_com::log_debug9, line ); }
 STDMETHODIMP Com_log::Debug8( BSTR line )                       { return Log( spooler_com::log_debug8, line ); }
 STDMETHODIMP Com_log::Debug7( BSTR line )                       { return Log( spooler_com::log_debug7, line ); }
@@ -1252,14 +1252,14 @@ STDMETHODIMP Com_log::Error ( BSTR line )                       { return Log( sp
 //-------------------------------------------------------------------------------------Com_log::log
 
 STDMETHODIMP Com_log::Log( spooler_com::Log_level level, BSTR line )
-{ 
+{
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
-        _log->log( (zschimmer::Log_level)level, bstr_as_string( line ) ); 
+        _log->log( (zschimmer::Log_level)level, bstr_as_string( line ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
@@ -1270,14 +1270,14 @@ STDMETHODIMP Com_log::Log( spooler_com::Log_level level, BSTR line )
 //--------------------------------------------------------------------------------Com_log::Log_file
 
 STDMETHODIMP Com_log::Log_file( BSTR path )
-{ 
+{
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
-        _log->log_file( bstr_as_string( path ) ); 
+        _log->log_file( bstr_as_string( path ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -1288,10 +1288,10 @@ STDMETHODIMP Com_log::Log_file( BSTR path )
 //--------------------------------------------------------------------------------Com_log::get_mail
 
 STDMETHODIMP Com_log::get_Mail( Imail** mail )
-{ 
+{
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1310,7 +1310,7 @@ STDMETHODIMP Com_log::put_Mail_on_error( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1328,7 +1328,7 @@ STDMETHODIMP Com_log::get_Mail_on_error( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1346,7 +1346,7 @@ STDMETHODIMP Com_log::put_Mail_on_warning( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1364,7 +1364,7 @@ STDMETHODIMP Com_log::get_Mail_on_warning( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1375,14 +1375,14 @@ STDMETHODIMP Com_log::get_Mail_on_warning( VARIANT_BOOL* b )
 
     return hr;
 }
-    
+
 //----------------------------------------------------------------------Com_log::put_mail_on_success
 
 STDMETHODIMP Com_log::put_Mail_on_success( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1400,7 +1400,7 @@ STDMETHODIMP Com_log::get_Mail_on_success( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1418,7 +1418,7 @@ STDMETHODIMP Com_log::put_Mail_on_process( int level )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1436,7 +1436,7 @@ STDMETHODIMP Com_log::get_Mail_on_process( int* result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1454,7 +1454,7 @@ STDMETHODIMP Com_log::put_Level( int level )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1472,7 +1472,7 @@ STDMETHODIMP Com_log::get_Level( int* level )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1490,7 +1490,7 @@ STDMETHODIMP Com_log::get_Filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1508,7 +1508,7 @@ STDMETHODIMP Com_log::put_New_filename( BSTR filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
         _log->set_new_filename( bstr_as_string( filename_bstr ) );
@@ -1525,7 +1525,7 @@ STDMETHODIMP Com_log::get_New_filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1543,7 +1543,7 @@ STDMETHODIMP Com_log::put_Collect_within( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1561,7 +1561,7 @@ STDMETHODIMP Com_log::get_Collect_within( double* result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1579,7 +1579,7 @@ STDMETHODIMP Com_log::put_Collect_max( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1597,7 +1597,7 @@ STDMETHODIMP Com_log::get_Collect_max( double* result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1615,7 +1615,7 @@ STDMETHODIMP Com_log::put_Mail_it( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1633,7 +1633,7 @@ STDMETHODIMP Com_log::get_Last_error_line( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1651,7 +1651,7 @@ STDMETHODIMP Com_log::get_Last( VARIANT* level, BSTR* result )
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1669,7 +1669,7 @@ STDMETHODIMP Com_log::Start_new_file()
 {
     HRESULT hr = NOERROR;
 
-    try 
+    try
     {
         if( !_log )  return E_POINTER;
 
@@ -1700,7 +1700,7 @@ HRESULT Com_log_proxy::Create_instance( zschimmer::com::object_server::Session*,
 void Com_log_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "level" )  _level = value.as_int();
-    else  
+    else
         z::throw_xc( "Com_log_proxy::set_property", name );
 }
 
@@ -1709,7 +1709,7 @@ void Com_log_proxy::set_property( const string& name, const Variant& value )
 STDMETHODIMP Com_log_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, UINT cNames, LCID lcid, DISPID* dispid )
 {
     HRESULT hr;
-    
+
     hr = com_get_dispid( _methods, iid, rszNames, cNames, lcid, dispid );       // Erst lokal versuchen
 
     if( hr == DISP_E_UNKNOWNNAME )
@@ -1722,7 +1722,7 @@ STDMETHODIMP Com_log_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, 
 */
 //----------------------------------------------------------------------------Com_log_proxy::Invoke
 
-STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
+STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams,
                                     VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
 {
     const Bstr& name = dispid == 0? "info" : name_from_dispid( dispid );
@@ -1746,7 +1746,7 @@ STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, un
     if( name == "debug1" )  { if( _level > spooler_com::log_debug1 )  return S_FALSE; }
     else
     if( name == "debug"  )  { if( _level > spooler_com::log_debug  )  return S_FALSE; }
-    else                                                                              
+    else
     if( name == "info"   )  { if( _level > spooler_com::log_info   )  return S_FALSE; }
     else
     if( name == "log"   )
@@ -1763,7 +1763,7 @@ STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, un
             if( dispparams->rgdispidNamedArgs[0] != DISPID_PROPERTYPUT )   return DISP_E_BADPARAMCOUNT;
             _level = int_from_variant( dispparams->rgvarg[0] );
         }
-        else 
+        else
         {
             if( dispparams->cNamedArgs != 0 )  return DISP_E_BADPARAMCOUNT;
 
@@ -1801,7 +1801,7 @@ STDMETHODIMP Com_log_proxy::put_level( int level )
 //-------------------------------------------------------------------------------Com_log_proxy::log
 /*
 STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
-{ 
+{
     HRESULT hr = NOERROR;
 
     if( level < _level )  return hr;
@@ -1843,7 +1843,7 @@ void Com_log_proxy::log2( zschimmer::Log_level log_level, const string&, const s
 #ifdef Z_COM
 
 const Com_method Com_job::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                            , _method                                               , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::Start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
     { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::Clear_when_directory_changed },
@@ -1889,7 +1889,7 @@ STDMETHODIMP Com_job::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
-//------------------------------------------------------------Com_job::start_when_directory_changed 
+//------------------------------------------------------------Com_job::start_when_directory_changed
 
 STDMETHODIMP Com_job::Start_when_directory_changed( BSTR directory_name, BSTR filename_pattern )
 {
@@ -1907,7 +1907,7 @@ STDMETHODIMP Com_job::Start_when_directory_changed( BSTR directory_name, BSTR fi
     return hr;
 }
 
-//------------------------------------------------------------Com_job::clear_when_directory_changed 
+//------------------------------------------------------------Com_job::clear_when_directory_changed
 
 STDMETHODIMP Com_job::Clear_when_directory_changed()
 {
@@ -1937,7 +1937,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
         ptr<Task>           task;
 
         ptr<Ivariable_set>  pars;
-        Time                start_at = Time(0); 
+        Time                start_at = Time(0);
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
@@ -2220,9 +2220,9 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
 
 // eMail von Püschel, 2008-02-24 17:12
 // Rückgabewert: liefert den Pfad des Jobs relativ zum Live-Directory. Der Pfad beginnt mit  einem "/", alle Bestandteile eines Pfads sind durch "/" getrennt
-// Beispiele: 
-// - für einen Job c:\scheduler\config\live\somewhere\excel\sample.job.xml wird "/somewhere/excel" zurückgeliefert 
-// - für einen Job c:\scheduler\config\live\sample.xml wird "/"  zurückgeliefert 
+// Beispiele:
+// - für einen Job c:\scheduler\config\live\somewhere\excel\sample.job.xml wird "/somewhere/excel" zurückgeliefert
+// - für einen Job c:\scheduler\config\live\sample.xml wird "/"  zurückgeliefert
 // - für einen Job außerhalb des Live-Verzeichnisses wird "" (Leerstring) zurückgeliefert
 // - die Methode liefert nicht null
 
@@ -2233,9 +2233,9 @@ STDMETHODIMP Com_job::get_Folder_path( BSTR* result )
     {
         if( !_job )  z::throw_xc( "SCHEDULER-122" );
 
-        hr = String_to_bstr( _job->has_base_file() && 
+        hr = String_to_bstr( _job->has_base_file() &&
                              _job->configuration_origin() == confdir_local?  // Siehe Püschels eMail vom 2008-02-24 17:12
-                                _job->folder_path() 
+                                _job->folder_path()
                               : Absolute_path(), result );
 
     }
@@ -2308,7 +2308,7 @@ STDMETHODIMP Com_job::get_Script_code( BSTR* result )
 #ifdef Z_COM  // JS-421 Com unter Unix
 
 const Com_method Com_task::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_Error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_Error              , VT_DISPATCH  },
@@ -2352,6 +2352,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::get_Order_params_xml   , VT_BSTR       },
     { DISPATCH_PROPERTYPUT, 36, "Order_params_xml"          , (Com_method_ptr)&Com_task::put_Order_params_xml   , VT_EMPTY      , { VT_BSTR } }, /* JS-421 get => put */
     { DISPATCH_PROPERTYGET, 37, "Web_service_access_token"  , (Com_method_ptr)&Com_task::get_Web_service_access_token, VT_BSTR  },
+    { DISPATCH_PROPERTYGET, 38, "agent_url"                 , (Com_method_ptr)&Com_task::get_Agent_url          , VT_BSTR       },
     //{ DISPATCH_METHOD     , 35, "Try_lock_else_call_me_again"              , (Com_method_ptr)&Com_task::Try_lock_else_call_me_again              , VT_BOOL, { VT_BSTR } },
     //{ DISPATCH_METHOD     , 36, "Try_lock_non_exclusive_else_call_me_again", (Com_method_ptr)&Com_task::Try_lock_non_exclusive_else_call_me_again, VT_BOOL, { VT_BSTR } },
     {}
@@ -2420,8 +2421,8 @@ ptr<object_server::Reference_with_properties> Com_task::get_reference_with_prope
 //-------------------------------------------------------------------------------Com_task::set_task
 
 void Com_task::set_task( Task* task )
-{ 
-    _task = task; 
+{
+    _task = task;
 }
 
 //----------------------------------------------------------------------------------Com_task::error
@@ -2496,7 +2497,7 @@ STDMETHODIMP Com_task::get_Params( Ivariable_set** result )
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
         *result = _task->params();
-        if( *result )  
+        if( *result )
         {
             (*result)->AddRef();
         }
@@ -2570,7 +2571,7 @@ STDMETHODIMP Com_task::get_Result( VARIANT* value )
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
-        VariantInit( value ); 
+        VariantInit( value );
         hr = VariantCopy( value, &_task->_result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
@@ -2724,7 +2725,7 @@ STDMETHODIMP Com_task::Try_hold_lock( BSTR lock_path_bstr, VARIANT_BOOL* result 
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE
                                                                             : VARIANT_FALSE;
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
@@ -2738,20 +2739,20 @@ STDMETHODIMP Com_task::Try_hold_lock( BSTR lock_path_bstr, VARIANT_BOOL* result 
 STDMETHODIMP Com_task::Try_hold_lock_non_exclusive( BSTR lock_path_bstr, VARIANT_BOOL* result )
 {
     Z_LOGI( Z_FUNCTION << '\n' );
-    
+
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 
-        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
+        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE
                                                                                                           : VARIANT_FALSE;
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -2760,9 +2761,9 @@ STDMETHODIMP Com_task::Try_hold_lock_non_exclusive( BSTR lock_path_bstr, VARIANT
 STDMETHODIMP Com_task::Call_me_again_when_locks_available()
 {
     Z_LOGI( Z_FUNCTION << '\n' );
-    
+
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2772,7 +2773,7 @@ STDMETHODIMP Com_task::Call_me_again_when_locks_available()
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -2781,21 +2782,21 @@ STDMETHODIMP Com_task::Call_me_again_when_locks_available()
 //STDMETHODIMP Com_task::Try_lock_else_call_me_again( BSTR lock_path_bstr, VARIANT_BOOL* result )
 //{
 //    Z_LOGI( Z_FUNCTION << '\n' );
-//    
+//
 //    HRESULT hr = S_OK;
-//    
+//
 //    try
 //    {
 //        if( !_task )  z::throw_xc( "SCHEDULER-122" );
 //        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 //
-//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE 
+//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ) )? VARIANT_TRUE
 //                                                                            : VARIANT_FALSE;
 //        if( !*result )  _task->delay_until_locks_available();
 //    }
 //    catch( const exception&  x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
 //    catch( const _com_error& x )  { hr = Set_excepinfo( x, Z_FUNCTION ); }
-//    
+//
 //    return hr;
 //}
 //
@@ -2812,7 +2813,7 @@ STDMETHODIMP Com_task::Call_me_again_when_locks_available()
 //        if( !_task )  z::throw_xc( "SCHEDULER-122" );
 //        if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
 //
-//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE 
+//        *result = _task->try_hold_lock( string_from_bstr( lock_path_bstr ), lock::Lock::lk_non_exclusive )? VARIANT_TRUE
 //                                                                                                          : VARIANT_FALSE;
 //        if( !*result )  _task->delay_until_locks_available();
 //    }
@@ -2827,9 +2828,9 @@ STDMETHODIMP Com_task::Call_me_again_when_locks_available()
 STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "(" << pid << "," << debug_string_from_variant( *timeout ) << ")\n" );
-    
+
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2841,7 +2842,7 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -2850,9 +2851,9 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 STDMETHODIMP Com_task::Remove_pid( int pid )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "(" << pid << ")\n" );
-    
+
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -2862,7 +2863,7 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -2871,7 +2872,7 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
 STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get_stderr, bool get_text )
 {
     HRESULT hr = S_OK;
-    
+
     try
     {
         *result = NULL;
@@ -2880,7 +2881,7 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
         if( current_thread_id() != _task->_spooler->thread_id() )  return E_ACCESSDENIED;
         if( !_task->_module_instance )  return S_FALSE;
 
-        string filename = get_stderr? _task->_module_instance->stderr_path() 
+        string filename = get_stderr? _task->_module_instance->stderr_path()
                                     : _task->_module_instance->stdout_path();
         if( filename == "" )  return S_FALSE;
 
@@ -2889,7 +2890,7 @@ STDMETHODIMP Com_task::get_Stderr_or_stdout_text_or_path( BSTR* result, bool get
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -2916,7 +2917,7 @@ STDMETHODIMP Com_task::get_Stderr_path( BSTR* result )
 STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "()\n" );
-    
+
     return get_Stderr_or_stdout_text_or_path( result, false, true );
 }
 
@@ -2925,7 +2926,7 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 STDMETHODIMP Com_task::get_Stdout_path( BSTR* result )
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "()\n" );
-    
+
     return get_Stderr_or_stdout_text_or_path( result, false, false );
 }
 
@@ -2946,21 +2947,21 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double* timeout, VARIANT_BOOL ig
 {
     Z_LOG2( "scheduler", Z_FUNCTION << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << is_process_group << ',' << string_from_bstr(title) << ")\n" );
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
 
-        _task->add_subprocess( pid, 
-                               Duration(*timeout), 
-                               ignore_error? true : false, 
-                               ignore_signal? true : false, 
+        _task->add_subprocess( pid,
+                               Duration(*timeout),
+                               ignore_error? true : false,
+                               ignore_signal? true : false,
                                is_process_group != 0,
                                string_from_bstr( title ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -3036,7 +3037,7 @@ STDMETHODIMP Com_task::get_Exit_code( int* result )
 STDMETHODIMP Com_task::get_Step_count( int* result )
 {
     HRESULT hr = S_OK;
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -3045,7 +3046,7 @@ STDMETHODIMP Com_task::get_Step_count( int* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -3058,7 +3059,7 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
     // Für <monitor>: Wenn spooler_process() eine Exception liefert, fängt der Scheduler sie zunächst ab,
     // meldet sie mit dieser Methode und ruft dann spooler_process_after().
     // Ohne <monitor> wird die Exception wie üblich geliefert.
-    
+
     try
     {
         if( !_task )  z::throw_xc( "SCHEDULER-122" );
@@ -3078,7 +3079,7 @@ STDMETHODIMP Com_task::Set_error_code_and_text( BSTR error_code, BSTR error_text
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-    
+
     return hr;
 }
 
@@ -3199,11 +3200,23 @@ STDMETHODIMP Com_task::put_Order_params_xml( BSTR xml_bstr )
     return hr;
 }
 
+STDMETHODIMP Com_task::get_Agent_url(BSTR* result) {
+    if (!_task )
+        return E_POINTER;
+    else
+        try {
+            return String_to_bstr(_task->remote_scheduler_address(), result);
+        }
+        catch (const exception& x) {
+            return _set_excepinfo( x, Z_FUNCTION );
+        }
+}
+
 //-------------------------------------------------------------------------Com_task_proxy::_methods
 // Dispid wie bei Com_task!
 
 const Com_method Com_task_proxy::_methods[] =
-{ 
+{
 #if defined COM_METHOD
     COM_METHOD      ( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, VT_BYREF|VT_VARIANT ),
     COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, VT_BSTR ),
@@ -3235,14 +3248,14 @@ HRESULT Com_task_proxy::Create_instance( zschimmer::com::object_server::Session*
 //-------------------------------------------------------------------Com_task_proxy::Com_task_proxy
 
 Com_task_proxy::Com_task_proxy()
-: 
+:
     Proxy_with_local_methods( &class_descriptor ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
 }
 
 //---------------------------------------------------------------------Com_task_proxy::set_property
-    
+
 void Com_task_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "subprocess_own_process_group_default" )  _subprocess_own_process_group_default = value.as_bool();
@@ -3250,7 +3263,7 @@ void Com_task_proxy::set_property( const string& name, const Variant& value )
     //if( name == "stdout_path" )  _stdout_path = value.as_string();
     //else
     //if( name == "stderr_path" )  _stderr_path = value.as_string();
-    else  
+    else
         z::throw_xc( Z_FUNCTION, name );
 }
 
@@ -3407,7 +3420,7 @@ void Com_task_proxy::wait_for_subprocesses()
 #ifdef Z_COM
 
 const Com_method Com_spooler::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_spooler::get_Log             , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  2, "id"                        , (Com_method_ptr)&Com_spooler::get_Id              , VT_BSTR      },
@@ -3834,14 +3847,14 @@ STDMETHODIMP Com_spooler::Terminate( VARIANT* timeout_v, VARIANT* restart_v, VAR
 
                            hr = My_variant_to_int ( *timeout_v       , &timeout        );
         if( !FAILED(hr) )  hr =    Variant_to_bool( *restart_v       , &restart        );
-        
+
         if( !FAILED(hr) )
         {
             bool b = false;     // Default
             hr = Variant_to_bool( *continue_exclusive_operation_v, &b );
-            if( !FAILED(hr) )  
+            if( !FAILED(hr) )
             {
-                continue_exclusive_operation = b? cluster::continue_exclusive_any 
+                continue_exclusive_operation = b? cluster::continue_exclusive_any
                                                 : cluster::continue_exclusive_non_backup;
             }
             else
@@ -3921,56 +3934,56 @@ STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 
 //---------------------------------------------------------Com_spooler::get_Db_variables_table_name
 
-STDMETHODIMP Com_spooler::get_Db_variables_table_name( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::get_Db_variables_table_name( BSTR* result )
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->db()->_variables_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_variables_tablename, result );
 }
 
 //-------------------------------------------------------------Com_spooler::get_Db_tasks_table_name
 
 STDMETHODIMP Com_spooler::get_Db_tasks_table_name( BSTR* result )
-{ 
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->db()->_tasks_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_tasks_tablename, result );
 }
 
 //------------------------------------------------------------Com_spooler::get_Db_orders_table_name
 
-STDMETHODIMP Com_spooler::get_Db_orders_table_name( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::get_Db_orders_table_name( BSTR* result )
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->db()->_orders_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_orders_tablename, result );
 }
 
 //-----------------------------------------------------------Com_spooler::get_Db_history_table_name
 
-STDMETHODIMP Com_spooler::get_Db_history_table_name( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::get_Db_history_table_name( BSTR* result )
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->db()->_job_history_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_job_history_tablename, result );
 }
 
 //-----------------------------------------------------Com_spooler::get_Db_order_history_table_name
 
-STDMETHODIMP Com_spooler::get_Db_order_history_table_name( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::get_Db_order_history_table_name( BSTR* result )
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->db()->_order_history_tablename, result ); 
+    return String_to_bstr( _spooler->db()->_order_history_tablename, result );
 }
 
 //------------------------------------------------------------------------Com_spooler::get_Ini_path
 
-STDMETHODIMP Com_spooler::get_Ini_path( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::get_Ini_path( BSTR* result )
+{
     if( !_spooler )  return E_POINTER;
-    return String_to_bstr( _spooler->_factory_ini, result ); 
+    return String_to_bstr( _spooler->_factory_ini, result );
 }
 
 //-------------------------------------------------------------------------Com_spooler::Execute_xml
 
-STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
+{
     HRESULT hr = S_OK;
 
     if( !_spooler )  return E_POINTER;
@@ -4107,7 +4120,7 @@ STDMETHODIMP Com_spooler::get_Configuration_directory( BSTR* result )
     try
     {
         string dir = _spooler->_configuration_directories[ confdir_local ];
-        
+
         if( string_ends_with( dir, "/" ) ||
             string_ends_with( dir, Z_DIR_SEPARATOR ) )  dir.erase( dir.length() - 1 );
 
@@ -4151,7 +4164,7 @@ STDMETHODIMP Com_spooler::get_Uri(BSTR* result) {
 // dispids wie bei Com_spooler::_methods!
 
 const Com_method Com_spooler_proxy::_methods[] =
-{ 
+{
 #ifdef Z_COM
     COM_PROPERTY_GET( Com_spooler_proxy,  7, Include_path          , VT_BSTR     , 0 ),
     COM_PROPERTY_GET( Com_spooler_proxy,  8, Log_dir               , VT_BSTR     , 0 ),
@@ -4179,21 +4192,21 @@ HRESULT Com_spooler_proxy::Create_instance( zschimmer::com::object_server::Sessi
 //-------------------------------------------------------------Com_spooler_proxy::Com_spooler_proxy
 
 Com_spooler_proxy::Com_spooler_proxy()
-: 
+:
     Proxy_with_local_methods( &class_descriptor )
 {
 }
 
 //--------------------------------------------------------------Com_spooler_proxy::get_Include_path
-    
-STDMETHODIMP Com_spooler_proxy::get_Include_path( BSTR* result )                    
-{ 
+
+STDMETHODIMP Com_spooler_proxy::get_Include_path( BSTR* result )
+{
     HRESULT hr = E_FAIL;
 
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.include_path" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.include_path" ), result );
     }
 
     return hr;
@@ -4201,14 +4214,14 @@ STDMETHODIMP Com_spooler_proxy::get_Include_path( BSTR* result )
 
 //-------------------------------------------------------------------Com_spooler_proxy::get_Log_dir
 
-STDMETHODIMP Com_spooler_proxy::get_Log_dir( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler_proxy::get_Log_dir( BSTR* result )
+{
     HRESULT hr = E_FAIL;
 
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.log_dir" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.log_dir" ), result );
     }
 
     return hr;
@@ -4216,29 +4229,29 @@ STDMETHODIMP Com_spooler_proxy::get_Log_dir( BSTR* result )
 
 //-----------------------------------------------------------------Com_spooler_proxy::get_Directory
 
-STDMETHODIMP Com_spooler_proxy::get_Directory( BSTR* result )                    
-{ 
+STDMETHODIMP Com_spooler_proxy::get_Directory( BSTR* result )
+{
     HRESULT hr = E_FAIL;
 
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.directory" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.directory" ), result );
     }
 
     return hr;
 }
 
 //------------------------------------------------------------------Com_spooler_proxy::get_Ini_path
-    
-STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )                    
-{ 
+
+STDMETHODIMP Com_spooler_proxy::get_Ini_path( BSTR* result )
+{
     HRESULT hr = E_FAIL;
 
     Object* o = session()->server()->get_class_object_or_null( spooler_com::CLSID_Remote_module_instance_server );
     if( Com_remote_module_instance_server::Class_data* c = dynamic_cast<Com_remote_module_instance_server::Class_data*>( o ) )
     {
-        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.ini_path" ), result ); 
+        hr = String_to_bstr( c->_task_process_element.getAttribute( "scheduler.ini_path" ), result );
     }
 
     return hr;
@@ -4264,7 +4277,7 @@ STDMETHODIMP Com_spooler_proxy::Create_xslt_stylesheet( spooler_com::Ixslt_style
 #ifdef Z_COM
 
 const Com_method Com_context::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_context::get_Log             , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  2, "spooler"                   , (Com_method_ptr)&Com_context::get_Spooler         , VT_DISPATCH  },
@@ -4278,7 +4291,7 @@ const Com_method Com_context::_methods[] =
 //-------------------------------------------------------------------------Com_context::Com_context
 
 Com_context::Com_context()
-: 
+:
     Sos_ole_object( spooler_context_class_ptr, this )
 {
 }
@@ -4286,13 +4299,13 @@ Com_context::Com_context()
 //-------------------------------------------------------------------------------Com_context::close
 
 void Com_context::close()
-{ 
+{
     {
         _log     = NULL;
-        _spooler = NULL; 
-      //_thread  = NULL; 
-        _job     = NULL; 
-      //if( _task )  _task->set_task(NULL), _task = NULL; 
+        _spooler = NULL;
+      //_thread  = NULL;
+        _job     = NULL;
+      //if( _task )  _task->set_task(NULL), _task = NULL;
         _task = NULL;
     }
 }
@@ -4301,7 +4314,7 @@ void Com_context::close()
 #ifdef COM_METHOD
 
 const Com_method Com_job_chain::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                            , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_Name           , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_Name           , VT_BSTR       },
@@ -4419,7 +4432,7 @@ STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
             case VT_BSTR:
             {
                 string jobname = string_from_variant(*job_or_jobname);
-                
+
                 job = jobname == ""  ||  stricmp( jobname.c_str(), "*end" ) == 0? NULL
                                                                                 : _job_chain->_spooler->job_subsystem()->job( Absolute_path( root_path, jobname ) );
                 break;
@@ -4481,9 +4494,9 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        order->place_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        order->place_in_job_chain( dynamic_cast<Job_chain*>( this ) );
         //dynamic_cast<Job_chain*>( this )->add_order( order );
-        
+
 
         *result = iorder;
         (*result)->AddRef();
@@ -4511,7 +4524,7 @@ STDMETHODIMP Com_job_chain::Add_or_replace_order( spooler_com::Iorder* iorder )
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        order->place_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        order->place_or_replace_in_job_chain( dynamic_cast<Job_chain*>( this ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -4537,7 +4550,7 @@ STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result 
         if( !order )  return E_INVALIDARG;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        *result = order->try_place_in_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
+        *result = order->try_place_in_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
@@ -4740,7 +4753,7 @@ STDMETHODIMP Com_job_chain::get_States(SAFEARRAY** result)
 #ifdef Z_COM
 
 const Com_method Com_job_chain_node::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                               , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "state"                     , (Com_method_ptr)&Com_job_chain_node::get_State        , VT_VARIANT   },
     { DISPATCH_PROPERTYGET,  2, "next_node"                 , (Com_method_ptr)&Com_job_chain_node::get_Next_node    , VT_DISPATCH  },
@@ -4774,8 +4787,8 @@ STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 
 //--------------------------------------------------------------------Com_job_chain_node::get_state
 
-STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result ) 
-{ 
+STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result )
+{
     job_chain::Node* node = static_cast<job_chain::Node*>( this );
     return node->order_state().CopyTo( result );
     //return VariantCopy( result, &((job_chain::Node*)(this))->order_state() );
@@ -4784,7 +4797,7 @@ STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result )
 //----------------------------------------------------------------Com_job_chain_node::get_next_node
 
 STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
-{ 
+{
     job_chain::Node* node = static_cast<job_chain::Node*>( this );
     *result = node->next_node();
     if( *result )  (*result)->AddRef();
@@ -4793,10 +4806,10 @@ STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 
 //---------------------------------------------------------------Com_job_chain_node::get_error_node
 
-STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )   
-{ 
+STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )
+{
     job_chain::Node* node = static_cast<job_chain::Node*>( this );
-    *result = node->error_node(); 
+    *result = node->error_node();
     if( *result )  (*result)->AddRef();
     return S_OK;
 }
@@ -4804,7 +4817,7 @@ STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )
 //---------------------------------------------------------------Com_job_chain_node::get_next_state
 
 STDMETHODIMP Com_job_chain_node::get_Next_state( VARIANT* result )
-{ 
+{
     job_chain::Node* node = static_cast<job_chain::Node*>( this );
     return node->next_state().CopyTo( result );
     //return VariantCopy( result, &((job_chain::Node*)(this))->next_state() );
@@ -4812,8 +4825,8 @@ STDMETHODIMP Com_job_chain_node::get_Next_state( VARIANT* result )
 
 //--------------------------------------------------------------Com_job_chain_node::get_error_state
 
-STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )   
-{ 
+STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )
+{
     job_chain::Node* node = static_cast<job_chain::Node*>( this );
     return node->error_state().CopyTo( result );
     //return VariantCopy( result, &((job_chain::Node*)(this))->error_state() );
@@ -4821,11 +4834,11 @@ STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )
 
 //----------------------------------------------------------------------Com_job_chain_node::get_job
 
-STDMETHODIMP Com_job_chain_node::get_Job( Ijob** result )              
-{ 
+STDMETHODIMP Com_job_chain_node::get_Job( Ijob** result )
+{
     if( job_chain::Job_node* job_node = job_chain::Job_node::try_cast( (job_chain::Node*)this ) )
     {
-        *result = job_node->job()->com_job(); 
+        *result = job_node->job()->com_job();
     }
 
     if( *result )  (*result)->AddRef();
@@ -4866,7 +4879,7 @@ STDMETHODIMP Com_job_chain_node::get_Action( BSTR* result )
 #ifdef Z_COM
 
 const Com_method Com_order::_methods[] =
-{ 
+{
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYPUT,  1, "id"                        , (Com_method_ptr)&Com_order::put_Id                , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
     { DISPATCH_PROPERTYGET,  1, "id"                        , (Com_method_ptr)&Com_order::get_Id                , VT_VARIANT    },
@@ -5010,7 +5023,7 @@ STDMETHODIMP Com_order::get_Title( BSTR* result )
 
     return hr;
 }
-    
+
 //--------------------------------------------------------------------------Com_order::put_priority
 
 STDMETHODIMP Com_order::put_Priority( int priority )
@@ -5046,7 +5059,7 @@ STDMETHODIMP Com_order::get_Priority( int* result )
 
     return hr;
 }
-    
+
 //-------------------------------------------------------------------------Com_order::get_job_chain
 
 STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
@@ -5060,7 +5073,7 @@ STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
         if( !_order )  return E_POINTER;
 
         Job_chain* job_chain = _order->job_chain_for_api();
-        if( job_chain )  
+        if( job_chain )
         {
             ptr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
             ijob_chain.CopyTo( result );
@@ -5256,7 +5269,7 @@ STDMETHODIMP Com_order::Payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
         string typname = lcase( string_from_bstr( typname_bstr ) );
 
         Variant payload = _order->payload();
-        
+
         switch( payload.vt )
         {
             case VT_UNKNOWN:
@@ -5269,7 +5282,7 @@ STDMETHODIMP Com_order::Payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
                     if( SUCCEEDED(hr)  )  { *result = true;  return hr; }
                 }
 
-                if( typname == "hostware.dyn_obj" 
+                if( typname == "hostware.dyn_obj"
                  || typname == "hostware.record" )
                 {
                     ptr<IUnknown> hostware_dynobj;
@@ -5280,7 +5293,7 @@ STDMETHODIMP Com_order::Payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
                 hr = S_FALSE;
                 break;
             }
-            
+
             default: ;
         }
     }
@@ -5325,7 +5338,7 @@ STDMETHODIMP Com_order::put_At( VARIANT* datetime )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
-                
+
     return hr;
 }
 
@@ -5376,7 +5389,7 @@ STDMETHODIMP Com_order::Remove_from_job_chain()
     {
         if( !_order )  return E_POINTER;
 
-        _order->remove( File_based::rm_base_file_too );  
+        _order->remove( File_based::rm_base_file_too );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
@@ -5715,7 +5728,7 @@ STDMETHODIMP Com_order::get_Last_error(BSTR* result) {
 #ifdef Z_COM
 
 const Com_method Com_order_queue::_methods[] =
-{ 
+{
    // _flags          , dispid, _name                       , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "length"                    , (Com_method_ptr)&Com_order_queue::get_Length      , VT_INT        },
   //{ DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::Add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },

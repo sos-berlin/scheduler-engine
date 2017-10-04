@@ -16,7 +16,13 @@ object JobEvent {
   private implicit val jobStateJsonFormat: JsonFormat[JobState] = JobState.MyJsonFormat
 
   implicit val jsonFormat: TypedJsonFormat[JobEvent] = TypedJsonFormat[JobEvent](
-    Subtype(jsonFormat1(JobStateChanged)))
+    Subtype(jsonFormat1(JobStateChanged)),
+    Subtype(jsonFormat0(() ⇒ JobUnstopped)),
+    Subtype(jsonFormat0(() ⇒ JobTaskQueueChanged)))
 }
 
 final case class JobStateChanged(state: JobState) extends JobEvent
+
+case object JobUnstopped extends JobEvent
+
+case object JobTaskQueueChanged extends JobEvent

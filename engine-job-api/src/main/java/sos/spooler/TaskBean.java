@@ -166,6 +166,10 @@ public final class TaskBean implements Bean<Task> {
         return delegate.web_service_access_token();
     }
 
+    public String getAgent_url() {
+        return delegate.agent_url();
+    }
+
     @Override public Task getDelegate() {
         return delegate;
     }

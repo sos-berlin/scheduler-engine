@@ -10,10 +10,13 @@ public enum CppEventCode {
     jobChainNodeActionChanged,
     jobChainStateChanged,
     jobStateChanged,
+    jobUnstopped,
+    jobTaskQueueChanged,
 
     taskStartedEvent,
     taskClosedEvent,
 
+    orderRemovedEvent,
     orderStartedEvent,
     orderFinishedEvent,
     orderSuspendedEvent,
