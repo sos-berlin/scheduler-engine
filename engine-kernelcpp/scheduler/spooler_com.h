@@ -65,8 +65,8 @@ typedef stdext::hash_map< string, ptr<Com_variable_set> >   Variable_set_map;
 
 //----------------------------------------------------------------------------------------Com_error
 
-struct Com_error: spooler_com::Ierror, 
-                  spooler_com::Ihas_java_class_name, 
+struct Com_error: spooler_com::Ierror,
+                  spooler_com::Ihas_java_class_name,
                   Sos_ole_object
 {
                                 Com_error                   ( const Xc_copy& );
@@ -97,8 +97,8 @@ void                            get_variable_name_and_value ( const xml::Element
 
 //-------------------------------------------------------------------------------------Com_variable
 
-struct Com_variable: spooler_com::Ivariable, 
-                     spooler_com::Ihas_java_class_name, 
+struct Com_variable: spooler_com::Ivariable,
+                     spooler_com::Ihas_java_class_name,
                      Sos_ole_object
 {
     Z_GNU_ONLY(                 Com_variable                ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -128,8 +128,8 @@ struct Com_variable: spooler_com::Ivariable,
 
 //----------------------------------------------------------------------------------Com_variable_set
 
-struct Com_variable_set: spooler_com::Ivariable_set, 
-                         spooler_com::Ihas_java_class_name, 
+struct Com_variable_set: spooler_com::Ivariable_set,
+                         spooler_com::Ihas_java_class_name,
                          Sos_ole_object,
                          zschimmer::Get_string_by_name_interface,
                          javabridge::has_proxy<Com_variable_set>
@@ -166,12 +166,12 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     int64                       get_int64                   ( const string& name, int64 deflt ) const;
     bool                        get_bool                    ( const string& name, bool deflt ) const;
     string                      get_string_by_name          ( const string& name, bool* name_found ) const;
-   
+
     bool contains(const Bstr& name) {
         return _map.find(name) != _map.end();
     }
 
-    ArrayListJ java_names() const; 
+    ArrayListJ java_names() const;
     void                        merge                       ( const Ivariable_set* );
     ptr<Com_variable_set>       clone                       ();
     string                      to_environment_string       () const;
@@ -189,7 +189,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
     STDMETHODIMP                Merge                       ( spooler_com::Ivariable_set* );
-    STDMETHODIMP            get__NewEnum                    ( IUnknown** );    
+    STDMETHODIMP            get__NewEnum                    ( IUnknown** );
     STDMETHODIMP            put_Xml                         ( BSTR xml_text );
     STDMETHODIMP            get_Xml                         ( BSTR* xml_text );
     void                    set_xml_string                  ( const string& xml_text );
@@ -222,7 +222,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
     STDMETHODIMP_(ULONG)        AddRef                  ()                                          { return Sos_ole_object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                 ()                                          { return Sos_ole_object::Release(); }
     STDMETHODIMP                QueryInterface          ( const IID&, void** );
-    
+
     //USE_SOS_OLE_OBJECT_WITHOUT_QI
 
                                 Com_variable_set_enumerator();
@@ -240,16 +240,16 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
 //------------------------------------------------------------------------------------------Com_log
 
-struct Com_log : spooler_com::Ilog, 
-                 spooler_com::Ihas_java_class_name, 
+struct Com_log : spooler_com::Ilog,
+                 spooler_com::Ihas_java_class_name,
                  z::com::object_server::Ihas_reference_with_properties,
-                 Sos_ole_object               
+                 Sos_ole_object
 {
                                 Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
-   
+
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
 
@@ -287,7 +287,7 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            put_Mail_on_error               ( VARIANT_BOOL );
     STDMETHODIMP            get_Mail_on_error               ( VARIANT_BOOL* );
-    
+
     STDMETHODIMP            put_Mail_on_success             ( VARIANT_BOOL );
     STDMETHODIMP            get_Mail_on_success             ( VARIANT_BOOL* );
 
@@ -318,7 +318,7 @@ struct Com_log : spooler_com::Ilog,
     STDMETHODIMP            get_Mail_on_warning             ( VARIANT_BOOL* );
 
     STDMETHODIMP                Start_new_file              ();
-    
+
     Prefix_log*                 log                         () const                                { return _log; }
 
   private:
@@ -342,7 +342,7 @@ struct Com_log_proxy: object_server::Proxy,
     void                    set_property                    ( const string& name, const Variant& value );
 
   //STDMETHODIMP                QueryInterface              ( const IID&, void** );
-   
+
   //STDMETHODIMP                GetIDsOfNames               ( const IID&, OLECHAR** rgszNames, UINT cNames, LCID, DISPID* );
 
     STDMETHODIMP                Invoke                      ( DISPID, const IID&, LCID, unsigned short wFlags, DISPPARAMS*,
@@ -381,9 +381,9 @@ struct Com_log_proxy: object_server::Proxy,
 
 //------------------------------------------------------------------------------------------Com_job
 
-struct Com_job : spooler_com::Ijob, 
-                 spooler_com::Ihas_java_class_name, 
-                 Sos_ole_object               
+struct Com_job : spooler_com::Ijob,
+                 spooler_com::Ihas_java_class_name,
+                 Sos_ole_object
 {
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Standard_job* );
@@ -418,7 +418,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP            get_Process_class               ( spooler_com::Iprocess_class** );
     STDMETHODIMP            get_Folder_path                 ( BSTR* );
     STDMETHODIMP            get_Configuration_directory     ( BSTR* );
-    STDMETHODIMP            get_Setback_max(int*);  // this getter is deprecated - use Max_order_setbacks instead 
+    STDMETHODIMP            get_Setback_max(int*);  // this getter is deprecated - use Max_order_setbacks instead
     STDMETHODIMP            get_Script_code(BSTR*);
     STDMETHODIMP            get_Max_order_setbacks(int*);
 
@@ -428,10 +428,10 @@ struct Com_job : spooler_com::Ijob,
 
 //-----------------------------------------------------------------------------------------Com_task
 
-struct Com_task : spooler_com::Itask, 
-                  spooler_com::Ihas_java_class_name, 
+struct Com_task : spooler_com::Itask,
+                  spooler_com::Ihas_java_class_name,
                   z::com::object_server::Ihas_reference_with_properties,
-                  Sos_ole_object               
+                  Sos_ole_object
 {
                                 Com_task                    ( Task* = NULL );
                                ~Com_task                    ()                                      {}
@@ -446,9 +446,9 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Task"; }
 
-    
+
     // Interface Ireference_with_properties
-    
+
     ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
 
 
@@ -499,7 +499,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Order_params_xml            ( BSTR* );
     STDMETHODIMP            put_Order_params_xml            ( BSTR );
     STDMETHODIMP            get_Web_service_access_token    (BSTR*);
-
+    STDMETHODIMP            get_Agent_url                   (BSTR*);
     //STDMETHODIMP            Try_lock_else_call_me_again( BSTR, VARIANT_BOOL* );
     //STDMETHODIMP            Try_lock_non_exclusive_else_call_me_again( BSTR, VARIANT_BOOL* );
 
@@ -510,7 +510,7 @@ struct Com_task : spooler_com::Itask,
 };
 
 //-----------------------------------------------------------------------------------Com_task_proxy
-                                    
+
 //Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
 
 struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy, spooler_com::Itask_proxy >
@@ -549,16 +549,16 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
 //--------------------------------------------------------------------------------------Com_spooler
 
-struct Com_spooler : spooler_com::Ispooler, 
-                     spooler_com::Ihas_java_class_name, 
+struct Com_spooler : spooler_com::Ispooler,
+                     spooler_com::Ihas_java_class_name,
                      z::com::object_server::Ihas_reference_with_properties,
-                     Sos_ole_object               
+                     Sos_ole_object
 {
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
-                                Com_spooler                 ( Spooler* ); 
+                                Com_spooler                 ( Spooler* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
-    
+
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     // Interface Ihas_reference_with_properties
@@ -646,7 +646,7 @@ struct Com_spooler_proxy : object_server::proxy_with_local_methods< Com_spooler_
 
 //--------------------------------------------------------------------------------------Com_context
 
-struct Com_context : spooler_com::Ispooler_context, Sos_ole_object               
+struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 {
                                 Com_context                 ();
 
@@ -669,9 +669,9 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
 //------------------------------------------------------------------------------------Com_job_chain
 
-struct Com_job_chain : spooler_com::Ijob_chain, 
-                       spooler_com::Ihas_java_class_name, 
-                       Sos_ole_object               
+struct Com_job_chain : spooler_com::Ijob_chain,
+                       spooler_com::Ihas_java_class_name,
+                       Sos_ole_object
 {
                                 Com_job_chain           ( Job_chain* );
 
@@ -688,9 +688,9 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP            get_Name                    ( BSTR* );
 
     STDMETHODIMP            get_Order_count             ( int* );
-    
+
     STDMETHODIMP            get_Order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
-    
+
     STDMETHODIMP            get_Node                    ( VARIANT* state, spooler_com::Ijob_chain_node** );
 
     STDMETHODIMP                Add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
@@ -714,7 +714,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP            get_Path                    (BSTR*);
 
     STDMETHODIMP            get_States                  ( SAFEARRAY** result );
-    
+
 
   private:
     Job_chain*       _job_chain;
@@ -722,9 +722,9 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
 //-------------------------------------------------------------------------------Com_job_chain_node
 
-struct Com_job_chain_node : spooler_com::Ijob_chain_node, 
-                            spooler_com::Ihas_java_class_name, 
-                            Sos_ole_object               
+struct Com_job_chain_node : spooler_com::Ijob_chain_node,
+                            spooler_com::Ihas_java_class_name,
+                            Sos_ole_object
 {
                                 Com_job_chain_node      ();
 
@@ -752,8 +752,8 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 
 //----------------------------------------------------------------------------------------Com_order
 
-struct Com_order : spooler_com::Iorder, 
-                   spooler_com::Ihas_java_class_name, 
+struct Com_order : spooler_com::Iorder,
+                   spooler_com::Ihas_java_class_name,
                    Sos_ole_object
 {
                                 Com_order               ( Order* );
@@ -773,33 +773,33 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            put_Title                   ( BSTR );
     STDMETHODIMP            get_Title                   ( BSTR* );
-    
+
     STDMETHODIMP            put_Priority                ( int );
     STDMETHODIMP            get_Priority                ( int* );
-    
+
     STDMETHODIMP            get_Job_chain               ( spooler_com::Ijob_chain** );
 
     STDMETHODIMP            get_Job_chain_node          ( spooler_com::Ijob_chain_node** );
-    
+
   //STDMETHODIMP            put_Job                     ( VARIANT* );
   //STDMETHODIMP         putref_Job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_Job( &v ); }
   //STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
-    
+
     STDMETHODIMP            put_State                   ( VARIANT* );
     STDMETHODIMP            get_State                   ( VARIANT* );
-    
+
     STDMETHODIMP            put_State_text              ( BSTR );
     STDMETHODIMP            get_State_text              ( BSTR* );
-    
+
     STDMETHODIMP            get_Error                   ( spooler_com::Ierror** );
-    
+
     STDMETHODIMP            put_Payload                 ( VARIANT* );
     STDMETHODIMP         putref_Payload                 ( IUnknown* );
     STDMETHODIMP            get_Payload                 ( VARIANT* );
-    
+
     STDMETHODIMP                Payload_is_type         ( BSTR, VARIANT_BOOL* );
 
-    STDMETHODIMP                Setback                 (); 
+    STDMETHODIMP                Setback                 ();
 
     STDMETHODIMP            put_At                      ( VARIANT* );
     STDMETHODIMP            get_At                      ( DATE* );
@@ -822,7 +822,7 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP            put_Xml_payload             ( BSTR );
     STDMETHODIMP            get_Xml_payload             ( BSTR* );
-    
+
     STDMETHODIMP            put_Params                  ( spooler_com::Ivariable_set* );
     STDMETHODIMP            get_Params                  ( spooler_com::Ivariable_set** );
 
@@ -830,7 +830,7 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            get_Suspended               ( VARIANT_BOOL* );
 
     STDMETHODIMP            get_Log                     ( spooler_com::Ilog** );
-    
+
     STDMETHODIMP            put_End_state               ( VARIANT* );
     STDMETHODIMP            get_End_state               ( VARIANT* );
 
@@ -850,9 +850,9 @@ struct Com_order : spooler_com::Iorder,
 
 //----------------------------------------------------------------------------------Com_order_queue
 
-struct Com_order_queue : spooler_com::Iorder_queue, 
-                         spooler_com::Ihas_java_class_name, 
-                         Sos_ole_object               
+struct Com_order_queue : spooler_com::Iorder_queue,
+                         spooler_com::Ihas_java_class_name,
+                         Sos_ole_object
 {
                                 Com_order_queue         ();
 
@@ -874,9 +874,9 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 
 //-----------------------------------------------------------------------------------Com_subprocess
 
-struct Com_subprocess : spooler_com::Isubprocess, 
-                        spooler_com::Ihas_java_class_name, 
-                        Sos_ole_object               
+struct Com_subprocess : spooler_com::Isubprocess,
+                        spooler_com::Ihas_java_class_name,
+                        Sos_ole_object
 {
                                 Com_subprocess          ();
 

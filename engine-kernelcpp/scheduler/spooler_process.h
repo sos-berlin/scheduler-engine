@@ -33,7 +33,7 @@ struct Api_process_configuration : javabridge::has_proxy<Api_process_configurati
     int _task_id;
     bool _has_api;
     bool _is_thread;
-    bool _log_stdout_and_stderr;   // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren      
+    bool _log_stdout_and_stderr;   // Prozess oder Thread soll stdout und stderr selbst über COM/TCP protokollieren
     string _priority;
     ptr<Com_variable_set> _environment;
     ptr<Login> _login;
@@ -72,7 +72,7 @@ struct Api_process : virtual Process {
     virtual void close__end() = 0;
     virtual void close_session() = 0;
     virtual void check_exception() {}
-    
+
     virtual string remote_scheduler_address() {
         return "";
     }
@@ -120,7 +120,7 @@ struct Process_class_configuration : idispatch_implementation< Process_class, sp
     STDMETHODIMP            put_Max_processes               ( int );
     STDMETHODIMP            get_Max_processes               ( int* result )                         { *result = _max_processes;  return S_OK; }
 
-  protected: 
+  protected:
     protected: virtual bool is_http_or_multiple(const string& remote_scheduler_address) const = 0;
 
     Fill_zero                  _zero_;
@@ -193,7 +193,7 @@ struct Process_class : Process_class_configuration,
         doc.appendChild(doc.createElement("XXX"));
         return xml::Element_ptr(dom_element(doc, Show_what()));
     }
-    
+
     public: bool max_processes_reached() const {
         return used_process_count() >= _max_processes;
     }
@@ -202,8 +202,8 @@ struct Process_class : Process_class_configuration,
         return _process_set.size();
     }
 
-    bool is_remote_host() const { 
-        return !_remote_scheduler_address.empty() || typed_java_sister().hasMoreAgents(); 
+    bool is_remote_host() const {
+        return !_remote_scheduler_address.empty() || typed_java_sister().hasMoreAgents();
     }
 
     const ProcessClassJ& typed_java_sister() const {
@@ -247,7 +247,7 @@ struct Process_class_folder : typed_folder<Process_class>
 
 //--------------------------------------------------------------------------Process_class_subsystem
 
-struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>, 
+struct Process_class_subsystem : idispatch_implementation< Process_class_subsystem, spooler_com::Iprocess_classes>,
                                  file_based_subsystem< Process_class >,
                                  javabridge::has_proxy<Process_class_subsystem>
 {

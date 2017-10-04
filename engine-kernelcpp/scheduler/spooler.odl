@@ -51,8 +51,8 @@ library Spooler
         log_debug2 = -2,
         log_debug1 = -1,
         log_debug  = -1,
-        log_info   =  0, 
-        log_warn   =  1, 
+        log_info   =  0,
+        log_warn   =  1,
         log_error  =  2,
       //log_fatal  =  3
     };
@@ -167,7 +167,7 @@ library Spooler
         HRESULT                 Merge                       ( [in] Ivariable_set* other);
 
         [id(DISPID_NEWENUM),propget,restricted]
-        HRESULT                 _NewEnum                    ( [out,retval] IUnknown** enumerator );    
+        HRESULT                 _NewEnum                    ( [out,retval] IUnknown** enumerator );
 
         [id(6),propput]
         HRESULT                 Xml                         ( [in] BSTR xml_text );
@@ -202,7 +202,7 @@ library Spooler
         dual
     ]
     interface Ivariable_set_enumerator : IEnumVARIANT
-    { 
+    {
         HRESULT                 Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched );
         HRESULT                 Skip                    ( unsigned long celt );
         HRESULT                 Reset                   ();
@@ -317,16 +317,16 @@ library Spooler
         [id(17)]
         HRESULT                 Execute_command             ( [in] BSTR );                      // F�r Joacim 2006-02-20
 
-        [id(18),propput]                                                                               
+        [id(18),propput]
         HRESULT                 Machine_resumable           ( [in] VARIANT_BOOL );              // F�r Joacim 2006-06-15
 
         [id(19),propget]                                                                               
         HRESULT                 Process_class               ( [out,retval] Iprocess_class** );
 
-        [id(20),propget]        
+        [id(20),propget]
         HRESULT                 Folder_path                 ( [out,retval] BSTR* );
 
-        [id(21),propget]        
+        [id(21),propget]
         HRESULT                 Configuration_directory     ( [out,retval] BSTR* );
 
         /* this getter is deprecated - use Max_order_setbacks instead */
@@ -418,7 +418,7 @@ library Spooler
 
         // Only for Itask_proxy
         [id(21)]
-        HRESULT                 Add_subprocess              ( [in] int Pid, [in] double* timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, 
+        HRESULT                 Add_subprocess              ( [in] int Pid, [in] double* timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal,
                                                               [in] VARIANT_BOOL kill_dependants_too, [in,defaultvalue("")] BSTR Title );
 
         [id(22),propput]
@@ -483,6 +483,9 @@ library Spooler
 
         [id(37), propget]
         HRESULT                 Web_service_access_token    ([out, retval] BSTR*);
+
+        [id(38),propget]
+        HRESULT                 Agent_url                   ([out,retval] BSTR*);
 
         //[id(35)]
         //HRESULT                 Try_lock_else_call_me_again ( [in] BSTR, [out,retval] VARIANT_BOOL* );
@@ -676,19 +679,19 @@ library Spooler
         [id(36),propput]
         HRESULT                 Suspend_after_resume    ( [in] VARIANT_BOOL );
 
-        [id(37),propget]        
+        [id(37),propget]
         HRESULT                 Locks                   ( [out,retval] Ilocks** );
 
-        [id(38),propget]        
+        [id(38),propget]
         HRESULT                 Process_classes         ( [out,retval] Iprocess_classes** );
 
-        [id(39),propget]        
+        [id(39),propget]
         HRESULT                 Supervisor_client       ( [out,retval] Isupervisor_client** );
 
-        [id(40),propget]        
+        [id(40),propget]
         HRESULT                 Configuration_directory ( [out,retval] BSTR* );
 
-        [id(41),propget]        
+        [id(41),propget]
         HRESULT                 Schedule                ( [in] BSTR, [out,retval] Ischedule** );
 
         [id(42),propget]
@@ -880,7 +883,7 @@ library Spooler
         //[propget]
         //HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name �ber IDispatch, statt �ber Ihas_java_class_name gerufen werden kann
     }
-    
+
     //--------------------------------------------------------------------------------Job_chain_node
 
     [
@@ -951,7 +954,7 @@ library Spooler
         HRESULT                 Order_count             ( [out,retval] int* Result );
 
         [id(3)]
-        HRESULT                 Add_job                 ( [in]          VARIANT* jobname, 
+        HRESULT                 Add_job                 ( [in]          VARIANT* jobname,
                                                           [in,optional] VARIANT* input_state,
                                                           [in,optional] VARIANT* output_state,
                                                           [in,optional] VARIANT* Error_state );
@@ -974,7 +977,7 @@ library Spooler
         HRESULT                 Orders_recoverable      ( [out,retval] VARIANT_BOOL* );
 
         [id(10)]
-        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // F�r Joacim, 2005-02-27 (was fehlt: Werden alle Auftr�ge in DB gel�scht? Wird eine Historie geschieben? 
+        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // F�r Joacim, 2005-02-27 (was fehlt: Werden alle Auftr�ge in DB gel�scht? Wird eine Historie geschieben?
                                                                                             // Besser mit Orders_recoverable=false!
                                                                                             // Vielleicht besser so:
                                                                                             // Begin_refresh_all_orders()
@@ -989,10 +992,10 @@ library Spooler
 
         [id(13)]
         HRESULT                 Remove                  ();
-    
+
         [id(14),propput]
         HRESULT                 Title                   ( [in] BSTR );
-    
+
         [id(14),propget]
         HRESULT                 Title                   ( [out,retval] BSTR* );
 
@@ -1241,19 +1244,19 @@ library Spooler
 
         [id(9)]
         HRESULT                 Debug1                  ( [in] BSTR line );
-        
+
         [id(10)]
         HRESULT                 Debug                   ( [in] BSTR line );
-        
+
         [id(0)]
         HRESULT                 Info                    ( [in] BSTR line );
-        
+
         [id(11)]
         HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilit�t, wie info()
-        
+
         [id(12)]
         HRESULT                 Warn                    ( [in] BSTR line );
-        
+
         [id(13)]
         HRESULT                 Error                   ( [in] BSTR line );
 
@@ -1361,16 +1364,16 @@ library Spooler
         HRESULT                 Debug3                  ( [in] BSTR line );
         HRESULT                 Debug2                  ( [in] BSTR line );
         HRESULT                 Debug1                  ( [in] BSTR line );
-        
+
         HRESULT                 Debug                   ( [in] BSTR line );
-        
+
         [id(0)]
         HRESULT                 Info                    ( [in] BSTR line );
-        
+
         HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilit�t, wie info()
-        
+
         HRESULT                 Warn                    ( [in] BSTR line );
-        
+
         HRESULT                 Error                   ( [in] BSTR line );
 
         HRESULT                 Log                     ( [in] enum Log_level, [in] BSTR line );
@@ -1460,10 +1463,10 @@ library Spooler
         HRESULT                 Priority                ( [out,retval] int* );
 
         [id(5),propput]
-        HRESULT                 Priority_class          ( [in] BSTR );                      
+        HRESULT                 Priority_class          ( [in] BSTR );
 
         [id(5),propget]
-        HRESULT                 Priority_class          ( [out,retval] BSTR* );             
+        HRESULT                 Priority_class          ( [out,retval] BSTR* );
 
       //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
@@ -1543,7 +1546,7 @@ library Spooler
     }
 
     //-----------------------------------------------------------------------------Ixslt_stylesheet
-    
+
     [
         uuid       ( feee47ac-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1601,7 +1604,7 @@ library Spooler
     };
     */
     //---------------------------------------------------------------------------------Iweb_service
-    
+
     [
         uuid       ( feee47ad-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1629,7 +1632,7 @@ library Spooler
     };
 
     //-----------------------------------------------------------------------Iweb_service_operation
-    
+
     [
         uuid       ( feee47ae-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1657,7 +1660,7 @@ library Spooler
     };
 
     //-------------------------------------------------------------------------Iweb_service_request
-    
+
     [
         uuid       ( feee47af-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1688,7 +1691,7 @@ library Spooler
     };
 
     //-------------------------------------------------------------------------Iweb_service_request
-    
+
     [
         uuid       ( feee47b0-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1713,7 +1716,7 @@ library Spooler
 
         [id(5),propput]
         HRESULT                 Binary_content          ( [in] SAFEARRAY(unsigned char) );
-        
+
         [id(6)]
         HRESULT                 Send                    ();
 
@@ -1731,7 +1734,7 @@ library Spooler
     };
 
     //---------------------------------------------------------------------------------------Ilocks
-    
+
     [
         uuid       ( feee47b5-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1756,7 +1759,7 @@ library Spooler
     };
 
     //----------------------------------------------------------------------------------------Ilock
-    
+
     [
         uuid       ( feee47b6-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1784,7 +1787,7 @@ library Spooler
     };
 
     //-----------------------------------------------------------------------------Iprocess_classes
-    
+
     [
         uuid       ( feee47b7-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1809,7 +1812,7 @@ library Spooler
     };
 
     //-------------------------------------------------------------------------------Iprocess_class
-    
+
     [
         uuid       ( feee47b8-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1843,7 +1846,7 @@ library Spooler
     };
 
     //---------------------------------------------------------------------------Isupervisor_client
-    
+
     [
         uuid       ( feee47b9-6c1b-11d8-8103-000476ee8afb ),
         odl,

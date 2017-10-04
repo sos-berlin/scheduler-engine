@@ -299,6 +299,11 @@ public class Task extends Idispatch implements HasBean<TaskBean>
         return (String)com_call("<web_service_access_token");
     }
 
+    @SchedulerGetter
+    public String agent_url() {
+        return (String)com_call("<agent_url");
+    }
+
     @Override public final TaskBean toBean() {
         return new TaskBean(this);
     }
