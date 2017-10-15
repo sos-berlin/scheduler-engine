@@ -37,7 +37,7 @@ final class SlowIT extends FreeSpec with ScalaSchedulerTest {
   override protected lazy val testConfiguration = TestConfiguration(getClass,
     binariesDebugMode = Some(CppBinariesDebugMode.release))
 
-  "Speed test" in {
+  if (sys.props contains "test.speed") "Speed test" in {
     val root = testEnvironment.newFileOrderSourceDirectory()
     val dir = root / "dir"
     createDirectory(dir)
