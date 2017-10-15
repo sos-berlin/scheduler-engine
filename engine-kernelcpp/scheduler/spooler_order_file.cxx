@@ -30,7 +30,7 @@ using namespace job_chain;
 
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
-const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
+const Duration                  file_order_sink_job_idle_timeout_default  = Duration(0);
 const Duration minimum_delay = Duration(1);
 const int                       max_tries                                 = 2;        // Nach Fehler machen wir sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
@@ -248,9 +248,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
 struct File_order_sink_job : Internal_job {
     File_order_sink_job(Scheduler* scheduler) :
         Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, "FileOrderSink"))
-    {
-        set_idle_timeout(Duration(0));
-    }
+    {}
 };
 
 //-----------------------------------------------------------------------------init_file_order_sink
