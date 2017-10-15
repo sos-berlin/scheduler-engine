@@ -129,8 +129,7 @@ Order::~Order()
 
 void Order::load_record( const Absolute_path& job_chain_path, const Record& record )
 {
-    _job_chain_path = job_chain_path;
-    //_job_chain_path.set_absolute( "/", job_chain_path );
+    set_job_chain_path(job_chain_path);
 
     set_id      ( record.as_string( "id"         ) );   _id_locked = true;
     _state      = record.as_string( "state"      );
@@ -2426,8 +2425,7 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
 
     _job_chain = NULL;
-    _job_chain_path.clear();
-
+    clear_job_chain_path();
 
     if( job_chain_stack_option == jc_remove_from_job_chain_stack )  
     {
@@ -2484,7 +2482,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         if( job_chain->_order_id_space )
         {
             Order* other_order = job_chain->_order_id_space->order_or_null( string_id() );
-            is_new = !other_order  ||  other_order == this && job_chain->subsystem()->normalized_path( _job_chain_path ) != job_chain->normalized_path();  // is_new, wenn Auftragskennung neu oder derselbe Auftrag nicht in job_chain ist.
+            is_new = !other_order  ||  other_order == this && _normalized_job_chain_path != job_chain->normalized_path();  // is_new, wenn Auftragskennung neu oder derselbe Auftrag nicht in job_chain ist.
         }
         else
         for( Retry_transaction ta ( db() ); ta.enter_loop(); ta++ ) try
@@ -2548,7 +2546,7 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
         if( !_is_distribution_inhibited  &&  job_chain->is_distributed() )  set_distributed();
 
-        _job_chain_path = job_chain->path();
+        set_job_chain_path(job_chain->path());
         _removed_from_job_chain_path.clear();
 
         activate_schedule();     // Errechnet die nächste Startzeit
@@ -2579,6 +2577,16 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
 
     assert( !exists_exception || is_new );
     return is_new;
+}
+
+void Order::set_job_chain_path(const Absolute_path& path) {
+    _job_chain_path = path;
+    _normalized_job_chain_path = order_subsystem()->normalized_path(path);
+}
+
+void Order::clear_job_chain_path() {
+   _job_chain_path.clear();
+   _normalized_job_chain_path.clear();
 }
 
 //-------------------------------------------------------------Order::place_or_replace_in_job_chain
@@ -2947,7 +2955,7 @@ void Order::move_to_nested_job_chain(Job_chain* next_job_chain)
     Job_chain* previous_job_chain = _job_chain;
     string outer_job_chain_path = _outer_job_chain_path;
     _state.clear();     // Lässt place_in_job_chain() den ersten Zustand der Jobkette nehmen
-    if (next_job_chain->normalized_path() == _job_chain->subsystem()->normalized_path(_job_chain_path)) {
+    if (next_job_chain->normalized_path() == _normalized_job_chain_path) {
         set_state(next_job_chain->first_node()->order_state());
     } else {
         place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette

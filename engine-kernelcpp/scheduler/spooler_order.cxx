@@ -2861,7 +2861,7 @@ void Job_chain::add_order( Order* order )
         z::throw_xc("SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state));
 
     order->_job_chain      = this;
-    order->_job_chain_path = path();
+    order->set_job_chain_path(path());
     order->_removed_from_job_chain_path.clear();
     order->_log->set_prefix( order->obj_name() );
 
@@ -2887,7 +2887,7 @@ void Job_chain::add_order( Order* order )
 
 void Job_chain::remove_order( Order* order )
 {
-    assert( subsystem()->normalized_path( order->_job_chain_path ) == normalized_path() );
+    assert(order->_normalized_job_chain_path == normalized_path());
     assert( order->_job_chain == this );
     assert( !order->_is_db_occupied );
 
@@ -2908,7 +2908,7 @@ void Job_chain::remove_order( Order* order )
     }
 
     order->_job_chain      = NULL;
-    order->_job_chain_path.clear();
+    order->clear_job_chain_path();
     order->_log->set_prefix( order->obj_name() );
 
     unregister_order( order );
@@ -4594,8 +4594,8 @@ void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act
         Standing_order_subsystem::File_based_map order_map = _spooler->standing_order_subsystem()->_file_based_map;
         Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, order_map, i) {
             Order* o = i->second;
-            if (_spooler->order_subsystem()->normalized_path(o->_job_chain_path) == normalized_job_chain_path && 
-                o->_state == _order_queue_node->order_state()) 
+            if (o->_normalized_job_chain_path == normalized_job_chain_path &&
+                o->_state == _order_queue_node->order_state())
             {
                 o->check_for_replacing_or_removing_with_distributed(when_to_act);
             }

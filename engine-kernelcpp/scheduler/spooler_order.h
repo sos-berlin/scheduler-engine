@@ -314,6 +314,8 @@ struct Order : Com_order,
     void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
+    void                        set_job_chain_path      (const Absolute_path& path);
+    void                        clear_job_chain_path    ();
     void                        java_remove             ()                                          { remove(rm_standard); }
     void                        remove                  ( File_based::Remove_flag );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack, Transaction* = NULL );
@@ -428,6 +430,7 @@ struct Order : Com_order,
     string                     _title;
     bool                       _title_modified;
     Absolute_path              _job_chain_path;
+    string                     _normalized_job_chain_path;
     Absolute_path              _outer_job_chain_path;
     State                      _outer_job_chain_state;
     Payload                    _payload;
