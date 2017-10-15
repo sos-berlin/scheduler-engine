@@ -2770,7 +2770,7 @@ ptr<Task> Standard_job::task_to_start()
     if( _state == s_pending  &&  _max_tasks > 0  &&  now >= _next_single_start )  
     {
         cause = cause_period_single, log_lines += "Task starts due to <period single_start=\"...\">\n";
-        has_order = request_order(now, obj_name());
+        has_order = request_order(now, Z_FUNCTION);
     }
     else
     if( is_in_period(now) )
@@ -2802,7 +2802,7 @@ ptr<Task> Standard_job::task_to_start()
             cause = cause_min_tasks, log_lines = "Task starts due to min_tasks\n";
         }
 
-        has_order = request_order( now, obj_name() );
+        has_order = request_order( now, Z_FUNCTION);
     }
     else
     {
