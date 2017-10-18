@@ -408,6 +408,9 @@ struct Standard_job : Job
     public: int max_tasks() const {
         return _max_tasks;
     }
+    
+  protected:
+    bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
 
     public: int running_tasks_count() const {
         return _running_tasks.size();
@@ -488,7 +491,6 @@ struct Standard_job : Job
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once_for_directory;
     bool                       _machine_resumable;          // Test
-    bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
     bool                       _ignore_every_signal;        // Nur Unix: Nach Beendigung mit Signal (kill, Absturz) den Job nicht stoppen 
     stdext::hash_set<int>      _ignore_signals_set;
 

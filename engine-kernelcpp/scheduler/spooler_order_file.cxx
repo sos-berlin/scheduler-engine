@@ -249,6 +249,7 @@ struct File_order_sink_job : Internal_job {
     File_order_sink_job(Scheduler* scheduler) :
         Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, "FileOrderSink"))
     {
+        _stop_on_error = false;
         set_idle_timeout(Duration(0));
     }
 };
