@@ -46,6 +46,25 @@
 
         #region Public Properties
 
+        #region Properties
+        //powershell exit
+        public int ExitCode
+        {
+            get
+            {
+                return exitCode;
+            }
+        }
+
+        //windows native program exit
+        public int LastExitCode { get; set; }
+
+        public String LastFunctionWithExitCode { get; private set; }
+
+        #endregion
+
+        #region Override
+
         public override CultureInfo CurrentCulture
         {
             get
@@ -62,15 +81,6 @@
             }
         }
 
-        //powershell exit
-        public int ExitCode
-        {
-            get
-            {
-                return exitCode;
-            }
-        }
-
         public override Guid InstanceId
         {
             get
@@ -78,9 +88,6 @@
                 return hostId;
             }
         }
-
-        //windows native program exit
-        public int LastExitCode { get; set; }
 
         public override string Name
         {
@@ -108,6 +115,8 @@
 
         #endregion
 
+        #endregion
+
         #region Public Methods
 
         public override void EnterNestedPrompt()
@@ -132,12 +141,17 @@
         {
             if (exitCode == 0)
             {
-                exitCode = shouldExitCode;
-                ui.WriteExitCodeError(exitCode);
-                spooler_task.set_exit_code(exitCode);
+                if (shouldExitCode != 0)
+                {
+                    exitCode = shouldExitCode;
+                    LastFunctionWithExitCode = ui.CurrentFunctionName;
+                    ui.WriteExitCodeError(exitCode);
+                    spooler_task.set_exit_code(exitCode);
+                }
             }
             else if (shouldExitCode != LastExitCode)
             {
+                LastFunctionWithExitCode = ui.CurrentFunctionName;
                 ui.WriteExitCodeWarning(shouldExitCode);
             }
         }

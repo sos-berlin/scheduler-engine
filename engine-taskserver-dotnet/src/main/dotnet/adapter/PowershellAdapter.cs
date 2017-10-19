@@ -91,8 +91,7 @@
             try
             {
                 InitializeScript(false);
-                var result = InvokeFunction("spooler_init");
-                return GetReturnValue(result, true);
+                return InvokeFunction("spooler_init", true);
             }
             catch (RuntimeException ex)
             {
@@ -141,8 +140,7 @@
 
             try
             {
-                var result = InvokeFunction("spooler_open");
-                return GetReturnValue(result, true);
+                return InvokeFunction("spooler_open", true);
             }
             catch (RuntimeException ex)
             {
@@ -159,11 +157,14 @@
                     spoolerParams.SetEnvVars();
                     InitializeScript(true);
                     HandleGlobalLastExitCode(true);
+                    if (host.ExitCode != 0)
+                    {
+                        return false;
+                    }
                     return IsOrderJob;
                 }
 
-                var result = InvokeFunction("spooler_process");
-                return GetReturnValue(result, IsOrderJob);
+                return InvokeFunction("spooler_process", true);
             }
             catch (RuntimeException ex)
             {
@@ -175,8 +176,7 @@
         {
             try
             {
-                var result = InvokeFunction("spooler_process_after", spoolerProcessResult);
-                return GetReturnValue(result, spoolerProcessResult);
+                return InvokeFunction("spooler_process_after", true, spoolerProcessResult);
             }
             catch (RuntimeException ex)
             {
@@ -188,8 +188,7 @@
         {
             try
             {
-                var result = InvokeFunction("spooler_process_before");
-                return GetReturnValue(result, true);
+                return InvokeFunction("spooler_process_before", true);
             }
             catch (RuntimeException ex)
             {
@@ -218,8 +217,7 @@
             try
             {
                 InitializeScript(false);
-                var result = InvokeFunction("spooler_task_before");
-                return GetReturnValue(result, true);
+                return InvokeFunction("spooler_task_before", true);
             }
             catch (RuntimeException ex)
             {
@@ -231,7 +229,7 @@
 
         #region Methods
 
-        private static string GetErrorMessage(String functionName, ErrorRecord errorRecord)
+        private string GetErrorMessage(String functionName, ErrorRecord errorRecord)
         {
             var sb = new StringBuilder();
             if (!String.IsNullOrEmpty(functionName))
@@ -243,20 +241,21 @@
             return sb.ToString();
         }
 
-        private static bool GetReturnValue(string result, bool defaultValue)
+        private bool GetReturnValue(string functionName, string result)
         {
-            var rs = defaultValue;
-            if (result != null)
+            if (!String.IsNullOrEmpty(host.LastFunctionWithExitCode)
+                    && host.LastFunctionWithExitCode.Equals(functionName))
             {
-                try
-                {
-                    rs = Boolean.Parse(result);
-                }
-                catch (Exception)
-                {
-                }
+                return false;
             }
-            return rs;
+
+            bool returnValue;
+            if (!Boolean.TryParse(result, out returnValue))
+            {
+                returnValue = functionName.Equals("spooler_process") && !IsOrderJob ? false : true;
+            }
+
+            return returnValue;
         }
 
         private int GetGlobalLastExitCode(bool useLocalScope)
@@ -280,7 +279,7 @@
         {
             runspace.Close();
             runspace.Dispose();
-            
+
             runspace = null;
             host = null;
             spoolerParams = null;
@@ -312,7 +311,7 @@
             return result;
         }
 
-        private string InvokeFunction(String functionName, bool? param = null)
+        private bool InvokeFunction(string functionName, bool doReturn = false, bool? param = null)
         {
             ((PowershellAdapterPSHostUserInterface)host.UI).CurrentFunctionName = functionName;
 
@@ -330,7 +329,14 @@
 
             var result = InvokeScript(false, command);
             HandleGlobalLastExitCode(false, functionName);
-            return result;
+
+            var returnValue = true;
+            if (doReturn)
+            {
+                returnValue = GetReturnValue(functionName, result);
+            }
+
+            return returnValue;
         }
 
         private string InvokeScript(bool useLocalScope, String command)
