@@ -19,16 +19,23 @@ private[task] final case class StdFiles(
   stdFileMap: Map[StdoutStderrType, Path],
   encoding: Charset = Encoding,
   stderrLogLevel: SchedulerLogLevel,
-  log: (SchedulerLogLevel, String) ⇒ Unit)
+  log: (SchedulerLogLevel, String) ⇒ Unit,
+  onErrorLogged: List[() ⇒ Unit] = Nil)
 {
   val toLevel = Map(Stdout → SchedulerLogLevel.info, Stderr → stderrLogLevel)
 
   def output(t: StdoutStderrType, batch: immutable.Seq[String]): Unit = {
-    val prefixedLines = stderrLogLevel match {
-      case SchedulerLogLevel.info ⇒ batch map { lines ⇒ prefixLinesWithStdoutOrStderr(t, lines) }
-      case _ ⇒ batch
+    if (batch.nonEmpty) {
+      val prefixedLines = stderrLogLevel match {
+        case SchedulerLogLevel.info ⇒ batch map { lines ⇒ prefixLinesWithStdoutOrStderr(t, lines) }
+        case _ ⇒ batch
+      }
+      val level = toLevel(t)
+      log(level, prefixedLines mkString "\n")
+      if (level == SchedulerLogLevel.error) {
+        for (f ← onErrorLogged) f()
+      }
     }
-    log(toLevel(t), prefixedLines mkString "\n")
   }
 
   def nonEmpty = !isEmpty

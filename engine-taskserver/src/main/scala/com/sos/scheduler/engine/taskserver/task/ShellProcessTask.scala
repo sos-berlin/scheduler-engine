@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger, SetOnce}
 import com.sos.scheduler.engine.common.utils.JavaShutdownHook
 import com.sos.scheduler.engine.common.xml.VariableSets
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.data.TaskServerConfiguration._
 import com.sos.scheduler.engine.taskserver.modules.shell.ShellModule
 import com.sos.scheduler.engine.taskserver.task.ShellProcessTask._
@@ -51,6 +52,7 @@ extends HasCloser with Task {
   private val richProcessOnce = new SetOnce[RichProcess]
   private val logger = Logger.withPrefix(getClass, toString)
   private var sigtermForwarder: Option[JavaShutdownHook] = None
+  @volatile private var errorLogged = false
 
   def start() = {
     requireState(!startCalled)
@@ -94,7 +96,10 @@ extends HasCloser with Task {
       processStdFileMap = RichProcess.createStdFiles(logDirectory, id = logFilenamePart, logon map { _.user })
     }
     concurrentStdoutStderrWell = new ConcurrentStdoutAndStderrWell(s"Job $jobName",
-      stdFiles.copy(stdFileMap = processStdFileMap ++ stdFiles.stdFileMap)).closeWithCloser
+      stdFiles.copy(
+        stdFileMap = processStdFileMap ++ stdFiles.stdFileMap,
+        onErrorLogged = { () ⇒ errorLogged = true } :: stdFiles.onErrorLogged)
+    ).closeWithCloser
     val processConfiguration = ProcessConfiguration(
       processStdFileMap,
       additionalEnvironment = env,
@@ -120,12 +125,16 @@ extends HasCloser with Task {
         logger.warn("step, but no process has been started")
         <process.result spooler_process_result="false" exit_code="999888999"/>.toString()
       case Some(richProcess) ⇒
-        val rc = richProcess.waitForTermination()
+        val returnCode = richProcess.waitForTermination()
         for (o ← sigtermForwarder) o.close()
         concurrentStdoutStderrWell.finish()
         transferReturnValuesToMaster()
-        val success = monitorProcessor.postStep(rc.isSuccess)
-        <process.result spooler_process_result={success.toString} exit_code={rc.toInt.toString} state_text={concurrentStdoutStderrWell.firstStdoutLine}/>.toString()
+        val success = monitorProcessor.postStep(returnCode.isSuccess)
+        <process.result
+          spooler_process_result={(!errorLogged && success).toString}
+          exit_code={returnCode.toInt.toString}
+          state_text={concurrentStdoutStderrWell.firstStdoutLine}/>
+        .toString()
     }
   }
 
