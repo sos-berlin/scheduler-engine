@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.modules.dotnet
 
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.dotnet.api.{DotnetModuleInstanceFactory, DotnetModuleReference, TaskContext}
 import com.sos.scheduler.engine.taskserver.moduleapi.{ModuleArguments, ModuleFactory, ModuleLanguage, RawModuleArguments}
 import com.sos.scheduler.engine.taskserver.modules.javamodule.{ApiModule, JavaModule}
@@ -13,11 +14,14 @@ final class DotnetModule private[dotnet](val arguments: DotnetModule.Arguments, 
 extends ApiModule {
   import DotnetModule._
 
-  def newJobInstance(namedIDispatches: TypedNamedIDispatches) =
-    factory.newInstance(classOf[sos.spooler.Job_impl], namedIDispatchesToTaskContext(namedIDispatches), arguments.reference)
+  def newJobInstance(namedIDispatches: TypedNamedIDispatches, stderrLogLevel: SchedulerLogLevel) =
+    factory.newInstance(
+      classOf[sos.spooler.Job_impl],
+      namedIDispatchesToTaskContext(namedIDispatches, stderrLogLevel),
+      arguments.reference)
 
-  def newMonitorInstance(namedIDispatches: TypedNamedIDispatches) =
-    factory.newInstance(classOf[sos.spooler.Monitor_impl], namedIDispatchesToTaskContext(namedIDispatches), arguments.reference)
+  def newMonitorInstance(namedIDispatches: TypedNamedIDispatches, stderrLogLevel: SchedulerLogLevel) =
+    factory.newInstance(classOf[sos.spooler.Monitor_impl], namedIDispatchesToTaskContext(namedIDispatches, stderrLogLevel), arguments.reference)
 }
 
 object DotnetModule {
@@ -48,11 +52,12 @@ object DotnetModule {
     override def toString = s"DotnetModule.Factory($factory)"
   }
 
-  private def namedIDispatchesToTaskContext(namedIDispatches: TypedNamedIDispatches) = TaskContext(
+  private def namedIDispatchesToTaskContext(namedIDispatches: TypedNamedIDispatches, stderrLogLevel: SchedulerLogLevel) = TaskContext(
     JavaModule.spooler_log(namedIDispatches),
     JavaModule.spooler_task(namedIDispatches),
     JavaModule.spooler_job(namedIDispatches),
-    JavaModule.spooler(namedIDispatches))
+    JavaModule.spooler(namedIDispatches),
+    stderrLogLevel)
 
   final case class Arguments(moduleFactory: ModuleFactory, reference: DotnetModuleReference) extends ModuleArguments
 }

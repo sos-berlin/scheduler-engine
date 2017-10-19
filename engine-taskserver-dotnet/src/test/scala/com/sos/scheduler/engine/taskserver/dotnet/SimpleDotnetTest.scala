@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.SideEffect.ImplicitSideEffect
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
 import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.dotnet.SimpleDotnetTest._
 import com.sos.scheduler.engine.taskserver.dotnet.api.{DotnetModuleReference, TaskContext}
 import org.mockito.Mockito._
@@ -42,7 +43,8 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
         new sos.spooler.Log(spoolerLogInvoker),
         new sos.spooler.Task(spoolerTaskInvoker),
         new sos.spooler.Job(spoolerJobInvoker),
-        new sos.spooler.Spooler(spoolerInvoker))
+        new sos.spooler.Spooler(spoolerInvoker),
+        SchedulerLogLevel.info)
 
       val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
@@ -70,7 +72,8 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
         new sos.spooler.Log(spoolerLogInvoker),
         new sos.spooler.Task(spoolerTaskInvoker),
         new sos.spooler.Job(spoolerJobInvoker),
-        new sos.spooler.Spooler(spoolerInvoker))
+        new sos.spooler.Spooler(spoolerInvoker),
+        SchedulerLogLevel.info)
       val job = instanceFactory.newInstance(classOf[sos.spooler.Job_impl], taskContext, dotnetModuleReference)
       job.spooler_init()
       val result = job.spooler_process()

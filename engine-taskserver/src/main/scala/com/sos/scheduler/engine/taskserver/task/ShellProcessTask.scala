@@ -44,7 +44,7 @@ extends HasCloser with Task {
   import commonArguments.{agentTaskId, hasOrder, jobName, monitors, namedIDispatches, stdFiles}
   import namedIDispatches.spoolerTask
 
-  private val monitorProcessor = MonitorProcessor.create(monitors, namedIDispatches).closeWithCloser
+  private val monitorProcessor = MonitorProcessor.create(monitors, namedIDispatches, commonArguments.stdFiles.stderrLogLevel).closeWithCloser
   private var orderParamsFile: Path = null
   private var processStdFileMap: Map[StdoutStderrType, Path] = Map()
   private var concurrentStdoutStderrWell: ConcurrentStdoutAndStderrWell = null

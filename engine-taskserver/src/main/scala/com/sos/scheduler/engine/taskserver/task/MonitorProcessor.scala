@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.task
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.moduleapi.ModuleArguments
 import com.sos.scheduler.engine.taskserver.modules.javamodule.ApiModule
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, TypedNamedIDispatches}
@@ -13,7 +14,7 @@ final class MonitorProcessor private(instances: Vector[sos.spooler.Monitor_impl]
 extends HasCloser {
 
   def preTask(): Boolean = instances forall { _.spooler_task_before() }
-  
+
   def postTask(): Unit =
     for (i ← instances.reverseIterator) {
       try i.spooler_task_after()
@@ -32,10 +33,10 @@ extends HasCloser {
 }
 
 object MonitorProcessor {
-  def create(monitors: Seq[Monitor], namedIDispatches: TypedNamedIDispatches) = {
+  def create(monitors: Seq[Monitor], namedIDispatches: TypedNamedIDispatches, stderrLogLevel: SchedulerLogLevel) = {
     def newMonitorInstance(args: ModuleArguments): sos.spooler.Monitor_impl =
       args.newModule() match {
-        case module: ApiModule ⇒ module.newMonitorInstance(namedIDispatches)
+        case module: ApiModule ⇒ module.newMonitorInstance(namedIDispatches, stderrLogLevel)
         case module ⇒ throw new IllegalArgumentException(s"Unsupported module class '${module.getClass.getSimpleName}' for a monitor")
       }
     new MonitorProcessor(monitors.toVector map { o ⇒ newMonitorInstance(o.moduleArguments) }, namedIDispatches.spoolerLog)

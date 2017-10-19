@@ -23,8 +23,8 @@ extends Task with HasCloser {
   import commonArguments.{jobName, monitors, namedIDispatches, stdFiles}
   import namedIDispatches.spoolerTask
 
-  private val monitorProcessor = MonitorProcessor.create(monitors, namedIDispatches).closeWithCloser
-  private val instance: sos.spooler.Job_impl = module.newJobInstance(namedIDispatches)
+  private val monitorProcessor = MonitorProcessor.create(monitors, namedIDispatches, commonArguments.stdFiles.stderrLogLevel).closeWithCloser
+  private val instance: sos.spooler.Job_impl = module.newJobInstance(namedIDispatches, commonArguments.stdFiles.stderrLogLevel)
   private val methodIsCalled = mutable.Set[String]()
   private val concurrentStdoutStderrWell = stdFiles.nonEmpty option new ConcurrentStdoutAndStderrWell(s"Job $jobName", stdFiles).closeWithCloser
   private var closeCalled = false

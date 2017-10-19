@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.modules.javamodule
 
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.moduleapi.ModuleArguments
 import com.sos.scheduler.engine.taskserver.modules.javamodule.JavaModule._
 import com.sos.scheduler.engine.taskserver.spoolerapi.TypedNamedIDispatches
@@ -12,7 +13,7 @@ trait JavaModule extends ApiModule {
   protected def newJobInstance(): sos.spooler.Job_impl
   protected def newMonitorInstance(): sos.spooler.Monitor_impl
 
-  final def newJobInstance(namedIDispatches: TypedNamedIDispatches): sos.spooler.Job_impl = {
+  final def newJobInstance(namedIDispatches: TypedNamedIDispatches, stderrLogLevel/*unused*/: SchedulerLogLevel): sos.spooler.Job_impl = {
     val r = newJobInstance()
     r.spooler_log = spooler_log(namedIDispatches)
     r.spooler_task = spooler_task(namedIDispatches)
@@ -21,7 +22,7 @@ trait JavaModule extends ApiModule {
     r
   }
 
-  final def newMonitorInstance(namedIDispatches: TypedNamedIDispatches): sos.spooler.Monitor_impl = {
+  final def newMonitorInstance(namedIDispatches: TypedNamedIDispatches, stderrLogLevel/*unused*/: SchedulerLogLevel): sos.spooler.Monitor_impl = {
     val r = newMonitorInstance()
     r.spooler_log = spooler_log(namedIDispatches)
     r.spooler_task = spooler_task(namedIDispatches)
