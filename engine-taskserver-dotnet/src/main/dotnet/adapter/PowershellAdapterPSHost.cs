@@ -14,15 +14,18 @@
         private readonly CultureInfo currentUiCulture;
         private readonly Guid hostId;
         private readonly PowershellAdapterPSHostUserInterface ui;
+        private readonly Task spooler_task;
+        private int exitCode;
 
         #endregion
 
         #region Constructors and Destructors
 
-        public PowershellAdapterPSHost(Log log)
+        public PowershellAdapterPSHost(Task task, Log log)
         {
-            this.hostId = Guid.NewGuid();
-            this.ui = new PowershellAdapterPSHostUserInterface(log);
+            hostId = Guid.NewGuid();
+            ui = new PowershellAdapterPSHostUserInterface(log);
+            spooler_task = task;
             var culture = Thread.CurrentThread.CurrentCulture;
             var uiCulture = Thread.CurrentThread.CurrentUICulture;
             if (culture != null && culture.Name != null)
@@ -35,8 +38,8 @@
                     Thread.CurrentThread.CurrentUICulture = uiCulture;
                 }
             }
-            this.currentCulture = culture;
-            this.currentUiCulture = uiCulture;
+            currentCulture = culture;
+            currentUiCulture = uiCulture;
         }
 
         #endregion
@@ -47,7 +50,7 @@
         {
             get
             {
-                return this.currentCulture;
+                return currentCulture;
             }
         }
 
@@ -55,7 +58,16 @@
         {
             get
             {
-                return this.currentUiCulture;
+                return currentUiCulture;
+            }
+        }
+
+        //powershell exit
+        public int ExitCode
+        {
+            get
+            {
+                return exitCode;
             }
         }
 
@@ -63,15 +75,18 @@
         {
             get
             {
-                return this.hostId;
+                return hostId;
             }
         }
+
+        //windows native program exit
+        public int LastExitCode { get; set; }
 
         public override string Name
         {
             get
             {
-                return "PowershellAdapterPSHost";
+                return "JobSchedulerPowershellAdapterPSHost";
             }
         }
 
@@ -79,7 +94,7 @@
         {
             get
             {
-                return this.ui;
+                return ui;
             }
         }
 
@@ -113,10 +128,20 @@
         {
         }
 
-        public override void SetShouldExit(int exitCode)
+        public override void SetShouldExit(int shouldExitCode)
         {
+            if (exitCode == 0)
+            {
+                exitCode = shouldExitCode;
+                ui.WriteExitCodeError(exitCode);
+                spooler_task.set_exit_code(exitCode);
+            }
+            else if (shouldExitCode != LastExitCode)
+            {
+                ui.WriteExitCodeWarning(shouldExitCode);
+            }
         }
 
-        #endregion
+        #endregion        
     }
 }

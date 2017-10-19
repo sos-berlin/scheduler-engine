@@ -13,6 +13,8 @@
 
         private readonly PowershellAdapterPSHostRawUserInterface rawUi;
         private readonly Log spooler_log;
+        private string currentFunctionName;
+        private string currentFunctionNameFormatted;
 
         #endregion
 
@@ -20,13 +22,26 @@
 
         public PowershellAdapterPSHostUserInterface(Log log)
         {
-            this.spooler_log = log;
-            this.rawUi = new PowershellAdapterPSHostRawUserInterface();
+            spooler_log = log;
+            rawUi = new PowershellAdapterPSHostRawUserInterface();
         }
 
         #endregion
 
         #region Public Properties
+
+        public String CurrentFunctionName
+        {
+            get
+            {
+                return currentFunctionName;
+            }
+            set
+            {
+                currentFunctionName = value;
+                currentFunctionNameFormatted = String.IsNullOrEmpty(currentFunctionName) ? "" : String.Format("[{0}] ", currentFunctionName);
+            }
+        }
 
         public String LastInfoMessage { get; set; }
 
@@ -34,7 +49,7 @@
         {
             get
             {
-                return this.rawUi;
+                return rawUi;
             }
         }
 
@@ -42,6 +57,22 @@
 
         #region Public Methods
 
+        #region Methods
+        public void WriteExitCodeError(int exitCode)
+        {
+            spooler_log.error(String.Format(
+                    "{0}Process terminated with exit code {1}. See the following warning SCHEDULER-280.", currentFunctionNameFormatted, exitCode));
+        }
+
+        public void WriteExitCodeWarning(int exitCode)
+        {
+            spooler_log.warn(String.Format(
+                    "{0}Process terminated with exit code {1}.", currentFunctionNameFormatted, exitCode));
+        }
+
+        #endregion
+
+        #region Override Methods 
         public override Dictionary<string, PSObject> Prompt(
             string caption, string message, Collection<FieldDescription> descriptions)
         {
@@ -79,27 +110,27 @@
 
         public override void Write(string value)
         {
-            this.WriteInfo(value);
+            WriteInfo(value);
         }
 
         public override void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value)
         {
-            this.WriteInfo(value);
+            WriteInfo(value);
         }
 
         public override void WriteDebugLine(string message)
         {
-            this.spooler_log.debug3(GetOutputMessage(message));
+            spooler_log.debug3(GetOutputMessage(message));
         }
 
         public override void WriteErrorLine(string message)
         {
-            Console.Error.WriteLine(GetOutputMessage(message));
+            Console.Error.WriteLine(String.Format("{0}{1}", currentFunctionNameFormatted, GetOutputMessage(message)));
         }
 
         public override void WriteLine(string value)
         {
-            this.WriteInfo(value);
+            WriteInfo(value);
         }
 
         public override void WriteProgress(long sourceId, ProgressRecord record)
@@ -108,13 +139,15 @@
 
         public override void WriteVerboseLine(string message)
         {
-            this.spooler_log.debug(GetOutputMessage(message));
+            spooler_log.debug(GetOutputMessage(message));
         }
 
         public override void WriteWarningLine(string message)
         {
-            this.spooler_log.warn(GetOutputMessage(message));
+            spooler_log.warn(GetOutputMessage(message));
         }
+
+        #endregion
 
         #endregion
 
@@ -128,8 +161,8 @@
         private void WriteInfo(string message)
         {
             var val = GetOutputMessage(message);
-            this.LastInfoMessage = val;
-            this.spooler_log.info(val);
+            LastInfoMessage = val;
+            spooler_log.info(val);
         }
 
         #endregion
