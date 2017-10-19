@@ -13,15 +13,15 @@
 
         #region Constructor
 
-        public SpoolerParams(Task task, Spooler spooler, bool isOrderJob, bool isShellMode)
+        public SpoolerParams(Task task, Spooler sp, bool orderJob, bool shellMode)
         {
-            this.spoolerTask = task;
-            this.spooler = spooler;
-            this.isOrderJob = isOrderJob;
-            this.isShellMode = isShellMode;
-            if (this.isShellMode)
+            spoolerTask = task;
+            spooler = sp;
+            isOrderJob = orderJob;
+            isShellMode = shellMode;
+            if (isShellMode)
             {
-                this.schedulerVariableNamePrefix = this.spooler.variables().value("scheduler.variable_name_prefix");
+                schedulerVariableNamePrefix = spooler.variables().value("scheduler.variable_name_prefix");
             }
         }
 
@@ -31,11 +31,11 @@
 
         public Variable_set getAll()
         {
-            var parameters = this.spooler.create_variable_set();
-            parameters.merge(this.spoolerTask.@params());
-            if (this.isOrderJob)
+            var parameters = spooler.create_variable_set();
+            parameters.merge(spoolerTask.@params());
+            if (isOrderJob)
             {
-                var op = this.spoolerTask.order();
+                var op = spoolerTask.order();
                 if (op != null)
                 {
                     parameters.merge(op.@params());
@@ -47,27 +47,27 @@
         public string get(string name)
         {
             var result = "";
-            if (this.isOrderJob)
+            if (isOrderJob)
             {
-                var op = this.spoolerTask.order();
+                var op = spoolerTask.order();
                 if (op != null)
                 {
                     result = op.@params().var(name);
                 }
             }
-            return string.IsNullOrEmpty(result) ? this.spoolerTask.@params().var(name) : result;
+            return string.IsNullOrEmpty(result) ? spoolerTask.@params().var(name) : result;
         }
 
         public string value(string name)
         {
-            return this.get(name);
+            return get(name);
         }
 
         public void set(string name, string value)
         {
-            if (this.isOrderJob)
+            if (isOrderJob)
             {
-                var op = this.spoolerTask.order();
+                var op = spoolerTask.order();
                 if (op != null)
                 {
                     op.@params().set_var(name, value);
@@ -75,12 +75,12 @@
             }
             else
             {
-                this.spoolerTask.@params().set_var(name, value);
+                spoolerTask.@params().set_var(name, value);
             }
 
-            if (this.isShellMode)
+            if (isShellMode)
             {
-                this.SetEnvVar(name, value);
+                SetEnvVar(name, value);
             }
         }
 
@@ -90,16 +90,20 @@
 
         internal void SetEnvVars()
         {
-            if (!this.isShellMode)
+            if (!isShellMode)
             {
                 return;
             }
 
-            var parameters = this.getAll();
-            var names = parameters.names().Split(';');
-            foreach (var name in names)
+            var parameters = getAll();
+            var parameterNames = getAll().names();
+            if (!String.IsNullOrEmpty(parameterNames))
             {
-                this.SetEnvVar(name, parameters.var(name));
+                var names = parameterNames.Split(';');
+                foreach (var name in names)
+                {
+                    SetEnvVar(name, parameters.var(name));
+                }
             }
         }
 
@@ -109,11 +113,7 @@
 
         private void SetEnvVar(string name, string value)
         {
-            if (!this.isShellMode)
-            {
-                return;
-            }
-            Environment.SetEnvironmentVariable(this.schedulerVariableNamePrefix + name.ToUpper(), value);
+            Environment.SetEnvironmentVariable(schedulerVariableNamePrefix + name.ToUpper(), value);
         }
 
         #endregion
