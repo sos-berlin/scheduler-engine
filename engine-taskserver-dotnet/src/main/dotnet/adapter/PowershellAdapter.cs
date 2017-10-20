@@ -22,8 +22,8 @@
         #region Constructors and Destructors
 
         public PowershellAdapter(
-            Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String scriptContent)
-            : base(contextLog, contextTask, contextJob, contextSpooler, scriptContent)
+            Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String contextStdErrLogLevel, String scriptContent)
+            : base(contextLog, contextTask, contextJob, contextSpooler, contextStdErrLogLevel, scriptContent)
         {
             ParseScript();
             spoolerParams = new PowershellSpoolerParams(spooler_task, spooler, IsOrderJob, isShellMode);
@@ -161,6 +161,10 @@
                     {
                         return false;
                     }
+                    if (ExitOnStdError())
+                    {
+                        return false;
+                    }
                     return IsOrderJob;
                 }
 
@@ -241,10 +245,41 @@
             return sb.ToString();
         }
 
+        private bool ExitOnStdError(string functionName = null)
+        {
+
+            if (IsStdErrLogLevel)
+            {
+                var ui = (PowershellAdapterPSHostUserInterface)host.UI;
+                if (ui.HasStdErr)
+                {
+                    if (isShellMode)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(ui.LastFunctionWithStdErr)
+                            && ui.LastFunctionWithStdErr.Equals(functionName))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private bool GetReturnValue(string functionName, string result)
         {
             if (!String.IsNullOrEmpty(host.LastFunctionWithExitCode)
                     && host.LastFunctionWithExitCode.Equals(functionName))
+            {
+                return false;
+            }
+
+            if (ExitOnStdError(functionName))
             {
                 return false;
             }

@@ -24,6 +24,7 @@
         {
             spooler_log = log;
             rawUi = new PowershellAdapterPSHostRawUserInterface();
+            HasStdErr = false;
         }
 
         #endregion
@@ -43,6 +44,10 @@
             }
         }
 
+        public bool HasStdErr { get; private set; }
+
+        public String LastFunctionWithStdErr { get; private set; }
+       
         public String LastInfoMessage { get; set; }
 
         public override PSHostRawUserInterface RawUI
@@ -125,6 +130,8 @@
 
         public override void WriteErrorLine(string message)
         {
+            HasStdErr = true;
+            LastFunctionWithStdErr = CurrentFunctionName;
             Console.Error.WriteLine(String.Format("{0}{1}", currentFunctionNameFormatted, GetOutputMessage(message)));
         }
 
