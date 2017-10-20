@@ -42,7 +42,7 @@ with UnmodifiableJobChain {
     private var _edgeSet: Set[(NodeId, NodeId)] = null
     private val predecessorsMap = mutable.Map[String, java.util.ArrayList[String]]() withDefault { nodeIdString ⇒
       if (_edgeSet == null) {
-        _edgeSet = (nodeMap.values filter { _.action == next_state } map { o ⇒ o.nodeId → o.nextNodeId }).toSet
+        _edgeSet = (_nodeMap.values filter { _.action == next_state } map { o ⇒ o.nodeId → o.nextNodeId }).toSet
       }
       val result = new java.util.ArrayList[String]
       result.addAll(allPredecessors(_edgeSet, NodeId(nodeIdString)) map { _.string } )
@@ -136,19 +136,23 @@ with UnmodifiableJobChain {
   }
 
   def jobNodes(query: JobChainNodeQuery): Iterator[JobNode] =
-    jobNodes.iterator filter { o ⇒ query.matches(o.queryable) }
-
-  lazy val jobNodes: immutable.Seq[JobNode] =
     inSchedulerThread {
-      nodes collect { case o: JobNode ⇒ o }
+      _jobNodes.iterator filter { o ⇒ query.matches(o.queryable) }
     }
 
-  def node(o: NodeId): Node = nodeMap(o)
+  private lazy val _jobNodes: immutable.Seq[JobNode] = nodes collect { case o: JobNode ⇒ o }
 
-  private[kernel] lazy val nodeMap: Map[NodeId, Node] =
-    inSchedulerThread {
-      (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
-    }
+  def jobNodes: immutable.Seq[JobNode] =
+    inSchedulerThread { _jobNodes }
+
+  def node(o: NodeId): Node =
+    inSchedulerThread { _nodeMap(o) }
+
+  private[kernel] def nodeMap: Map[NodeId, Node] =
+    inSchedulerThread { _nodeMap }
+
+  private lazy val _nodeMap: Map[NodeId, Node] =
+    (nodes map { n ⇒ n.nodeId → n }).toMap withDefault { o ⇒ throw new NoSuchElementException(s"No JobChainNode for '${o.string}'")}
 
   private[order] lazy val nodes: immutable.Seq[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector

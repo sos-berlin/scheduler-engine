@@ -20,7 +20,9 @@ final class SimpleJobNode(
 extends JobNode {
 
   protected implicit val schedulerThreadCallQueue = injector.instance[SchedulerThreadCallQueue]
-  lazy val jobPath = JobPath(inSchedulerThread { cppProxy.job_path })
+  private lazy val _jobPath = JobPath(cppProxy.job_path)
+
+  def jobPath = inSchedulerThread { _jobPath }
 
   private[order] def processClassPathOption = jobChain.defaultProcessClassPathOption
 
