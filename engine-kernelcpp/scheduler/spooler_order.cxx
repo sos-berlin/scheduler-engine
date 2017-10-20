@@ -1258,13 +1258,17 @@ bool Node::set_action(Action action)
             _job_chain->check_job_chain_node( this );
         }
         if (next_state_changed) {
-            _job_chain->typed_java_sister().onNextStateActionChanged();
+            _job_chain->recalculate_skipped_nodes();
         }
         report_event(CppEventFactoryJ::newJobChainNodeActionChangedEvent(_job_chain->path(), _order_state.as_string(), action));
         return true;
     }
     else 
         return false;
+}
+
+void Node::recalculate_skipped_nodes() {
+    _skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);
 }
 
 //--------------------------------------------------------------------------------Node::execute_xml
@@ -1506,7 +1510,7 @@ bool Order_queue_node::request_order(const Time& now, const string& cause)
                 if (result)  break;
             }
             // <file_order_source> aller hier herleitenden (<job_chain_node action="next_state">) Knoten:
-            vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+            vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->node_from_state(_order_state)->_skipped_nodes;     // <job_chain_node action="next_state">
             Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
                 Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
                     result = (*j)->request_order(cause);
@@ -1527,7 +1531,7 @@ void Order_queue_node::withdraw_order_request()
     Z_FOR_EACH(Order_source_list, _order_source_list, j) {
         (*j)->withdraw_order_request();
     }
-    vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+    vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->node_from_state(_order_state)->_skipped_nodes;     // <job_chain_node action="next_state">
     Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
         Z_FOR_EACH(Order_source_list, (*i)->_order_source_list, j) {
             (*j)->withdraw_order_request();
@@ -1555,7 +1559,7 @@ Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time
                 if (order) break;
             }
             if (!order) {
-                vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->skipped_order_queue_nodes(_order_state);     // <job_chain_node action="next_state">
+                vector<job_chain::Order_queue_node*> skipped_nodes = _job_chain->node_from_state(_order_state)->_skipped_nodes;
                 Z_FOR_EACH_CONST(vector<Order_queue_node*>, skipped_nodes, i) {
                     Order_queue_node* skipped_node = *i;
                     Z_FOR_EACH(Order_source_list, skipped_node->_order_source_list, it) {
@@ -2057,6 +2061,13 @@ bool Job_chain::order_id_space_contains_order_id(const string& id) {
         return has_order_id((Read_transaction*)NULL, id);
 }
 
+
+void Job_chain::recalculate_skipped_nodes() {
+    typed_java_sister().onNextStateActionChanged();
+    Z_FOR_EACH(Node_list, _node_list, node) {
+        (*node)->recalculate_skipped_nodes();
+    }
+}
 
 vector<Order_queue_node*> Job_chain::skipped_order_queue_nodes(const Order::State& state) const {
     vector<Order_queue_node*> result;
@@ -3006,7 +3017,7 @@ void Job_chain::add_order( Order* order )
         z::throw_xc("SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state));
 
     order->_job_chain      = this;
-    order->_job_chain_path = path();
+    order->set_job_chain_path(path());
     order->_removed_from_job_chain_path.clear();
     order->_log->set_prefix( order->obj_name() );
 
@@ -3032,7 +3043,7 @@ void Job_chain::add_order( Order* order )
 
 void Job_chain::remove_order( Order* order )
 {
-    assert( subsystem()->normalized_path( order->_job_chain_path ) == normalized_path() );
+    assert(order->_normalized_job_chain_path == normalized_path());
     assert( order->_job_chain == this );
     assert( !order->_is_db_occupied );
 
@@ -3053,7 +3064,7 @@ void Job_chain::remove_order( Order* order )
     }
 
     order->_job_chain      = NULL;
-    order->_job_chain_path.clear();
+    order->clear_job_chain_path();
     order->_log->set_prefix( order->obj_name() );
 
     unregister_order( order );
@@ -4729,8 +4740,8 @@ void Order_queue::check_orders_for_replacing_or_removing(File_based::When_to_act
         Standing_order_subsystem::File_based_map order_map = _spooler->standing_order_subsystem()->_file_based_map;
         Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, order_map, i) {
             Order* o = i->second;
-            if (_spooler->order_subsystem()->normalized_path(o->_job_chain_path) == normalized_job_chain_path && 
-                o->_state == _order_queue_node->order_state()) 
+            if (o->_normalized_job_chain_path == normalized_job_chain_path &&
+                o->_state == _order_queue_node->order_state())
             {
                 o->check_for_replacing_or_removing_with_distributed(when_to_act);
             }

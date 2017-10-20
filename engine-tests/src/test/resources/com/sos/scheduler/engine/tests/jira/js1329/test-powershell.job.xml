@@ -3,11 +3,13 @@
      xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/release/1.10/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
      stderr_log_level="error"
      stop_on_error="false"
-     process_class="/test"
+     process_class="/test-agent"
+     order="true"
 >
-    <script language="shell"><![CDATA[
-echo TEST-STDOUT
-echo TEST-STDERR 1>&2
-exit 0
-    ]]></script>
+    <params>
+        <param name="dummy-for-powerscript-adapter" value=""/>
+    </params>
+    <script language="powershell">
+        write-error "TEST-STDERR"
+    </script>
 </job>

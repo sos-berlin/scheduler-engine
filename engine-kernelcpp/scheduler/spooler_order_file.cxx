@@ -3,7 +3,7 @@
 /*
     VERBESSERUNG:
 
-    request_order() durch ein Abonnement ersetzen: 
+    request_order() durch ein Abonnement ersetzen:
     Job oder Task kann Aufträge abonnieren und das Abonnement auch wieder abbestellen.
     Dann wird das Verzeichnis außerhalb der <schedule/> nicht überwacht.
 
@@ -30,7 +30,7 @@ using namespace job_chain;
 
 const Absolute_path             file_order_sink_job_path                  ( "/scheduler_file_order_sink" );
 const int                       delay_after_error_default                 = INT_MAX;
-const Duration                  file_order_sink_job_idle_timeout_default  = Duration(60);
+const Duration                  file_order_sink_job_idle_timeout_default  = Duration(0);
 const Duration minimum_delay = Duration(1);
 const int                       max_tries                                 = 2;        // Nach Fehler machen wir sofort einen zweiten Versuch
 const bool                      alert_when_directory_missing_default      = true;
@@ -74,7 +74,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     string                      obj_name                () const;
     void on_call(const Directory_read_result_call&);
 
-    public: 
+    public:
     bool on_requisite_loaded(File_based* file_based) {
         to_my_process_class(file_based);
         if (_is_active) {
@@ -83,7 +83,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
         return true;
     }
 
-    public: 
+    public:
     bool on_requisite_to_be_removed(File_based* file_based) {
         to_my_process_class(file_based);
         stop_watching();
@@ -94,14 +94,14 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     bool check_and_handle_process_class_replacement() {
         assert(_is_watching);
         string r = process_class_remote_scheduler();
-        if (r == _remote_scheduler) 
+        if (r == _remote_scheduler)
             return false;
         else {
             Z_LOG2("scheduler", Z_FUNCTION << " " << obj_name() << ": remote_scheduler=" << r << "\n");
             restart_watching();
             assert(r == _remote_scheduler);
             return true;
-        } 
+        }
     }
 
     private:
@@ -120,7 +120,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
         }
     }
 
-    private: 
+    private:
     void start_watching() {
         assert(!_is_watching);
         if (!_process_class_path.empty()) {
@@ -157,9 +157,9 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
 
     private:
     string process_class_remote_scheduler() {
-        if (_process_class_path.empty()) 
+        if (_process_class_path.empty())
             return "";
-        else 
+        else
             return spooler()->process_class_subsystem()->process_class(_process_class_path)->remote_scheduler_address();
     }
 
@@ -172,7 +172,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
         }
     }
 
-    private: 
+    private:
     Process_class* to_my_process_class(File_based* file_based) {
         assert(file_based->subsystem() == spooler()->process_class_subsystem());
         assert(file_based->normalized_path() == file_based->subsystem()->normalized_path(_process_class_path));
@@ -181,7 +181,7 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
         return result;
     }
 
-    public: 
+    public:
     Prefix_log* log() const { return Directory_file_order_source_interface::log(); }
 
   private:
@@ -249,7 +249,7 @@ struct File_order_sink_job : Internal_job {
     File_order_sink_job(Scheduler* scheduler) :
         Internal_job(scheduler, file_order_sink_job_path.without_slash(), new_internal_module(scheduler, "FileOrderSink"))
     {
-        set_idle_timeout(Duration(0));
+        _stop_on_error = false;
     }
 };
 
@@ -330,7 +330,7 @@ void Directory_file_order_source::close()
     stop_watching();
     close_notification();
 
-    if( _next_node ) 
+    if( _next_node )
     {
         _next_node->unregister_order_source( this );
         _next_node = NULL;
@@ -355,7 +355,7 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
         if (!_repeat.is_eternal())              element.setAttribute( "repeat"           , _repeat.seconds());
         element.setAttribute( "alert_when_directory_missing", _alert_when_directory_missing );
         element.setAttribute_optional("remote_scheduler", _remote_scheduler);
-        
+
         if( _directory_error )  append_error_element( element, _directory_error );
 
         if( _new_files_index < _new_files.size() )
@@ -411,9 +411,9 @@ xml::Element_ptr Directory_file_order_source::dom_element( const xml::Document_p
 //---------------------------------------------------Directory_file_order_source::async_state_text_
 
 string Directory_file_order_source::async_state_text_() const
-{ 
+{
     S result;
-    
+
     result << "Directory_file_order_source(\"" << _path << "\"";
     if( _regex_string != "" )  result << ",\"" << _regex_string << "\"";
     if( _notification_event.signaled_flag() )  result << ",signaled!";
@@ -429,7 +429,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
 {
     // Windows XP:
     // Ein überwachtes lokales Verzeichnis kann entfernt (rd), aber nicht angelegt (mkdir) werden. Der Name ist gesperrt.
-    // Aber ein überwachtes Verzeichnis im Netzwerk kann entfernt und wieder angelegt werden, 
+    // Aber ein überwachtes Verzeichnis im Netzwerk kann entfernt und wieder angelegt werden,
     // ohne dass die Überwachung das mitbekommt. Sie signaliert keine Veränderung im neuen Verzeichnis, ist also nutzlos.
     // Deshalb erneuern wir die Verzeichnisüberwachung, wenn seit _repeat Sekunde kein Signal gekommen ist.
 
@@ -447,9 +447,9 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
                 if( _notification_event.handle() )      // Signal retten. Eigentlich überflüssig, weil wir hiernach sowieso das Verzeichnis lesen
                 {
                     _notification_event.wait( 0 );
-                    if( _notification_event.signaled() )      
+                    if( _notification_event.signaled() )
                     {
-                        _notification_event.set_signaled();     
+                        _notification_event.set_signaled();
                         Z_LOG2( "scheduler.file_order", Z_FUNCTION << " Old directory watchers signal has been transfered to new watcher.\n" );
                     }
 
@@ -458,7 +458,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
 
                 _notification_event.set_handle( h );
                 _notification_event.set_name( "FindFirstChangeNotification " + _path );
-        
+
                 add_to_event_manager( _spooler->_connection_manager );
             }
         }
@@ -471,7 +471,7 @@ void Directory_file_order_source::start_or_continue_notification( bool was_notif
             BOOL ok = FindNextChangeNotification( _notification_event.handle() );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }
-    } 
+    }
     catch (exception &x) {
         log()->debug(message_string("SCHEDULER-724", _path, x.what()));
     }
@@ -529,7 +529,7 @@ bool Directory_file_order_source::request_order( const string& cause )
     if (has_new_file())
         return true;
     else {
-        if( _expecting_request_order 
+        if( _expecting_request_order
          || async_next_gmtime_reached() )       // 2007-01-09 nicht länger: Das, weil die Jobs bei jeder Gelegenheit do_something() durchlaufen, auch wenn nichts anliegt (z.B. bei TCP-Verkehr)
         {
             Z_LOG2("scheduler.file_order", Z_FUNCTION << " async_wake()\n");
@@ -673,11 +673,11 @@ void Directory_file_order_source::read_directory(bool was_notified)
             {
                 if ( _alert_when_directory_missing )
                 {
-                    log()->warn( x.what() ); 
+                    log()->warn( x.what() );
 
                     if( _spooler->_mail_on_error )
                     {
-                        _send_recovered_mail = true; 
+                        _send_recovered_mail = true;
                         send_mail( evt_file_order_source_error, &x );
                     }
                 }
@@ -743,14 +743,14 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                             // !ok ==> Auftrag ist bereits vorhanden
                         }
 
-                        if( ok  &&  order->is_distributed() ) 
+                        if( ok  &&  order->is_distributed() )
                         {
                             ok = order->db_occupy_for_processing();
 
                             if (_remote_scheduler == "" && !path.file_exists())
                             {
                                 // Ein anderer Scheduler hat vielleicht den Dateiauftrag blitzschnell erledigt
-                                order->db_release_occupation(); 
+                                order->db_release_occupation();
                                 ok = false;
                             }
                         }
@@ -767,7 +767,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                             log()->info(message_string("SCHEDULER-983", order->obj_name(), written_at));
                         }
 
-                        if( !ok )  
+                        if( !ok )
                         {
                             if( !was_in_job_chain )  order->remove_from_job_chain();
                             order->close();
@@ -799,7 +799,7 @@ Order* Directory_file_order_source::fetch_and_occupy_order(const Order::State& f
                         send_mail( evt_file_order_error, &xx );
                     }
 
-                    if( order ) 
+                    if( order )
                     {
                         if( !was_in_job_chain )  order->remove_from_job_chain();
                         order->close();
@@ -876,7 +876,7 @@ bool Directory_file_order_source::read_new_files()
             _new_files_count++;
         }
 
-        if( is_first_file ) 
+        if( is_first_file )
         {
             is_first_file = false;
             Z_LOG2( "scheduler.file_order", Z_FUNCTION << "  " << file_info->path() << ", erste Datei\n" );
@@ -916,14 +916,14 @@ void Directory_file_order_source::clean_up_blacklisted_files()
 
             try
             {
-                if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff 
+                if( ptr<Order> order = _job_chain->order_or_null( path ) )  // Kein Datenbankzugriff
                 {
                     order->on_blacklisted_file_removed();   // Removes the order
                 }
                 else
                 if( _job_chain->is_distributed() )
                 {
-                    Transaction ta ( _spooler->db() ); 
+                    Transaction ta ( _spooler->db() );
 
                     ptr<Order> order = order_subsystem()->try_load_distributed_order_from_database( &ta, _job_chain->path(), path, Order_subsystem::lo_blacklisted_lock );
                     if( order )
@@ -962,7 +962,7 @@ void Directory_file_order_source::get_blacklisted_files(String_set* result) {
 void Directory_file_order_source::send_mail( Scheduler_event_type event_code, const exception* x )
 {
     try
-    {                                   
+    {
         switch( event_code )
         {
             case evt_file_order_source_error:
@@ -1085,7 +1085,7 @@ void Directory_file_order_source::repeat_after_delay(const Duration& duration) {
     Duration lower_bound = (_last_continue + minimum_delay) - Time::now();
     delay = max(lower_bound.as_double(), delay);
     set_async_delay(delay);
-    //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order << 
+    //Z_LOG2( "scheduler.file_order", Z_FUNCTION  << " set_async_delay(" << delay << ")  _expecting_request_order=" << _expecting_request_order <<
     //          "   async_next_gmtime" << Time( async_next_gmtime() ).as_string() << "GMT \n" );
 }
 
@@ -1108,7 +1108,7 @@ bool Directory_file_order_source::has_new_file() {
                     return true;
                 //} else {
                 //    if (!known_orders_has_been_read) {
-                //        read_known_orders(&known_orders); 
+                //        read_known_orders(&known_orders);
                 //        known_orders_has_been_read = true;
                 //    }
                 //    return known_orders.find(path) == known_orders.end();

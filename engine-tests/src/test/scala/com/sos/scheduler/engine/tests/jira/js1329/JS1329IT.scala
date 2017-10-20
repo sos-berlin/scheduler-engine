@@ -1,13 +1,17 @@
 package com.sos.scheduler.engine.tests.jira.js1329
 
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.job.{JobPath, ReturnCode}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId}
 import com.sos.scheduler.engine.data.log.{ErrorLogged, InfoLogged}
 import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.data.xmlcommands.ProcessClassConfiguration
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
-import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
+import com.sos.scheduler.engine.test.agent.DotnetProvidingAgent
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
@@ -16,14 +20,15 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 
 /**
-  * JS-1329, JS-1615: &lt;job stderr_log_level="error">.
+  * JS-1329, JS-1615, JS-1734: &lt;job stderr_log_level="error">.
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
+final class JS1329IT extends FreeSpec with ScalaSchedulerTest with DotnetProvidingAgent {
 
   override protected lazy val testConfiguration = TestConfiguration(getClass,
-    errorLoggedIsTolerated = _.message contains "TEST-STDERR")
+    errorLoggedIsTolerated = _ ⇒ true)
+    //errorLogEventIsTolerated = e ⇒ Set("TEST-STDERR", "API-TEST-ERROR")(e.message))
 
   private val processClassSetting = List(
     "Without Agent" → (() ⇒ ProcessClassConfiguration()),
@@ -42,6 +47,26 @@ final class JS1329IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
       assert(expectedReturnCodes(result.returnCode))
     }
   }
+
+  for ((groupName, processClass) ← processClassSetting) {  // JS-1734 output to stderr should let order change to error_state: Job test-exit-0
+    s"$groupName, order" in {
+      writeConfigurationFile(ProcessClassPath("/test"), processClass())
+      val setting = List(
+        JobChainPath("/test-without-stderr") → NodeId("END"),
+        JobChainPath("/test-exit-0") → NodeId("ERROR"),
+        JobChainPath("/test-api") → NodeId("END"))  // In an API job, spooler_log.error() does not let move order to error_state
+      val jobChainPaths = setting map (_._1)
+      val whenResults = for (jobChainPath ← jobChainPaths) yield startOrder(jobChainPath orderKey "1").result
+      val nodeIds = whenResults await 99.s map (_.nodeId)
+      assert(jobChainPaths.zip(nodeIds) == setting)
+    }
+  }
+
+  if (isWindows)
+    "Powershell write-error" in {
+      val result = startOrder(JobChainPath("/test-powershell") orderKey "1").result await 99.s
+      assert(result.nodeId == NodeId("ERROR"))
+    }
 
   private def testOutput(jobPath: JobPath): TaskResult = {
     var result: TaskResult = null
