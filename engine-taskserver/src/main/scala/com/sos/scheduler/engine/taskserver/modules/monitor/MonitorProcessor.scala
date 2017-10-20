@@ -1,6 +1,7 @@
 package com.sos.scheduler.engine.taskserver.modules.monitor
 
 import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.modules.monitors.Monitors
 import com.sos.scheduler.engine.taskserver.spoolerapi.{SpoolerLog, TypedNamedIDispatches}
 import scala.util.control.NonFatal
@@ -31,8 +32,8 @@ extends HasCloser {
 }
 
 private[taskserver] object MonitorProcessor {
-  def create(monitors: Seq[Monitor], namedIDispatches: TypedNamedIDispatches): MonitorProcessor =
+  def create(monitors: Seq[Monitor], namedIDispatches: TypedNamedIDispatches, stderrLogLevel: SchedulerLogLevel): MonitorProcessor =
     new MonitorProcessor(
-      monitors.toVector map { o ⇒ Monitors.newMonitorInstance(o.moduleArguments, namedIDispatches) },
+      monitors.toVector map { o ⇒ Monitors.newMonitorInstance(o.moduleArguments, namedIDispatches, stderrLogLevel) },
       namedIDispatches.spoolerLog)
 }

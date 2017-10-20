@@ -329,6 +329,8 @@ struct Order : Com_order,
     void                        place_in_job_chain      ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack );
     void                        place_or_replace_in_job_chain( Job_chain* );
     bool                        try_place_in_job_chain  ( Job_chain*, Job_chain_stack_option = jc_remove_from_job_chain_stack, bool exists_exception = false );
+    void                        set_job_chain_path      (const Absolute_path& path);
+    void                        clear_job_chain_path    ();
     void                        java_remove             ()                                          { remove(rm_standard); }
     void                        remove                  ( File_based::Remove_flag );
     void                        remove_from_job_chain   ( Job_chain_stack_option = jc_remove_from_job_chain_stack, Transaction* = NULL );
@@ -451,6 +453,7 @@ struct Order : Com_order,
     string                     _title;
     bool                       _title_modified;
     Absolute_path              _job_chain_path;
+    string                     _normalized_job_chain_path;
     Absolute_path              _outer_job_chain_path;
     State                      _outer_job_chain_state;
     Payload                    _payload;
@@ -677,6 +680,7 @@ struct Node : Com_job_chain_node,
     void                        set_action_string           (const string& o)                       { set_action(action_from_string(o)); }
     virtual bool                set_action                  (Action);
     void                        set_action_complete         (const string&);
+    void                        recalculate_skipped_nodes   ();
     string                      string_action               () const                                { return string_from_action(_action); }
     int                         priority                    () const                                { return _priority; }
     bool                        is_ready_for_order_processing() const;
@@ -690,6 +694,7 @@ struct Node : Com_job_chain_node,
 
 
     Fill_zero                  _zero_;
+    vector<job_chain::Order_queue_node*> _skipped_nodes;
 
   protected:
     friend struct               ::sos::scheduler::order::Job_chain;
@@ -1038,6 +1043,7 @@ struct Job_chain : Com_job_chain,
 
     Order_subsystem_impl*       order_subsystem             () const;
 
+    void                        recalculate_skipped_nodes   ();
     vector<job_chain::Order_queue_node*> skipped_order_queue_nodes(const Order::State&) const;
     vector<Order::State>        skipped_states              (const Order::State&) const;
     int                         number_of_touched_orders    () const;

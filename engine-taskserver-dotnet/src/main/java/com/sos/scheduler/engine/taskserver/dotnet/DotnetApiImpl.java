@@ -11,6 +11,7 @@ import sos.spooler.Log;
 import sos.spooler.Spooler;
 import sos.spooler.Task;
 import system.reflection.Assembly;
+import com.sos.scheduler.engine.data.log.SchedulerLogLevel;
 
 public class DotnetApiImpl {
     private static final String POWERSHELL_CLASS_NAME = "sos.spooler.PowershellAdapter";
@@ -28,7 +29,7 @@ public class DotnetApiImpl {
         reference = ref;
         setPropertiesFromReference();
         apiImplType = apiImplType(path, className);
-        initApiImplInstance(taskContext.spoolerLog(), taskContext.spoolerTask(), taskContext.spoolerJob(), taskContext.spooler());
+        initApiImplInstance(taskContext.spoolerLog(), taskContext.spoolerTask(), taskContext.spoolerJob(), taskContext.spooler(), taskContext.stderrLogLevel());
     }
 
     private void setPropertiesFromReference() {
@@ -67,29 +68,11 @@ public class DotnetApiImpl {
                                 className)));
     }
 
-    private void initApiImplInstance(Log spoolerLog, Task spoolerTask, Job spoolerJob, Spooler spooler) {
+    private void initApiImplInstance(Log spoolerLog, Task spoolerTask, Job spoolerJob, Spooler spooler, SchedulerLogLevel stderrLogLevel) {
 
         system.Type[] types;
         system.Object[] params;
         if (reference instanceof DotnetModuleReference.Powershell) {
-            types = new system.Type[]{
-                    bridge.getSchedulerApiTypes()[0],
-                    bridge.getSchedulerApiTypes()[1],
-                    bridge.getSchedulerApiTypes()[2],
-                    bridge.getSchedulerApiTypes()[3],
-                    system.Type.GetType("System.String")
-            };
-            params = new system.Object[]{
-                    Bridge.wrapJVM(spoolerLog),
-                    Bridge.wrapJVM(spoolerTask),
-                    Bridge.wrapJVM(spoolerJob),
-                    Bridge.wrapJVM(spooler),
-                    new system.String(((DotnetModuleReference.Powershell)reference).script())
-            };
-        } else if (reference instanceof DotnetModuleReference.DotnetClass) {
-            types = new system.Type[]{};
-            params = new system.Object[]{};
-        } else if (reference instanceof DotnetModuleReference.ScriptControl) {
             types = new system.Type[]{
                     bridge.getSchedulerApiTypes()[0],
                     bridge.getSchedulerApiTypes()[1],
@@ -103,6 +86,28 @@ public class DotnetApiImpl {
                     Bridge.wrapJVM(spoolerTask),
                     Bridge.wrapJVM(spoolerJob),
                     Bridge.wrapJVM(spooler),
+                    new system.String(stderrLogLevel.name()),
+                    new system.String(((DotnetModuleReference.Powershell)reference).script())
+            };
+        } else if (reference instanceof DotnetModuleReference.DotnetClass) {
+            types = new system.Type[]{};
+            params = new system.Object[]{};
+        } else if (reference instanceof DotnetModuleReference.ScriptControl) {
+            types = new system.Type[]{
+                    bridge.getSchedulerApiTypes()[0],
+                    bridge.getSchedulerApiTypes()[1],
+                    bridge.getSchedulerApiTypes()[2],
+                    bridge.getSchedulerApiTypes()[3],
+                    system.Type.GetType("System.String"),
+                    system.Type.GetType("System.String"),
+                    system.Type.GetType("System.String")
+            };
+            params = new system.Object[]{
+                    Bridge.wrapJVM(spoolerLog),
+                    Bridge.wrapJVM(spoolerTask),
+                    Bridge.wrapJVM(spoolerJob),
+                    Bridge.wrapJVM(spooler),
+                    new system.String(stderrLogLevel.name()),
                     new system.String(((DotnetModuleReference.ScriptControl)reference).script()),
                     new system.String(((DotnetModuleReference.ScriptControl)reference).language())
             };

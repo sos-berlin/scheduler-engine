@@ -10,20 +10,24 @@
         public Spooler spooler { get; private set; }
 
         protected string Script { get; private set; }
+
+        protected bool IsStdErrLogLevel { get; private set; }
+
         protected bool IsOrderJob { get; private set; }
 
         #region Constructor
 
         protected ScriptAdapter(
-            Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String scriptContent)
+            Log contextLog, Task contextTask, Job contextJob, Spooler contextSpooler, String contextStdErrLogLevel, String scriptContent)
         {
-            this.spooler_log = contextLog;
-            this.spooler_task = contextTask;
-            this.spooler_job = contextJob;
-            this.spooler = contextSpooler;
+            spooler_log = contextLog;
+            spooler_task = contextTask;
+            spooler_job = contextJob;
+            spooler = contextSpooler;
 
-            this.Script = scriptContent;
-            this.IsOrderJob = this.spooler_job.order_queue() != null;
+            IsStdErrLogLevel = contextStdErrLogLevel.Equals("error");
+            Script = scriptContent;
+            IsOrderJob = spooler_job.order_queue() != null;
         }
 
         #endregion
