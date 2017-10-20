@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
-import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers}
+import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers, PublishEvent, Result}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
@@ -149,8 +149,10 @@ with HasCloser {
     new SchedulerClusterMemberKey(schedulerId, clusterMemberId)
 
   @Provides @Singleton
-  private def provideCommandSubsystem(pluginSubsystem: PluginSubsystem) =
-    new CommandSubsystem(asJavaIterable(commandHandlers(List(pluginSubsystem))))
+  private def provideCommandSubsystem(eventBus: EventBus, pluginSubsystem: PluginSubsystem) =
+    new CommandSubsystem(asJavaIterable(
+      PublishEvent.commandHandlers(eventBus) :::
+      commandHandlers(List(pluginSubsystem))))
 
   @Provides @Singleton
   private def provideMessageCodeHandler(spoolerC: SpoolerC)(implicit stcq: SchedulerThreadCallQueue): MessageCodeHandler =
@@ -206,7 +208,7 @@ with HasCloser {
 }
 
 object SchedulerModule {
-  private def commandHandlers(objects: Iterable[AnyRef]): Iterable[CommandHandler] =
+  private def commandHandlers(objects: List[AnyRef]): List[CommandHandler] =
     (objects collect { case o: HasCommandHandlers ⇒ o.commandHandlers: Iterable[CommandHandler] }).flatten
 
   final case class LateBoundCppSingletons(interfaces: Vector[Class[_]])
