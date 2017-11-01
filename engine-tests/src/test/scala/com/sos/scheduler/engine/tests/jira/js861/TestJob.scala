@@ -16,6 +16,7 @@ final class TestJob extends sos.spooler.Job_impl {
     spooler_log.info(execute("""C:\Windows\System32\ping.exe""", "-n", "1", "127.0.0.1"))
     spooler_log.info(s"TEST-USERNAME=SELF-TEST")
     spooler_log.info(s"TEST-USERNAME=$whoami")
+    spooler_log.info("SCHEDULER_DATA=" + sys.env.getOrElse("SCHEDULER_DATA", ""))
     spooler_task.order.params.set_value("JOB-VARIABLE", "JOB-VALUE")
     false
   }

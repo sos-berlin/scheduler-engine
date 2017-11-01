@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.tests.jira.js861
 
-import com.sos.scheduler.engine.common.process.windows.{WindowsProcessCredentials, WindowsUserName}
+import com.sos.scheduler.engine.common.process.windows.{WindowsProcess, WindowsProcessCredentials, WindowsUserName}
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -21,6 +21,14 @@ import scala.util.control.NonFatal
   */
 @RunWith(classOf[JUnitRunner])
 final class JS861IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
+
+  override def onBeforeSchedulerActivation() = {
+    WindowsProcess.environment.set("SCHEDULER_DATA", testEnvironment.directory.toString)
+    onClose {
+      WindowsProcess.environment.delete("SCHEDULER_DATA")
+    }
+    super.onBeforeSchedulerActivation()
+  }
 
   if (isWindows) {
     val me = WindowsUserName(
@@ -72,6 +80,9 @@ final class JS861IT extends FreeSpec with ScalaSchedulerTest with AgentWithSched
     def checkLog(result: OrderRunResult, userName: WindowsUserName) = {
       val log = result.logString
       assert(log.contains(s"THIS IS THE JOB ${result.orderKey.jobChainPath.string}"))  // jobPath == jobChainPath
+      if (result.orderKey.jobChainPath.string endsWith "-logon") {
+        assert(log.contains(s"SCHEDULER_DATA=${testEnvironment.directory}"))  // Environment is simulated only for WindowsProcess
+      }
       val userNameLines = log split "\n" filter { _ contains "TEST-USERNAME=" } map { _.trim.toLowerCase(Locale.ROOT) }
       assert(userNameLines exists { _ endsWith "self-test" })
       userName match {
