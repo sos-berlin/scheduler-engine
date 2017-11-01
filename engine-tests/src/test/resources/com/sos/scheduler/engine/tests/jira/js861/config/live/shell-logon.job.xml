@@ -9,6 +9,7 @@
         echo THIS IS THE JOB /shell-logon
         icacls %SCHEDULER_RETURN_VALUES%
         echo JOB-VARIABLE=JOB-VALUE >>%SCHEDULER_RETURN_VALUES%
+        echo SCHEDULER_DATA=%SCHEDULER_DATA%
         ping.exe 127.0.0.1
         for /f "usebackq tokens=*" %%a in (`echo SELF-TEST`) do echo TEST-USERNAME=%%a
         for /f "usebackq tokens=*" %%a in (`%WinDir%\system32\whoami.exe`) do echo TEST-USERNAME=%%a

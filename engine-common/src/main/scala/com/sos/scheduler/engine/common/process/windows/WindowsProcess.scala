@@ -2,7 +2,7 @@ package com.sos.scheduler.engine.common.process.windows
 
 import com.sos.scheduler.engine.common.process.Processes.Pid
 import com.sos.scheduler.engine.common.process.windows.CommandLineConversion.argsToCommandLine
-import com.sos.scheduler.engine.common.process.windows.WindowsApi.{advapi32, call, handleCall, kernel32, myUserenv, openProcessToken, usersEnvironment, waitForSingleObject, windowsDirectory}
+import com.sos.scheduler.engine.common.process.windows.WindowsApi.{advapi32, call, handleCall, kernel32, myUserenv, openProcessToken, waitForSingleObject, windowsDirectory}
 import com.sos.scheduler.engine.common.process.windows.WindowsProcess._
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
@@ -23,7 +23,9 @@ import java.nio.charset.Charset
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import org.jetbrains.annotations.TestOnly
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.io.Codec
 import scala.util.Try
 import scala.util.control.NonFatal
@@ -126,7 +128,32 @@ object WindowsProcess {
   private[windows] val TerminateProcessExitValue = 999999999
   val WindowsProcessTargetSystemProperty = "jobscheduler.WindowsProcess.target"
   val AuthenticatedUsersSid = "S-1-5-11"
+  private val InheritableEnvironmentVariables = Vector(  // JS-1747
+    "SCHEDULER_DATA",
+    "SCHEDULER_HOME",
+    "SCHEDULER_HTTP_PORT",
+    "SCHEDULER_HTTPS_PORT",
+    "SCHEDULER_LOG_DIR",
+    "SCHEDULER_LOGFILE",
+    "SCHEDULER_PID",
+    "SCHEDULER_PID_FILE",
+    "SCHEDULER_PORT",
+    "SCHEDULER_WORK_DIR")
   private val logger = Logger(getClass)
+
+  object environment {
+    private lazy val _env = mutable.Map[String, String]() ++ sys.env
+
+    def env = _env.toMap
+
+    @TestOnly
+    def set(key: String, value: String): Unit =
+      _env(key) = value
+
+    @TestOnly
+    def delete(key: String): Unit =
+      _env -= key
+  }
 
   def start(processBuilder: ProcessBuilder, logon: Option[Logon] = None): WindowsProcess = {
     val loggedOn = LoggedOn.logon(logon)
@@ -144,9 +171,9 @@ object WindowsProcess {
     val creationFlags = CREATE_UNICODE_ENVIRONMENT
     val env = logon match {
       case Some(o) if o.withUserProfile ⇒
-        usersEnvironment(loggedOn.userToken)  // Only reliable if user profile has been loaded (see JS-1725)
+        inheritedUsersEnvironment(loggedOn.userToken)  // Only reliable if user profile has been loaded (see JS-1725)
       case Some(o) ⇒
-        usersEnvironment(null) ++  // Default system environment
+        inheritedUsersEnvironment(null) ++  // Default system environment
           Some("USERNAME" → o.user.withoutDomain) ++ // Default system environment contains default USERNAME and USERDOMAIN. We change this..
           (o.user.domain orElse sys.env.get("USERDOMAIN") map "USERDOMAIN".→)
       case None ⇒
@@ -167,6 +194,12 @@ object WindowsProcess {
     processInformation.hThread = INVALID_HANDLE_VALUE
     new WindowsProcess(processInformation, inRedirection, outRedirection, errRedirection, loggedOn)
   }
+
+  private def inheritedUsersEnvironment(userToken: HANDLE) =
+    WindowsApi.usersEnvironment(userToken) ++ {
+      val env = environment.env
+      InheritableEnvironmentVariables collect { case k if env isDefinedAt k ⇒ k → env(k) }
+    }
 
   private class LoggedOn(val userToken: HANDLE, val profileHandle: HANDLE = INVALID_HANDLE_VALUE)
   extends AutoCloseable {
