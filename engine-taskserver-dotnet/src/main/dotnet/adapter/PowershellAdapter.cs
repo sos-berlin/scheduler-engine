@@ -3,15 +3,19 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Management.Automation;
     using System.Management.Automation.Runspaces;
+    using System.Security;
     using System.Text;
 
     public class PowershellAdapter : ScriptAdapter
     {
         #region Constants and Fields
 
+        private const string PROFILE_FILE_NAME = "JobScheduler.PowerShell_profile.ps1";
+        private const string CONFIG_DIR = "config\\powershell";
         private PowershellAdapterPSHost host;
         private bool isShellMode;
         private Runspace runspace;
@@ -36,6 +40,8 @@
             runspace.SessionStateProxy.SetVariable("spooler_job", spooler_job);
             runspace.SessionStateProxy.SetVariable("spooler", spooler);
             runspace.SessionStateProxy.SetVariable("spooler_params", spoolerParams);
+
+            InvokeDollarProfile();
         }
 
         #endregion
@@ -233,6 +239,104 @@
 
         #region Methods
 
+        #region Profile
+        private String GetCurrentUserProfilePath(string configDir)
+        {
+            string path = null;
+            bool isSystem = false;
+            try
+            {
+                using (var identity = System.Security.Principal.WindowsIdentity.GetCurrent())
+                {
+                    isSystem = identity.IsSystem;
+                }
+            }
+            catch (SecurityException ex)
+            {
+                spooler_log.info(String.Format("[GetCurrentUserProfilePath][SecurityException]{0}", ex.ToString()));
+                var userprofile = Environment.GetEnvironmentVariable("USERPROFILE");
+                if (!string.IsNullOrEmpty(userprofile) && userprofile.EndsWith("systemprofile"))
+                {
+                    isSystem = true;
+                }
+            }
+
+            if (isSystem)
+            {
+                path = Path.Combine(configDir, PROFILE_FILE_NAME);
+            }
+            else
+            {
+                var userDir = Path.Combine(configDir, "Users\\" + Environment.GetEnvironmentVariable("USERNAME"));
+                path = Path.Combine(userDir, PROFILE_FILE_NAME);
+            }
+            return path;
+        }
+
+        private PSObject GetDollarProfile(string allUsersAllHosts, string allUsersCurrentHost, string currentUserAllHosts, string currentUserCurrentHost)
+        {
+            PSObject returnValue = new PSObject(currentUserCurrentHost);
+            returnValue.Properties.Add(new PSNoteProperty("AllUsersAllHosts", allUsersAllHosts));
+            returnValue.Properties.Add(new PSNoteProperty("AllUsersCurrentHost", allUsersCurrentHost));
+            returnValue.Properties.Add(new PSNoteProperty("CurrentUserAllHosts", currentUserAllHosts));
+            returnValue.Properties.Add(new PSNoteProperty("CurrentUserCurrentHost", currentUserCurrentHost));
+            return returnValue;
+        }
+
+        private void InvokeDollarProfile()
+        {
+            try
+            {
+                var allUsersAllHosts = "";
+                var currentUserAllHosts = "";
+
+                var dataDir = Environment.GetEnvironmentVariable("SCHEDULER_DATA");
+                if (!string.IsNullOrEmpty(dataDir))
+                {
+                    var configDir = Path.Combine(dataDir, CONFIG_DIR);
+                    allUsersAllHosts = Path.Combine(configDir, PROFILE_FILE_NAME);
+                    currentUserAllHosts = GetCurrentUserProfilePath(configDir);
+                }
+                var allUsersCurrentHost = allUsersAllHosts;
+                var currentUserCurrentHost = currentUserAllHosts;
+
+                runspace.SessionStateProxy.SetVariable("profile", GetDollarProfile(allUsersAllHosts, allUsersCurrentHost, currentUserAllHosts, currentUserCurrentHost));
+                InvokeProfiles(allUsersAllHosts, currentUserAllHosts);
+            }
+            catch (Exception ex)
+            {
+                spooler_log.warn(String.Format("[InvokeDollarProfile]{0}", ex.ToString()));
+            }
+        }
+
+        private void InvokeProfiles(string allUsersAllHosts, string currentUserAllHosts)
+        {
+            if (allUsersAllHosts.Length > 0)
+            {
+                InvokeProfile(allUsersAllHosts);
+            }
+            if (!currentUserAllHosts.Equals(allUsersAllHosts))
+            {
+                InvokeProfile(currentUserAllHosts);
+            }
+        }
+
+        private void InvokeProfile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    InvokeFile(false, path);
+                }
+            }
+            catch (RuntimeException ex)
+            {
+                spooler_log.warn(GetErrorMessage("InvokeProfile", ex.ErrorRecord));
+            }
+        }
+        #endregion
+
         private string GetErrorMessage(String functionName, ErrorRecord errorRecord)
         {
             var sb = new StringBuilder();
@@ -341,6 +445,17 @@
             using (var pipeline = runspace.CreatePipeline())
             {
                 pipeline.Commands.AddScript(command, useLocalScope);
+                result = pipeline.Invoke();
+            }
+            return result;
+        }
+
+        private IEnumerable<PSObject> InvokeFile(bool useLocalScope, String path)
+        {
+            Collection<PSObject> result;
+            using (var pipeline = runspace.CreatePipeline())
+            {
+                pipeline.Commands.Add(new Command(path, false, useLocalScope));
                 result = pipeline.Invoke();
             }
             return result;
