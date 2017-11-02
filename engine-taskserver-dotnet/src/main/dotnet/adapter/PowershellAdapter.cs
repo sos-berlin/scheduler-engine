@@ -15,7 +15,7 @@
         #region Constants and Fields
 
         private const string PROFILE_FILE_NAME = "JobScheduler.PowerShell_profile.ps1";
-        private const string CONFIG_DIR = "config\\powershell";
+        private const string CONFIG_DIR = "config";
         private PowershellAdapterPSHost host;
         private bool isShellMode;
         private Runspace runspace;
@@ -240,9 +240,19 @@
         #region Methods
 
         #region Profile
-        private String GetCurrentUserProfilePath(string configDir)
+
+        private PSObject GetDollarProfile(string allUsersAllHosts, string allUsersCurrentHost, string currentUserAllHosts, string currentUserCurrentHost)
         {
-            string path = null;
+            PSObject returnValue = new PSObject(currentUserCurrentHost);
+            returnValue.Properties.Add(new PSNoteProperty("AllUsersAllHosts", allUsersAllHosts));
+            returnValue.Properties.Add(new PSNoteProperty("AllUsersCurrentHost", allUsersCurrentHost));
+            returnValue.Properties.Add(new PSNoteProperty("CurrentUserAllHosts", currentUserAllHosts));
+            returnValue.Properties.Add(new PSNoteProperty("CurrentUserCurrentHost", currentUserCurrentHost));
+            return returnValue;
+        }
+
+        private bool IsSystemIdentity()
+        {
             bool isSystem = false;
             try
             {
@@ -253,34 +263,14 @@
             }
             catch (SecurityException ex)
             {
-                spooler_log.info(String.Format("[GetCurrentUserProfilePath][SecurityException]{0}", ex.ToString()));
+                spooler_log.info(String.Format("[IsSystemIdentity][SecurityException]{0}", ex.ToString()));
                 var userprofile = Environment.GetEnvironmentVariable("USERPROFILE");
                 if (!string.IsNullOrEmpty(userprofile) && userprofile.EndsWith("systemprofile"))
                 {
                     isSystem = true;
                 }
             }
-
-            if (isSystem)
-            {
-                path = Path.Combine(configDir, PROFILE_FILE_NAME);
-            }
-            else
-            {
-                var userDir = Path.Combine(configDir, "Users\\" + Environment.GetEnvironmentVariable("USERNAME"));
-                path = Path.Combine(userDir, PROFILE_FILE_NAME);
-            }
-            return path;
-        }
-
-        private PSObject GetDollarProfile(string allUsersAllHosts, string allUsersCurrentHost, string currentUserAllHosts, string currentUserCurrentHost)
-        {
-            PSObject returnValue = new PSObject(currentUserCurrentHost);
-            returnValue.Properties.Add(new PSNoteProperty("AllUsersAllHosts", allUsersAllHosts));
-            returnValue.Properties.Add(new PSNoteProperty("AllUsersCurrentHost", allUsersCurrentHost));
-            returnValue.Properties.Add(new PSNoteProperty("CurrentUserAllHosts", currentUserAllHosts));
-            returnValue.Properties.Add(new PSNoteProperty("CurrentUserCurrentHost", currentUserCurrentHost));
-            return returnValue;
+            return isSystem;
         }
 
         private void InvokeDollarProfile()
@@ -294,8 +284,18 @@
                 if (!string.IsNullOrEmpty(dataDir))
                 {
                     var configDir = Path.Combine(dataDir, CONFIG_DIR);
-                    allUsersAllHosts = Path.Combine(configDir, PROFILE_FILE_NAME);
-                    currentUserAllHosts = GetCurrentUserProfilePath(configDir);
+                    var configDirAllUsers = Path.Combine(configDir, "powershell");
+
+                    allUsersAllHosts = Path.Combine(configDirAllUsers, PROFILE_FILE_NAME);
+                    if (IsSystemIdentity())
+                    {
+                        currentUserAllHosts = allUsersAllHosts;
+                    }
+                    else
+                    {
+                        var configDirCurrentUser = Path.Combine(configDir, "Users", Environment.GetEnvironmentVariable("USERNAME"), "powershell");
+                        currentUserAllHosts = Path.Combine(configDirCurrentUser, PROFILE_FILE_NAME);
+                    }
                 }
                 var allUsersCurrentHost = allUsersAllHosts;
                 var currentUserCurrentHost = currentUserAllHosts;
@@ -456,6 +456,8 @@
             using (var pipeline = runspace.CreatePipeline())
             {
                 pipeline.Commands.Add(new Command(path, false, useLocalScope));
+                pipeline.Commands.Add("Out-Default");
+                pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
                 result = pipeline.Invoke();
             }
             return result;
