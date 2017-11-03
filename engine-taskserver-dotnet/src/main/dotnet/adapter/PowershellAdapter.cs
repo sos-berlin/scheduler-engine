@@ -458,7 +458,7 @@
             Collection<PSObject> result;
             using (var pipeline = runspace.CreatePipeline())
             {
-                pipeline.Commands.Add(new Command(path, false, useLocalScope));
+                pipeline.Commands.Add(new Command(File.ReadAllText(path), true, useLocalScope));
                 pipeline.Commands.Add("Out-Default");
                 pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
                 result = pipeline.Invoke();
