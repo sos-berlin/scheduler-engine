@@ -345,7 +345,10 @@
                 sb.Append(String.Format("[{0}] ", functionName));
             }
             sb.Append(errorRecord.ToString());
-            sb.Append(errorRecord.InvocationInfo.PositionMessage);
+            if (errorRecord.InvocationInfo != null)
+            {
+                sb.Append(errorRecord.InvocationInfo.PositionMessage);
+            }
             return sb.ToString();
         }
 
