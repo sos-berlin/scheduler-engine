@@ -1554,6 +1554,8 @@ void Spooler::read_ini_file()
     _log_collect_within = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 ));
     _log_collect_max    = Duration(read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 ));
   //_zschimmer_mode     = read_profile_bool  ( _factory_ini, "spooler", "zschimmer", _zschimmer_mode );
+    modifiable_settings()->_job_java_options = trim(
+        modifiable_settings()->_job_java_options + " " + read_profile_string(_factory_ini, "java", "job_options"));
 }
 
 //-------------------------------------------------------------Spooler::read_command_line_arguments
@@ -1686,7 +1688,9 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("java-classpath")) { _java_classpath = opt.value(); }   // wird in sos::spooler_main vearbeitet
             else
-            if (opt.with_value("job-java-options")) { modifiable_settings()->_job_java_options = opt.value(); }
+            if (opt.with_value("job-java-options")) { 
+                modifiable_settings()->_job_java_options = trim(modifiable_settings()->_job_java_options + " " + opt.value()); 
+            }
             else
             if (opt.with_value("job-java-classpath")) { modifiable_settings()->_job_java_classpath = opt.value(); }
             else
