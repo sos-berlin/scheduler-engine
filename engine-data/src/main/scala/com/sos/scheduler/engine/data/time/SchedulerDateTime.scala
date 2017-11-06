@@ -9,9 +9,9 @@ import java.time.{Instant, ZoneId, ZonedDateTime}
   * @author Joacim Zschimmer
   */
 object SchedulerDateTime {
-  val formatUtc: TemporalAccessor ⇒ String =
-    newDateFormatBuilder().appendLiteral('Z').toFormatter.withZone(ZoneId.of("UTC")).format _
   private val utc = ZoneId.of("UTC")
+  val formatUtc: TemporalAccessor ⇒ String =
+    newDateFormatBuilder().appendLiteral('Z').toFormatter.withZone(utc).format _
 
   private def newDateFormatBuilder() =
     new DateTimeFormatterBuilder()
