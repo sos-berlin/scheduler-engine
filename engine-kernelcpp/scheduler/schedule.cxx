@@ -1280,9 +1280,15 @@ void Schedule::Inlay::set_dom( File_based* source_file_based, const xml::Element
             dt.assign( e.getAttribute( "date" ) );
             if( !dt.time_is_zero() )  z::throw_xc( "SCHEDULER-208", e.getAttribute( "date" ) );
             Date date;
-            date._day_nr = (int)( dt.as_time_t() / (24*60*60) );
-            date._day.set_dom_periods( e, &default_day, &default_period );
-            _date_set._date_set.insert( date );
+            int day_nr = (int)(dt.as_time_t() / (24*60*60));
+            Date_set::Daynr_to_date::iterator i = _date_set._daynr_to_date.find(day_nr);
+            if (i == _date_set._daynr_to_date.end()) {
+                date._day_nr = day_nr;
+                date._day.set_dom_periods(e, &default_day, &default_period);
+                _date_set._daynr_to_date[day_nr] = date;
+            } else {
+                i->second._day.set_dom_periods(e, &default_day, &default_period);
+            }
         }
         else
         if( e.nodeName_is( "weekdays" ) )
@@ -1761,14 +1767,16 @@ void Day::set_dom_periods( const xml::Element_ptr& element, const Day* default_d
 {
     if( !element )  return;
 
-    if( default_day )  _period_set = default_day->_period_set;
-
-    bool first = true;
+    bool filled = false;
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( first )  first = false, _period_set.clear();
+        filled = true;
         _period_set.insert( Period( e, default_period ) );
+    }
+
+    if (!filled && default_day) {
+        _period_set = default_day->_period_set;
     }
 }
 
@@ -2107,9 +2115,9 @@ Period Date_set::next_period_of_same_day( const Time& tim, With_single_start sin
     Time   time_of_day = tim.time_of_day();
     int    day_nr      = tim.day_nr();
 
-    FOR_EACH( set<Date>, _date_set, it )
+    FOR_EACH(Daynr_to_date, _daynr_to_date, it )
     {
-        const Date& date = *it;
+        const Date& date = it->second;
 
         if( date._day_nr >= day_nr )
         {
@@ -2132,9 +2140,9 @@ void Date_set::print( ostream& s ) const
 {
     s << "Date_set(";
 
-    FOR_EACH_CONST( set<Date>, _date_set, it )
+    FOR_EACH_CONST(Daynr_to_date, _daynr_to_date, it)
     {
-        s << *it << " ";
+        s << it->second << " ";
     }
 
     s << ")";

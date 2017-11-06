@@ -287,11 +287,13 @@ struct Date_set
 {
     Period                      next_period_of_same_day     ( const Time&, With_single_start single_start );
 
-    bool                        is_filled                   () const                                { return !_date_set.empty(); }
+    bool                        is_filled                   () const                                { return !_daynr_to_date.empty(); }
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Date_set& o )       { o.print(s); return s; }
 
-    set<Date>                  _date_set;
+
+    typedef stdext::hash_map<int, Date> Daynr_to_date;
+    Daynr_to_date                   _daynr_to_date;
 };
 
 //------------------------------------------------------------------------------------------At_set
