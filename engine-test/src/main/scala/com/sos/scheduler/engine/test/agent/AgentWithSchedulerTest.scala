@@ -13,6 +13,7 @@ import com.sos.scheduler.engine.data.scheduler.SchedulerClosed
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest._
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import java.nio.file.Path
+import scala.concurrent.Future
 
 /**
  * @author Joacim Zschimmer
@@ -28,6 +29,7 @@ trait AgentWithSchedulerTest extends HasCloser with ScalaSchedulerTest {
   }
   protected final lazy val agentUri = agent.localUri
   protected final lazy val agentClient: AgentClient = instance[SchedulerAgentClientFactory].apply(agentUri)
+  protected def startAgent: Boolean = true
 
   protected def newAgentConfiguration(): AgentConfiguration =
     newAgentConfiguration(data = Some(testEnvironment.agent.dataDirectory))
@@ -35,7 +37,7 @@ trait AgentWithSchedulerTest extends HasCloser with ScalaSchedulerTest {
   protected final def newAgentConfiguration(data: Option[Path]) = AgentConfiguration.forTest(data = data)
 
   protected override def onSchedulerActivated() = {
-    val started = agent.start()
+    val started = if (startAgent) agent.start() else Future.successful(())
     scheduler executeXml <process_class name={AgentProcessClassPath.withoutStartingSlash} remote_scheduler={agentUri}/>
     started await 10.s
     super.onSchedulerActivated()

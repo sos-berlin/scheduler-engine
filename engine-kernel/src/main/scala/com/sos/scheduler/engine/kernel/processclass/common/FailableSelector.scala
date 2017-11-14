@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.kernel.processclass.common
 
-import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.base.utils.ScalaUtils.functionWithToString
 import com.sos.scheduler.engine.common.async.FutureCompletion.functionToFutureTimedCall
 import com.sos.scheduler.engine.common.async.{CallQueue, TimedCall}
@@ -19,7 +18,8 @@ import scala.util.{Failure, Success, Try}
 class FailableSelector[Failable, Result](
   failables: FailableCollection[Failable],
   callbacks: Callbacks[Failable, Result],
-  callQueue: CallQueue) {
+  callQueue: CallQueue,
+  connectionTimeout: Option[Duration]) {
 
   import callQueue.implicits.executionContext
 
@@ -29,9 +29,10 @@ class FailableSelector[Failable, Result](
   private[this] val promise = Promise[(Failable, Result)]()
 
   final def start(): Future[(Failable, Result)] = {
+    val connectUntil = connectionTimeout map now.+
     if (timedCall != null) throw new IllegalStateException("Single start only")
     def loopUntilConnected(): Unit = {
-      val (delay, failable) = failables.nextDelayAndEntity()
+      val (delay, failable) = nextDelayAndEntity(connectUntil)
       if (delay > 0.s) {
         callbacks.onDelay(delay, failable)
       }
@@ -46,9 +47,14 @@ class FailableSelector[Failable, Result](
             promise.failure(new CancelledException)
           case Success(Failure(ExpectedException(e))) ⇒
             promise.failure(e)
-          case Success(Failure(throwable)) ⇒ // Tolerated failure
+          case Success(Failure(throwable)) ⇒
             failables.setFailure(failable, throwable)
-            loopUntilConnected()
+            if (connectUntil exists (now >= _)) {
+              logger.debug(s"Failing after connectionTimeout=${connectionTimeout.get.pretty}")
+              promise.failure(throwable)
+            } else {
+              loopUntilConnected()  // Tolerated failure
+            }
           case f @ Failure(_: TimedCall.CancelledException) ⇒
             logger.debug(s"$f")
             promise.failure(new CancelledException)
@@ -69,6 +75,15 @@ class FailableSelector[Failable, Result](
     }
     loopUntilConnected()
     promise.future
+  }
+
+  private final def nextDelayAndEntity(connectUntil: Option[Instant]): (Duration, Failable) = {
+    val (delay, failable) = failables.nextDelayAndEntity()
+    val d = connectUntil match {
+      case Some(until) ⇒ (until - now) max 0.s min delay
+      case None ⇒ delay
+    }
+    (d, failable)
   }
 
   final def cancel(): Unit = {

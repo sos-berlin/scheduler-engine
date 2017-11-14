@@ -250,7 +250,7 @@ private object FailableSelectorTest {
     }
 
     def newFailableSelector() =
-      new FailableSelector(failables, callbacks, callQueue) {
+      new FailableSelector(failables, callbacks, callQueue, connectionTimeout = None) {
         override def now = _now
       }
     }

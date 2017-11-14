@@ -69,7 +69,7 @@ extends AutoCloseable {
   }
 
   private def startNewAgentSelector(failableAgents: FailableAgents) = {
-    val result = new AgentSelector(failableAgents, callbacks, callQueue)
+    val result = new AgentSelector(failableAgents, callbacks, callQueue, connectionTimeout = apiProcessConfiguration.connectionTimeout)
     result.start() onComplete {
       case Success((agent, httpRemoteProcess)) ⇒
         logger.debug(s"Process on agent $agent started: $httpRemoteProcess")

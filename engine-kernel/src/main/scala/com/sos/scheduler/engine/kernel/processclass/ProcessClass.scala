@@ -87,7 +87,8 @@ extends FileBased {
     warningCall: CppCall,
     resultCall: CppCall): CppHttpRemoteApiProcessClient =
   {
-    val r = newCppHttpRemoteApiProcessClient(apiProcessConfiguration(conf), schedulerApiTcpPort, warningCall, resultCall)
+    val apiConf = apiProcessConfiguration(conf).copy(connectionTimeout = config.timeout)
+    val r = newCppHttpRemoteApiProcessClient(apiConf, schedulerApiTcpPort, warningCall, resultCall)
     clients += r
     r.startRemoteTask(failableAgents)
     r
@@ -182,8 +183,8 @@ object ProcessClass {
     }
   }
 
-  private def apiProcessConfiguration(c: Api_process_configurationC) = {
-    new ApiProcessConfiguration(
+  private def apiProcessConfiguration(c: Api_process_configurationC) =
+    ApiProcessConfiguration(
       meta = StartTask.Meta(JobPath(c._job_path), TaskId(c._task_id)),
       hasApi = c._has_api,
       javaOptions = c._java_options.trim,
@@ -191,6 +192,6 @@ object ProcessClass {
       logon = c._credentials_key.trim.nonEmpty option
         StartTask.KeyLogon(
           credentialsKey = c._credentials_key.trim,
-          withUserProfile = c._load_user_profile))
-  }
+          withUserProfile = c._load_user_profile),
+      connectionTimeout = None)  // Filled later
 }

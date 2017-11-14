@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.kernel.processclass
 
+import com.sos.scheduler.engine.base.convert.As
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.domElementToStaxSource
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
@@ -20,7 +21,8 @@ import scala.collection.immutable
 private[processclass] case class Configuration(
   agentOption: Option[Agent] = None,
   moreAgents: immutable.IndexedSeq[Agent] = Vector(),
-  selectionMethod: SelectionMethod = DefaultSelectionMethod)
+  selectionMethod: SelectionMethod = DefaultSelectionMethod,
+  timeout: Option[Duration] = None)
 {
   val agents: immutable.IndexedSeq[Agent] = agentOption.toVector ++ moreAgents
 
@@ -41,8 +43,9 @@ private[processclass] object Configuration {
         val nextId: () ⇒ Int = (Iterator from 0).next
         val attributeAgentOption = for (string ← attributeMap.get("remote_scheduler") if string.nonEmpty) yield
           Agent(nextId(), AgentAddress.normalized(string), httpHeartbeatTiming = None)
+        val timeout = attributeMap.optionAs("timeout")(As(o ⇒ Duration.ofSeconds(o.toInt)))
         attributeMap.ignoreUnread()
-        (forEachStartElement {
+        forEachStartElement {
           case "remote_schedulers" ⇒ parseElement() {
             val selectionMethod = attributeMap.get("select") match {
               case Some("first") ⇒ FixedPriority
@@ -56,16 +59,16 @@ private[processclass] object Configuration {
                 val httpHeartbeatTimingOption =
                   for (timeout ← attributeMap.get("http_heartbeat_timeout") map { o ⇒ Duration ofSeconds o.toInt };
                        period = attributeMap.get("http_heartbeat_period") map { o ⇒ Duration ofSeconds o.toInt } getOrElse timeout / 2)
-                  yield HttpHeartbeatTiming(period = period, timeout = timeout)
+                    yield HttpHeartbeatTiming(period = period, timeout = timeout)
                 Agent(nextId(), AgentAddress(uri), httpHeartbeatTimingOption)
               }
               case _ ⇒ ()
             }
-            Configuration(None, children.byClass[Agent], selectionMethod)
+            Configuration(None, children.byClass[Agent], selectionMethod, timeout = timeout)
           }
-        }
-          .option[Configuration] getOrElse Configuration()
-          copy (agentOption = attributeAgentOption))
+        }.option[Configuration]
+          .getOrElse(Configuration())
+          .copy(agentOption = attributeAgentOption)
       }
     }
 }
