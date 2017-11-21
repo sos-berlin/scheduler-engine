@@ -292,8 +292,8 @@ struct Date_set
     friend ostream&             operator <<                 ( ostream& s, const Date_set& o )       { o.print(s); return s; }
 
 
-    typedef stdext::hash_map<int, Date> Daynr_to_date;
-    Daynr_to_date                   _daynr_to_date;
+    typedef std::map<int, Date> Daynr_to_date;
+    Daynr_to_date               _daynr_to_date;
 };
 
 //------------------------------------------------------------------------------------------At_set
