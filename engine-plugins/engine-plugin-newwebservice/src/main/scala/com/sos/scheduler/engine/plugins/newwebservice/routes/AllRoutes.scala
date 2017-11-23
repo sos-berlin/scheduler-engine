@@ -24,7 +24,7 @@ trait AllRoutes extends ApiRoute with WebjarsRoute with JocCompatibleRoute with 
   }
 
   final def route: Route =
-    (decompressRequest() & compressResponseIfRequested(())) {
+    decompressRequest() {    // & compressResponseIfRequested(())) {  // JOC-352 beim Lesen von JOC 1 prototype.js: IllegalArgumentException: Cannot create MessageChunk with empty data
       pathEndOrSingleSlash {
         redirectToDefaultGui
       } ~
