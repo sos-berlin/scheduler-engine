@@ -17,10 +17,12 @@ import com.sos.scheduler.engine.taskserver.data.TaskServerMainTerminated
 import com.sos.scheduler.engine.taskserver.modules.common.{CommonArguments, Task}
 import com.sos.scheduler.engine.taskserver.modules.monitor.MonitorProcessor
 import com.sos.scheduler.engine.taskserver.modules.shell.ShellProcessTask._
+import com.sos.scheduler.engine.taskserver.modules.shell.TaskVariables.taskStartVariables
 import com.sos.scheduler.engine.taskserver.task.process.ShellScriptProcess.startShellScript
 import com.sos.scheduler.engine.taskserver.task.process.{ProcessConfiguration, RichProcess}
 import java.nio.file.Files._
 import java.nio.file.Path
+import java.time.Instant.now
 import org.jetbrains.annotations.TestOnly
 import org.scalactic.Requirements._
 import scala.concurrent.duration.Duration.Inf
@@ -90,7 +92,10 @@ extends HasCloser with Task {
     val env = {
       val params = spoolerTask.parameterMap ++ spoolerTask.orderParameterMap
       val paramEnv = params map { case (k, v) ⇒ (variablePrefix concat k.toUpperCase) → v }
-      environment + (ReturnValuesFileEnvironmentVariableName → orderParamsFile.toAbsolutePath.toString) ++ paramEnv
+      environment +
+        (ReturnValuesFileEnvironmentVariableName → orderParamsFile.toAbsolutePath.toString) ++
+        taskStartVariables(now) ++
+        paramEnv
     }
     val (agentTaskIdOption, killScriptFileOption) =
       if (taskServerMainTerminatedOption.nonEmpty) (None, None)
