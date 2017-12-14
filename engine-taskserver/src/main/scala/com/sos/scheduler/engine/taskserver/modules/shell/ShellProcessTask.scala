@@ -23,6 +23,7 @@ import com.sos.scheduler.engine.taskserver.task.process.{ProcessConfiguration, R
 import java.nio.file.Files._
 import java.nio.file.Path
 import java.time.Instant.now
+import java.util.Locale
 import org.jetbrains.annotations.TestOnly
 import org.scalactic.Requirements._
 import scala.concurrent.duration.Duration.Inf
@@ -90,8 +91,10 @@ extends HasCloser with Task {
         orderParamsFile = createTempFile("sos-", ".tmp")
     }
     val env = {
-      val params = spoolerTask.parameterMap ++ spoolerTask.orderParameterMap
-      val paramEnv = params map { case (k, v) ⇒ (variablePrefix concat k.toUpperCase) → v }
+      val params = // First upper-case, then merge, to merge handle case conflicts properly
+        spoolerTask.parameterMap.map { case (k, v) ⇒ k.toUpperCase(Locale.ROOT) → v } ++
+        spoolerTask.orderParameterMap.map { case (k, v) ⇒ k.toUpperCase(Locale.ROOT) → v }
+      val paramEnv = params map { case (k, v) ⇒ (variablePrefix concat k) → v }
       environment +
         (ReturnValuesFileEnvironmentVariableName → orderParamsFile.toAbsolutePath.toString) ++
         taskStartVariables(now) ++
