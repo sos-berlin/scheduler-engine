@@ -129,6 +129,10 @@ final class JS1291AgentIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         assert(shellOutput contains s"""SCHEDULER_ID="$id"""")
       }
 
+      "SCHEDULER_ORDER_STATE" in {
+        assert(shellOutput contains s"""SCHEDULER_ORDER_STATE="100"""")
+      }
+
       "Shell with monitor has access to stdout_text" in {
         awaitSuccess(startJob(JobPath("/no-crash")).result).logString should include ("SPOOLER_PROCESS_AFTER")
       }
@@ -264,6 +268,7 @@ object JS1291AgentIT {
             |echo !$EnvironmentVariable=%$EnvironmentVariable%
             |echo !PATH="%Path%"
             |echo !SCHEDULER_ID="%SCHEDULER_ID%"
+            |echo !SCHEDULER_ORDER_STATE="%SCHEDULER_ORDER_STATE%"
             |if "%SCHEDULER_RETURN_VALUES%" == "" goto :noReturnValues
             |    echo ${ChangedVariable.name}=${ChangedVariable.value} >> %SCHEDULER_RETURN_VALUES%
             |:noReturnValues
@@ -273,6 +278,7 @@ object JS1291AgentIT {
             |echo !$EnvironmentVariable=$$$EnvironmentVariable
             |echo !PATH=\\""$$PATH"\\"
             |echo !SCHEDULER_ID=\\""$$SCHEDULER_ID"\\"
+            |echo !SCHEDULER_ORDER_STATE=\\""$$SCHEDULER_ORDER_STATE"\\"
             |[ -n "$$SCHEDULER_RETURN_VALUES" ] && echo ${ChangedVariable.name}=${ChangedVariable.value} >> $$SCHEDULER_RETURN_VALUES
             |""".stripMargin
         ) +
