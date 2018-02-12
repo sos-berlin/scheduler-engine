@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.agent.configuration
 
+import com.google.common.base.Splitter
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration._
 import com.sos.scheduler.engine.agent.data.ProcessKillScript
 import com.sos.scheduler.engine.agent.web.common.ExternalWebService
@@ -26,6 +27,7 @@ import java.net.InetSocketAddress
 import java.nio.file.Files.{createDirectory, exists}
 import java.nio.file.{Path, Paths}
 import java.time.Duration
+import java.util.regex.Pattern
 import org.scalactic.Requirements._
 import scala.collection.JavaConversions._
 import scala.collection.immutable
@@ -60,7 +62,7 @@ final case class AgentConfiguration(
       https = a.optionAs("-https-port=")(StringToServerInetSocketAddress) map { o ⇒ inetSocketAddressToHttps(o) } orElse https,
       uriPathPrefix = a.as[String]("-uri-prefix=", uriPathPrefix) stripPrefix "/" stripSuffix "/",
       logDirectory = a.optionAs("-log-directory=")(asAbsolutePath) getOrElse logDirectory,
-      jobJavaOptions = a.optionAs[String]("-job-java-options=") map { o ⇒ List(o) } getOrElse jobJavaOptions,
+      jobJavaOptions = a.optionAs[String]("-job-java-options=").toList.flatMap(splitJavaOptions) ++: jobJavaOptions,
       rpcKeepaliveDuration = a.optionAs[Duration]("-rpc-keepalive=", rpcKeepaliveDuration))
     v = v withKillScript a.optionAs[String]("-kill-script=")
     for (o ← a.optionAs("-dotnet-class-directory=")(asAbsolutePath)) {
@@ -198,4 +200,7 @@ object AgentConfiguration {
         http = Some(WebServerBinding.Http(new InetSocketAddress("127.0.0.1", httpPort))),
         jobJavaOptions = List(s"-Dlogback.configurationFile=${TaskServerLogbackResource.path}") ++ sys.props.get("agent.job.javaOptions"))
   }
+
+  private def splitJavaOptions(options: String): immutable.Seq[String] =
+    Splitter.on(Pattern.compile("\\s+")).trimResults.omitEmptyStrings.split(options).toVector
 }

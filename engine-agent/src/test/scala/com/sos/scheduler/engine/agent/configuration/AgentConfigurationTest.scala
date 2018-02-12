@@ -131,5 +131,9 @@ final class AgentConfigurationTest extends FreeSpec {
     assert(conf(List("-rpc-keepalive=5m")).rpcKeepaliveDuration == Some(5 * 60.s))
   }
 
+  "-job-java-options=" in {
+    assert(conf(List("-job-java-options=-Xmx20m -Xms10m")).jobJavaOptions == List("-Xmx20m", "-Xms10m"))
+  }
+
   private def conf(args: List[String]) = AgentConfiguration(args)
 }
