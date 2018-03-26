@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.tests.jira.js793
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
@@ -16,10 +17,14 @@ import org.scalatest.junit.JUnitRunner
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class JS793IT extends FreeSpec with ScalaSchedulerTest {
+final class JS793IT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
   "JS-793 shell job" in {
     runTest(JobChainPath("/test-shell"))
+  }
+
+  "JS-1764 shell job on Agent" in {
+    runTest(JobChainPath("/test-shell-agent"))
   }
 
   "JS-1573 API job - FAILS" in {
@@ -28,7 +33,7 @@ final class JS793IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
-  private def runTest(jobChainPath: JobChainPath) {
+  private def runTest(jobChainPath: JobChainPath): Unit = {
     val result = runOrder(OrderCommand(
       jobChainPath orderKey "1",
       parameters = Map(

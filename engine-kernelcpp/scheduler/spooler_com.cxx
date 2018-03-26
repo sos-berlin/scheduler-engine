@@ -3166,7 +3166,18 @@ STDMETHODIMP Com_task::get_Order_params_xml( BSTR* result )
     {
         if( !_task )  return E_POINTER;
         *result = NULL;
-        if( Order* order = _task->order() )  order->params()->get_Xml( result );
+        if (Order* order = _task->order()) {
+            string prefix = order->string_state() + "/";
+            ptr<Com_variable_set> v = new Com_variable_set();
+            Z_FOR_EACH_CONST(Com_variable_set::Map, order->params()->_map, p) {
+                string name = string_from_bstr(p->first);
+                if (string_begins_with(name, prefix)) {
+                    name = name.substr(prefix.length());
+                }
+                v->put_Var(Bstr(name), &p->second->_value);
+            }
+            v->get_Xml(result);
+        } 
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, Z_FUNCTION ); }
 
