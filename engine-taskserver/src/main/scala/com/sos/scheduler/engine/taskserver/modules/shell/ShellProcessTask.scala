@@ -91,7 +91,7 @@ extends HasCloser with Task {
         orderParamsFile = createTempFile("sos-", ".tmp")
     }
     val env = {
-      val params = // First upper-case, then merge, to merge handle case conflicts properly
+      val params = // First upper-case, then merge, to handle case conflicts properly
         spoolerTask.parameterMap.map { case (k, v) ⇒ k.toUpperCase(Locale.ROOT) → v } ++
         spoolerTask.orderParameterMap.map { case (k, v) ⇒ k.toUpperCase(Locale.ROOT) → v }
       val paramEnv = params map { case (k, v) ⇒ (variablePrefix concat k) → v }
