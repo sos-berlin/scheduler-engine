@@ -354,7 +354,15 @@ bool Remote_module_instance_proxy::try_to_get_process(const Api_process_configur
         process_configuration._job_path = _task->job()->path();
         process_configuration._task_id = _task_id;
         process_configuration._is_thread = _module->_kind == Module::kind_java_in_process;
-        process_configuration._credentials_key = _module->_credentials_key;
+
+        ptr<Com_variable_set> variables = new Com_variable_set;
+        variables->merge(_spooler->variables());
+        if (Task* t = _task) {
+            variables->merge(t->params());
+            if (Order *o = t->order()) variables->merge(o->params());
+        }
+        process_configuration._credentials_key = subst_env(_module->_credentials_key, variables);
+
         process_configuration._load_user_profile = _module->_load_user_profile;
 
         bool ok = Module_instance::try_to_get_process(&process_configuration);
