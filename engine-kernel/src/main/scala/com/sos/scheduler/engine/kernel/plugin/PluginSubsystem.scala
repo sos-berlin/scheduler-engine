@@ -85,7 +85,7 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
   }
 
   private[plugin] def plugins[A : ClassTag]: immutable.Iterable[A] =
-    (classToPluginAdapter.valuesIterator map { _.pluginInstance } collect assignableFrom[A]).toImmutableIterable
+    (classToPluginAdapter.valuesIterator flatMap { _.pluginInstanceOption } collect assignableFrom[A]).toImmutableIterable
 
   private def pluginAdapters = classToPluginAdapter.values
 }

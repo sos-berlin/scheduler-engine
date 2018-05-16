@@ -76,6 +76,9 @@ final class PluginAdapter(val configuration: PluginConfiguration) {
       case _ ⇒ throw new SchedulerException("Plugin is not a " + classOf[HasCommandHandlers].getSimpleName)
     }
 
+  private[plugin] def pluginInstanceOption: Option[Plugin] =
+    Option(_pluginInstance)
+
   private[plugin] def pluginInstance =
     _pluginInstance match {
       case null ⇒ throw new IllegalStateException("PluginAdapter not initialized")
