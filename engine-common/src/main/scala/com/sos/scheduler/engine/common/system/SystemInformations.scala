@@ -1,22 +1,41 @@
 package com.sos.scheduler.engine.common.system
 
 import com.sos.scheduler.engine.base.system.SystemInformation
-import com.sos.scheduler.engine.common.utils.BeanPropertyReader
-import com.sos.scheduler.engine.common.utils.BeanPropertyReader.ConditionalConverter
-import java.lang.management.ManagementFactory.getOperatingSystemMXBean
-import java.lang.management.OperatingSystemMXBean
+import com.sos.scheduler.engine.common.system.OperatingSystem.operatingSystem
+import java.lang.management.ManagementFactory.{getOperatingSystemMXBean, getPlatformMBeanServer}
+import javax.management.ObjectName
+import scala.util.Try
 
-object SystemInformations {
-  private val OnlyNonNegative: ConditionalConverter = { case v: Number if v.doubleValue >= 0 ⇒ v }
+object SystemInformations
+{
+  private def filteredMap(keyValues: Iterable[(String, Any)]): Map[String, Any] =
+    (keyValues flatMap {
+      case (_, v: Int) if v < 0 ⇒ Nil
+      case o ⇒ o :: Nil
+    }).toMap
 
-  private val operatingSystemMXBeanReader = new BeanPropertyReader[OperatingSystemMXBean](getOperatingSystemMXBean.getClass, {
-    case "availableProcessors" ⇒ OnlyNonNegative
-    case "systemCpuLoad" ⇒ OnlyNonNegative
-    case "processCpuLoad" ⇒ OnlyNonNegative
-    case "committedVirtualMemorySize" ⇒ OnlyNonNegative
-    case "totalPhysicalMemorySize" ⇒ OnlyNonNegative
-    case "freePhysicalMemorySize" ⇒ OnlyNonNegative
-  })
+
+  private def operatingSystemMXBean(): Map[String, Any] = {
+    val bean = getOperatingSystemMXBean
+    filteredMap(Map(
+      "availableProcessors" → bean.getAvailableProcessors,
+      "systemLoadAverage" → bean.getSystemLoadAverage))
+  }
+
+  private val OperatingSystemObjectName = new ObjectName("java.lang", "type", "OperatingSystem")
+  private def platformMBean(): Map[String, Any] = {
+    val bean = getPlatformMBeanServer
+    val keys =
+      "processCpuLoad" ::
+      "systemCpuLoad" ::
+      "totalPhysicalMemorySize" ::
+      "committedVirtualMemorySize" ::
+      "freePhysicalMemorySize" :: Nil
+    filteredMap(for {
+      key ← keys
+      value ← Try { bean.getAttribute(OperatingSystemObjectName, key.capitalize) }.toOption
+    } yield key → value)
+  }
 
   def systemInformation(): SystemInformation = {
     import OperatingSystem.operatingSystem.{cpuModel, distributionNameAndVersionOption, hostname}
