@@ -324,7 +324,7 @@ object WindowsProcess {
     process.getOutputStream.close()  // stdin
     val lines = {
       val commandCodec = new Codec(Charset forName "cp850")
-      try autoClosing(io.Source.fromInputStream(process.getInputStream)(commandCodec)) { _.getLines().toVector }
+      try autoClosing(process.getInputStream) { in ⇒ io.Source.fromInputStream(in)(commandCodec).getLines().toVector }
       catch { case NonFatal(t) ⇒
         Vector(s"error message not readable: $t")
       }

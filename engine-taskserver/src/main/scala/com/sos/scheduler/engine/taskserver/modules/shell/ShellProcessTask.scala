@@ -20,6 +20,7 @@ import com.sos.scheduler.engine.taskserver.modules.shell.ShellProcessTask._
 import com.sos.scheduler.engine.taskserver.modules.shell.TaskVariables.taskStartVariables
 import com.sos.scheduler.engine.taskserver.task.process.ShellScriptProcess.startShellScript
 import com.sos.scheduler.engine.taskserver.task.process.{ProcessConfiguration, RichProcess}
+import java.io.FileInputStream
 import java.nio.file.Files._
 import java.nio.file.Path
 import java.time.Instant.now
@@ -167,8 +168,8 @@ extends HasCloser with Task {
   }
 
   private def fetchReturnValues() =
-    autoClosing(io.Source.fromFile(orderParamsFile)(Encoding)) { source ⇒
-      (source.getLines map lineToKeyValue).toMap
+    autoClosing(new FileInputStream(orderParamsFile)) { in ⇒
+      io.Source.fromInputStream(in)(Encoding).getLines.map(lineToKeyValue).toMap
     }
 
   def sendProcessSignal(signal: ProcessSignal): Unit = {

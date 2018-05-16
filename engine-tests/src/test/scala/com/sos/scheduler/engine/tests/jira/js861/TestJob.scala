@@ -28,8 +28,8 @@ private[js861] object TestJob {
   private def execute(args: String*): String = {
     val process = new ProcessBuilder(args: _*).start()
     val codec = Codec(US_ASCII).onMalformedInput(IGNORE).onUnmappableCharacter(IGNORE)
-    val output = autoClosing(io.Source.fromInputStream(process.getInputStream)(codec)) { source ⇒
-      source.getLines() mkString "\n"
+    val output = autoClosing(process.getInputStream) { in ⇒
+      io.Source.fromInputStream(in)(codec).getLines() mkString "\n"
     }
     process.waitFor()
     output

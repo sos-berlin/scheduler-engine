@@ -4,7 +4,6 @@ import com.sos.scheduler.engine.cplusplus.generator.cpp._
 import com.sos.scheduler.engine.cplusplus.generator.javaproxy.clas.CppClass
 import com.sos.scheduler.engine.cplusplus.generator.util.ProcedureSignature
 import java.lang.reflect.Constructor
-import scala.language.reflectiveCalls
 
 final class CppConstructor(cppClass: CppClass, s: ProcedureSignature) extends CppProcedure(cppClass, s) {
 

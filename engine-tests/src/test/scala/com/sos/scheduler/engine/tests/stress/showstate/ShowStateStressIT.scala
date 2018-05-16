@@ -40,7 +40,7 @@ object ShowStateStressIT {
     for (i <- 1 to Int.MaxValue) connection.sendAndReceive(emptyCommand)
   }
 
-  private class Connection(val address: InetSocketAddress) {
+  private class Connection(val address: InetSocketAddress) extends AutoCloseable {
     private def encoding = Charsets.UTF_8
     private val socket = new Socket
     socket.connect(address)

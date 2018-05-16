@@ -3,14 +3,12 @@ package com.sos.scheduler.engine.common.scalautil
 import com.google.common.io.Closer
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersCloser
-import scala.language.reflectiveCalls
 
 /**
  * @author Joacim Zschimmer
  */
 object Closers {
   type GuavaCloseable = java.io.Closeable
-  private type HasClose = { def close(): Unit }
 
   object implicits {
     implicit class RichClosersCloser(val delegate: Closer) extends AnyVal {
@@ -61,13 +59,7 @@ object Closers {
     }
   }
 
-  def toGuavaCloseable(autoCloseable: AutoCloseable): GuavaCloseable =
-    autoCloseable match {
-      case o: GuavaCloseable ⇒ o
-      case o ⇒ guavaCloseable { o.close() }
-    }
-
-  def toGuavaCloseable(closeable: HasClose): GuavaCloseable = guavaCloseable { closeable.close() }
+  def toGuavaCloseable(closeable: AutoCloseable): GuavaCloseable = guavaCloseable { closeable.close() }
 
   private def guavaCloseable(f: ⇒ Unit): GuavaCloseable =
     new GuavaCloseable {

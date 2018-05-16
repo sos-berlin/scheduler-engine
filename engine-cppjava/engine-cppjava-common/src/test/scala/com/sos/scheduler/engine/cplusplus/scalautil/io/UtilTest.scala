@@ -14,7 +14,7 @@ final class UtilTest {
         suppressLogging(Util.getClass){ closeQuietly(null) }
     }
 
-  private class A {
+    private class A extends AutoCloseable {
         var closed = false
         def close(): Unit = {
             closed = true

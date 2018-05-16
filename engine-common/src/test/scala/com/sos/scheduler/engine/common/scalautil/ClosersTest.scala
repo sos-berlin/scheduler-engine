@@ -10,7 +10,6 @@ import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 import scala.collection.mutable
-import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 final class ClosersTest extends FreeSpec {

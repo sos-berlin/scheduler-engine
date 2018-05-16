@@ -12,7 +12,6 @@ import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
 import java.time.Duration
-import scala.language.reflectiveCalls
 import spray.http.Uri
 
 /**

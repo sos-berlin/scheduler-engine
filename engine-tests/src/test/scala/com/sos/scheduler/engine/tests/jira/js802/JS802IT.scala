@@ -12,7 +12,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
-import scala.language.reflectiveCalls
 
 /** JS-802 "http://www.sos-berlin.com/jira/browse/JS-802": Testet einen Auftrag und einen Job.
   * @see <a href="http://www.sos-berlin.com/jira/browse/JS-802">JS-802</a> */
@@ -21,7 +20,7 @@ final class JS802IT extends FreeSpec with ScalaSchedulerTest {
 
   @volatile private var startTime = new DateTime(0)
 
-  private val collector = new {
+  private object collector {
     val set = mutable.HashSet[Any]()
 
     def add(o: Any): Unit = {

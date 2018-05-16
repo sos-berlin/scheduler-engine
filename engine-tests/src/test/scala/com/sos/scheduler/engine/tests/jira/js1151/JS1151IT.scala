@@ -42,22 +42,26 @@ final class JS1151IT extends FreeSpec {
     import controller._
     deleteTable("SCHEDULER_JOB_CHAINS")
     scheduler executeXml <job_chain.modify job_chain={jobChainPath.string} state="stopped"/>
-    autoClosing(instance[EntityManagerFactory].createEntityManager()) { entityManager ⇒
+    val entityManager = instance[EntityManagerFactory].createEntityManager()
+    try {
       val jobChainEntities = entityManager.fetchSeq[JobChainEntity]("select t from JobChainEntity t")
       jobChainEntities map { o ⇒ (o.jobChainPath, o.clusterMemberId, o.isStopped)} shouldEqual List(
         (jobChainPath.withoutStartingSlash, expectedClusterMemberId, true))
     }
+    finally entityManager.close()
   }
 
   private def checkJobChainNode(jobChainPath: JobChainPath, expectedClusterMemberId: String)(implicit controller: TestSchedulerController): Unit = {
     import controller._
     deleteTable("SCHEDULER_JOB_CHAIN_NODES")
     scheduler executeXml <job_chain_node.modify job_chain={jobChainPath.string} state="100" action="stop"/>
-    autoClosing(instance[EntityManagerFactory].createEntityManager()) { entityManager ⇒
+    val entityManager = instance[EntityManagerFactory].createEntityManager()
+    try {
       val nodesEntities = entityManager.fetchSeq[JobChainNodeEntity]("select t from JobChainNodeEntity t order by t.jobChainPath, t.clusterMemberId")
       nodesEntities map { o ⇒ (o.jobChainPath, o.clusterMemberId, o.orderState, o.action) } shouldEqual List(
         (jobChainPath.withoutStartingSlash, expectedClusterMemberId, "100", "stop"))
     }
+    finally entityManager.close()
   }
 
   private def deleteTable(name: String)(implicit controller: TestSchedulerController): Unit = {

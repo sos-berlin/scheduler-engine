@@ -8,6 +8,7 @@ import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.data.job.{JobPath, TaskId}
+import java.io.FileInputStream
 import java.nio.file.Files.{delete, exists, size}
 import java.nio.file.{Files, Paths}
 import org.junit.runner.RunWith
@@ -97,5 +98,7 @@ final class CrashKillScriptTest extends FreeSpec with HasCloser with BeforeAndAf
     assert(lines.toSet == (evilJobPaths.indices map { i ⇒ s""""test-kill.sh" -kill-agent-task-id=$i -master-task-id=$i""" }).toSet)
   }
 
-  private def lines = autoClosing(io.Source.fromFile(file)) { _.getLines.toList }
+  private def lines = autoClosing(new FileInputStream(file)) { in ⇒
+    io.Source.fromInputStream(in).getLines.toList
+  }
 }

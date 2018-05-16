@@ -1,20 +1,17 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
 import org.slf4j.LoggerFactory
-import scala.language.reflectiveCalls
 
 // Kann gelegentlich verallgemeinert werden zu com.sos.scalautil.io
 
 object Util {
     private val logger = LoggerFactory.getLogger(getClass)
 
-    private type HasClose = { def close(): Unit }
-    
     /** Implementiert das Load Pattern mit close().
      * Aufruf: closingFinally( new InputStream ) { inputStream => code }.
      * B ist üblicherweise Unit.
      */
-    def closingFinally[A <: HasClose, B](a: A)(function: A => B): B = {
+    def closingFinally[A <: AutoCloseable, B](a: A)(function: A => B): B = {
         if (a == null)  throw new NullPointerException("closingFinally: object is null")
         var ok = false
         try {
@@ -26,7 +23,7 @@ object Util {
         finally if (!ok) closeQuietly(a)
     }
 
-    def closeQuietly[A <: HasClose](o: A): Unit = {
+    def closeQuietly[A <: AutoCloseable](o: A): Unit = {
         try o.close()
         catch { case x: Exception => logger.error(x.toString, x) }
     }

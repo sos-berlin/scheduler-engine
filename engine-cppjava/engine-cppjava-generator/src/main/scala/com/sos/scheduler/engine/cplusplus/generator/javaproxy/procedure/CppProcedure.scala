@@ -29,7 +29,7 @@ class CppProcedure(cppClass: CppClass, m: ProcedureSignature) {
       quoted(Jni.methodTypeSignatureString(m.parameterTypes, m.returnType)) + ")"
   }
 
-  val objectClassCode = new CppCode {
+  object objectClassCode {
     val declarationStub = name + parameterListDeclaration + (" const"? !m.isStatic)
 
     def headerCode = ("static "? m.isStatic) + cppReturnType +" "+ declarationStub +";"

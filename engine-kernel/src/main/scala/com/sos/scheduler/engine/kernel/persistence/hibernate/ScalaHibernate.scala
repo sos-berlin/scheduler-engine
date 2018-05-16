@@ -1,8 +1,7 @@
 package com.sos.scheduler.engine.kernel.persistence.hibernate
 
-import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Logger
-import javax.persistence.{EntityManagerFactory, EntityManager}
+import javax.persistence.{EntityManager, EntityManagerFactory}
 
 object ScalaHibernate {
 
@@ -11,10 +10,11 @@ object ScalaHibernate {
   def transaction[A](f: EntityManager => A)(implicit entityManagerFactory: EntityManagerFactory): A =
     transaction(entityManagerFactory)(f)
 
-  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A =
-    autoClosing(entityManagerFactory.createEntityManager()) { entityManager =>
-      transaction(entityManager)(f)
-    }
+  def transaction[A](entityManagerFactory: EntityManagerFactory)(f: EntityManager => A): A = {
+    val entityManager = entityManagerFactory.createEntityManager()
+    try transaction(entityManager)(f)
+    finally entityManager.close()
+  }
 
   private def transaction[A](entityManager: EntityManager)(f: EntityManager => A): A = {
     val ta = entityManager.getTransaction

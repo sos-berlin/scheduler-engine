@@ -27,13 +27,15 @@ final class JS1082IT extends FreeSpec with ScalaSchedulerTest {
       }
     }
     runJob(testJobPath).taskId shouldEqual TaskId.First + 1
-    autoClosing(instance[EntityManagerFactory].createEntityManager()) { entityManager ⇒
+    val entityManager = instance[EntityManagerFactory].createEntityManager()
+    try {
       val taskHistoryEntities = entityManager.fetchSeq[TaskHistoryEntity]("select t from TaskHistoryEntity t order by t.id")
       taskHistoryEntities map { o ⇒ TaskId(o.id) → o.jobPath } shouldEqual List(
         (TaskId.First - 1) → "(Spooler)",
          TaskId.First      → testJobPath.withoutStartingSlash,
         (TaskId.First + 1) → testJobPath.withoutStartingSlash)
     }
+    finally entityManager.close()
   }
 
   private def withDatabaseError(body: ⇒ Unit)(implicit controller: TestSchedulerController): Unit = {
