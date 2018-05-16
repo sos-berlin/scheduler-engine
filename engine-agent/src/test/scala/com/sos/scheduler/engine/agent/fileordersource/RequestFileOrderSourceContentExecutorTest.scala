@@ -35,7 +35,6 @@ import scala.util.matching.Regex
 final class RequestFileOrderSourceContentExecutorTest extends FreeSpec with Futures {
 
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    def configure() = ()
     @Provides @Singleton
     def executionContext: ExecutionContext = ExecutionContext.global
   })

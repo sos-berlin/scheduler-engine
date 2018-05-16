@@ -41,8 +41,6 @@ final class ExtraSchedulerIT extends FreeSpec with ProvidesTestDirectory {
       closer.onClose { actorSystem.shutdown() }
       import actorSystem.dispatcher
       val injector = Guice.createInjector(new AbstractModule {
-        def configure() = ()
-
         @Provides @Singleton
         def actorRefFactory(): ActorRefFactory = actorSystem
       })

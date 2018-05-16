@@ -71,8 +71,6 @@ object WebServiceActor {
 
   def props(gateKeeper: GateKeeper, injector: Injector) = Props {
     injector.createChildInjector(new AbstractModule {
-      def configure() = {}
-
       @Provides @Singleton
       def provideGateKeeper(): GateKeeper = gateKeeper
     })

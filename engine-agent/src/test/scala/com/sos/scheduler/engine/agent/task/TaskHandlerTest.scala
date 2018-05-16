@@ -253,7 +253,7 @@ private object TaskHandlerTest {
   private class TestModule(tasks: List[AgentTask]) extends ScalaAbstractModule {
     private val taskIterator = tasks.iterator
 
-    def configure() = {
+    override def configure() = {
       bindInstance[TimerService](TimerService(idleTimeout = Some(1.s)))
       bindInstance[ExecutionContext](ExecutionContext.global)
     }

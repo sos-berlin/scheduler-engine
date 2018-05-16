@@ -33,8 +33,6 @@ final class AgentClientCommandMarshallingTest extends FreeSpec with BeforeAndAft
   }
 
   override protected def extraAgentModule = new AbstractModule {
-    def configure() = {}
-
     @Provides @Singleton
     def commandExecutor(): CommandExecutor = new CommandExecutor {
       def executeCommand(command: Command, meta: CommandMeta): Future[command.Response] =

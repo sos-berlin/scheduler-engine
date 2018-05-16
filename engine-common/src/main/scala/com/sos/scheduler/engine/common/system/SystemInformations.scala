@@ -37,12 +37,12 @@ object SystemInformations
     } yield key → value)
   }
 
-  def systemInformation(): SystemInformation = {
-    import OperatingSystem.operatingSystem.{cpuModel, distributionNameAndVersionOption, hostname}
+  def systemInformation(): SystemInformation =
     SystemInformation(
-      hostname = hostname,
-      distribution = distributionNameAndVersionOption,
-      cpuModel = cpuModel,
-      mxBeans = Map("operatingSystem" → operatingSystemMXBeanReader.toMap(getOperatingSystemMXBean)))
-  }
+      hostname = operatingSystem.hostname,
+      distribution = operatingSystem.distributionNameAndVersionOption,
+      cpuModel = operatingSystem.cpuModel,
+      mxBeans = Map("operatingSystem" → (
+        operatingSystemMXBean() ++
+        platformMBean())))
 }

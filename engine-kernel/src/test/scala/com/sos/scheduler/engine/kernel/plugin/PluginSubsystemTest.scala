@@ -20,8 +20,6 @@ import scala.collection.immutable
 final class PluginSubsystemTest extends FreeSpec {
 
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    def configure() = {}
-
     @Provides def pluginConfigurations: immutable.Seq[PluginConfiguration] = List(
       PluginConfiguration(classOf[APlugin].getName, None),
       PluginConfiguration(classOf[BPlugin].getName, None))

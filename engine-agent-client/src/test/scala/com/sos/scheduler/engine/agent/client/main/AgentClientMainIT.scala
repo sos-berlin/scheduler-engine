@@ -25,7 +25,7 @@ final class AgentClientMainIT extends FreeSpec with BeforeAndAfterAll with HasCl
   override def afterAll() = closer.closeThen { super.afterAll() }
 
   override protected def extraAgentModule = new ScalaAbstractModule {
-    def configure() = {
+    override def configure() = {
       bindInstance[CommandExecutor](new CommandExecutor {
         def executeCommand(command: Command, meta: CommandMeta): Future[command.Response] = {
           val response = command match {

@@ -29,8 +29,6 @@ import scala.util.Failure
 final class SchedulerClientFactoryTest extends FreeSpec with BeforeAndAfterAll {
 
   private lazy val injector = Guice.createInjector(new AbstractModule {
-    def configure() {}
-
     @Provides @Singleton
     def executionContext(actorSystem: ActorSystem): ExecutionContext = actorSystem.dispatcher
 

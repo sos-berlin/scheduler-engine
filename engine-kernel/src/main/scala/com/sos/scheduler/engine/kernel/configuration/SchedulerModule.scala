@@ -59,7 +59,7 @@ with HasCloser {
 
   private val lateBoundCppSingletons = mutable.Buffer[Class[_]]()
 
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(classOf[DependencyInjectionCloser]) toInstance DependencyInjectionCloser(closer)
     bindInstance(spoolerC)
     bindInstance(controllerBridge)

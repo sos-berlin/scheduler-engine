@@ -99,7 +99,7 @@ object PluginAdapter {
 
   private def newPluginInstanceByDI(injector: Injector, c: Class[_ <: Plugin], configElement: Element): Plugin = {
     val module = new AbstractModule {
-      protected def configure(): Unit = {
+      override protected def configure(): Unit = {
         bind(classOf[Element]) annotatedWith Names.named(Plugins.configurationXMLName) toInstance configElement
       }
     }

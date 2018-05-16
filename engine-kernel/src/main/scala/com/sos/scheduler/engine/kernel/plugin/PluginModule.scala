@@ -7,7 +7,7 @@ import scala.collection.immutable
 final class PluginModule(pluginConfigurations: immutable.Seq[PluginConfiguration])
 extends ScalaAbstractModule  {
 
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(new TypeLiteral[immutable.Seq[PluginConfiguration]] {}) toInstance pluginConfigurations
     pluginConfigurations flatMap { _.guiceModuleOption } foreach install
     bindInstance(pluginConfigurations)

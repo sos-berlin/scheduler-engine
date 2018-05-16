@@ -39,8 +39,6 @@ extends Plugin {
 
   private val conf = NewWebServiceConfigurationParser.parseString(toXml(pluginElement))
   private val myInjector = schedulerInjector.createChildInjector(new AbstractModule {
-    def configure() = {}
-
     @Provides @Singleton
     def newWebServicePluginConfiguration(): NewWebServicePluginConfiguration = conf
   })
