@@ -34,6 +34,8 @@
     #define SERVER_JVM_RELATIVE_PATH "/lib/sparcv9/server/libjvm.so"
     #define CLIENT_JVM_RELATIVE_PATH "/lib/sparcv9/client/libjvm.so"
 #elif defined Z_LINUX
+    #define SERVER_10_JVM_RELATIVE_PATH "/lib/server/libjvm.so"
+    #define CLIENT_10_JVM_RELATIVE_PATH "/lib/client/libjvm.so"
     #if defined Z_64
         #define SERVER_JVM_RELATIVE_PATH "/lib/amd64/server/libjvm.so"
         #define CLIENT_JVM_RELATIVE_PATH "/lib/amd64/client/libjvm.so"
@@ -420,6 +422,10 @@ vector<string> Vm::filenames()
         }
         result.push_back(home + SERVER_JVM_RELATIVE_PATH);
         result.push_back(home + CLIENT_JVM_RELATIVE_PATH);
+        #if defined Z_LINUX
+            result.push_back(home + SERVER_10_JVM_RELATIVE_PATH);
+            result.push_back(home + CLIENT_10_JVM_RELATIVE_PATH);
+        #endif
     }
     else
     if (!_filename.empty()) {
@@ -429,9 +435,18 @@ vector<string> Vm::filenames()
         string jvm_path;
         #ifdef Z_WINDOWS
             windows::Registry_key hkey;
-            windows::Registry_key version_hkey;
 
+            if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\JRE", KEY_QUERY_VALUE)) {  // Since Java 9, https://bugs.openjdk.java.net/browse/JDK-8187906
+                windows::Registry_key version_hkey;
+                string current_version = hkey.get_string("CurrentVersion", "");
+                if( current_version != "" 
+                    && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
+                {
+                    result.push_back(version_hkey.get_string( "RuntimeLib", "" ));
+                }
+            } else
             if (hkey.try_open( HKEY_LOCAL_MACHINE, "software\\JavaSoft\\Java Runtime Environment", KEY_QUERY_VALUE)) {
+                windows::Registry_key version_hkey;
                 string current_version = hkey.get_string("CurrentVersion", "");
                 if( current_version != "" 
                     && version_hkey.try_open( hkey, current_version, KEY_QUERY_VALUE ) )
