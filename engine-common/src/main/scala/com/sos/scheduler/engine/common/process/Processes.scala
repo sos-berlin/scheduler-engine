@@ -24,7 +24,7 @@ object Processes {
   def processToPidOption(process: Process): Option[Pid] =
     process match {
       case process: WindowsProcess ⇒ Some(process.pid)
-      case _ ⇒ ProcessesJava8pid.processToPid(process)
+      case _ ⇒ ProcessPidRetriever.processToPid(process)
     }
 
   final case class Pid(number: Long) {
