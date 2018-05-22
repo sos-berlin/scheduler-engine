@@ -831,7 +831,7 @@ void Process_module_instance::fill_process_environment_with_params()
 
 //------------------------------------Process_module_instance::fill_process_environment_with_params
 
-string Process_module_instance::get_parameter_name(const string suffix)
+string Process_module_instance::get_parameter_name(const string& suffix)
 {
    const string state_parameter_delimiter = "/";
    string result = suffix;
