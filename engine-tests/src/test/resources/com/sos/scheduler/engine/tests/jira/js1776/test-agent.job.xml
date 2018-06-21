@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://github.com/sos-berlin/scheduler-engine-doc/raw/release/1.12/enginedoc-common/src/main/resources/com/sos/scheduler/enginedoc/common/scheduler.xsd"
+     process_class="/test-agent"
+>
+    <script java_class="com.sos.scheduler.engine.tests.jira.js1776.TestJob"
+            java_class_path="TEST-JOB-CLASS-PATH"/>
+</job>

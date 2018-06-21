@@ -535,7 +535,6 @@ struct Vm : Object              // Java virtual machine
 
     void                    set_class_path                  ( const string& class_path )            { _class_path = class_path; }
     string                      class_path                  ()                                      { expand_class_path(); return _complete_class_path; }
-    void                        append_class_path           ( const string& path )                  { _class_path += Z_PATH_SEPARATOR; _class_path += path; }
     void                        prepend_class_path          ( const string& path )                  { _class_path = path + Z_PATH_SEPARATOR + _class_path; }
     void                        expand_class_path           ();
 
