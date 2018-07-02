@@ -1686,7 +1686,7 @@ void Spooler::read_command_line_arguments()
             else
             if (opt.with_value("java-options")) { _java_options = opt.value(); }  // wird in sos::spooler_main vearbeitet
             else
-            if (opt.with_value("java-classpath")) { _java_classpath = opt.value(); }   // wird in sos::spooler_main vearbeitet
+            if (opt.with_value("java-classpath")) {}   // wird in sos::spooler_main vearbeitet
             else
             if (opt.with_value("job-java-options")) { 
                 modifiable_settings()->_job_java_options = trim(modifiable_settings()->_job_java_options + " " + opt.value()); 

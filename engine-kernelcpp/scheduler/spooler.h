@@ -802,7 +802,6 @@ struct Spooler : Object,
     Duration                   _max_micro_step_time;
 
     string                     _java_options;
-    string                     _java_classpath;
     string                     _time_zone_name;
 };
 

@@ -151,11 +151,11 @@ void Remote_module_instance_server::try_delete_files()
                 if( double_from_gmtime() >= until )  break;
             }
 
-            if( deleted )  
+            if( deleted )
             {
                 _log.debug( message_string( "SCHEDULER-877" ) );  // Nur, wenn eine Datei nicht löschbar gewesen ist
             }
-            else 
+            else
             {
                 string paths = join( ", ", _module_instance->undeleted_files() );
                 _log.info( message_string( "SCHEDULER-878", paths ) );
@@ -169,7 +169,7 @@ void Remote_module_instance_server::try_delete_files()
 #ifdef Z_COM
 
 const Com_method Com_remote_module_instance_server::_methods[] =
-{ 
+{
    // _flags              , _name                     , _method                                                                  , _result_type , _types        , _default_arg_count
     { DISPATCH_METHOD     , 1, "Construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_BOOL      , { VT_ARRAY|VT_VARIANT } },
     { DISPATCH_METHOD     , 2, "Add_obj"              , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj              , VT_EMPTY     , { VT_DISPATCH, VT_BSTR } },
@@ -212,7 +212,7 @@ void Com_remote_module_instance_server::Class_data::read_xml_bytes( const string
     if( xml_text != "" )
     {
         //Z_LOG2( "zschimmer", Z_FUNCTION << xml_text << "\n" );
-        
+
         _stdin_dom_document.load_xml_bytes( xml_text );
 
         _task_process_element = _stdin_dom_document.documentElement();
@@ -314,7 +314,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             {
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
-                    if( ee.nodeName_is( "variable" ) ) 
+                    if( ee.nodeName_is( "variable" ) )
                     {
                         string name;
                         string value;
@@ -348,9 +348,9 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 string value = string_from_ole( ole_value );
 
                 if( key_word == "language"         )  _server->_module->_language        = value;
-                else                                                                         
+                else
                 if( key_word == "com_class"        )  _server->_module->_com_class_name  = value;
-                else                                                                         
+                else
                 if( key_word == "filename"         )  _server->_module->_filename        = value;
                 else
                 if( key_word == "java_class"       )  _server->_module->_java_class_name = value;
@@ -361,7 +361,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                 else
                 if( key_word == "task_id"          )  task_id                           = as_int( value );
                 else
-                if( key_word == "environment"      )  
+                if( key_word == "environment"      )
                 {
                     xml::Document_ptr dom_document = xml::Document_ptr::from_xml_string(value);
                     _server->_module->_process_environment = new Com_variable_set();
@@ -380,13 +380,13 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
                     m->_language = value;
                     monitor = Z_NEW(Module_monitor(m));
                 }
-                else                                                                         
+                else
                 if( monitor  &&  key_word == "monitor.name"       )  monitor->_monitor_name = value;
-                else                                                                         
+                else
                 if( monitor  &&  key_word == "monitor.ordering"   )  monitor->_ordering                 = as_int( value );
-                else                                                                         
+                else
                 if( monitor  &&  key_word == "monitor.com_class"  )  monitor->module()->_com_class_name  = value;
-                else                                                                         
+                else
                 if( monitor  &&  key_word == "monitor.filename"   )  monitor->module()->_filename        = value;
                 else
                 if( monitor  &&  key_word == "monitor.java_class" )  monitor->module()->_java_class_name = value;
@@ -402,15 +402,11 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
             }
         }
 
-        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_class_path=" << java_class_path << "\n" );;
-        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_work_dir  =" << java_work_dir << "\n" );;
-        //Z_LOG2( "zschimmer", Z_FUNCTION << " java_options   =" << java_options << "\n" );;
-
         _server->_module->set_injectorJ(this->_session->injectorJ());
         _server->_module->init();
         _server->_module->_monitors->try_load();
         _server->_module_instance = _server->_module->create_instance((Process_class*)NULL, "", (Task*)NULL);
-       
+
         if( _server->_module_instance )
         {
             _server->_module_instance->set_job_name( job_name );             // Nur zur Diagnose
@@ -427,19 +423,6 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray,
     return hr;
 }
 
-//---------------------------------------------Com_remote_module_instance_server::set_vm_class_path
-
-void Com_remote_module_instance_server::set_vm_class_path(javabridge::Vm* java_vm , const string& task_class_path) const // JS-540
-{
-    // Java einstellen, falls der Job in Java geschrieben ist oder indirekt (über Javascript) Java benutzt.
-    //java_vm->set_log( &_log );
-    if( !task_class_path.empty() )
-        java_vm->set_class_path( task_class_path );
-
-    if (!_server->_module->_java_class_path.empty())
-        java_vm->prepend_class_path(_server->_module->_java_class_path);
-}
-
 //-------------------------------------------------------Com_remote_module_instance_server::Add_obj
 
 STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR name_bstr )
@@ -449,7 +432,7 @@ STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR
     try
     {
         string name = string_from_bstr( name_bstr );
-        
+
         if( !_server->_module_instance )  z::throw_xc( "SCHEDULER-203", "add_obj", name );
         _server->_module_instance->add_obj( object, name );
     }
@@ -484,11 +467,11 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name_bstr, VARIANT* r
     {
         string name = string_from_bstr( name_bstr );
 
-        if( !_server  ||  !_server->_module_instance )  
+        if( !_server  ||  !_server->_module_instance )
         {
             if( name == spooler_close_name
              || name == spooler_on_error_name
-             || name == spooler_exit_name     ) 
+             || name == spooler_exit_name     )
             {
                 result->vt = VT_EMPTY;
                 return hr;
@@ -518,16 +501,16 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         Locked_safearray<Variant> objects ( objects_safearray );
         Locked_safearray<Variant> names   ( names_safearray );
 
-        for( int i = 0; i < objects.count(); i++ )  
+        for( int i = 0; i < objects.count(); i++ )
         {
             VARIANT* o = &objects[i];
             if( o->vt != VT_DISPATCH )  return DISP_E_BADVARTYPE;
             IDispatch* object = V_DISPATCH( o );
-            
+
             string name = string_from_variant( names[i] );
             _server->_module_instance->_object_list.push_back( Module_instance::Object_list_entry( object, name ) );
 
-            if( name == "spooler_log" )  
+            if( name == "spooler_log" )
             {
                 _log = dynamic_cast<Com_log_proxy*>( object ),  assert( _log );
                 _server->set_log( _log );
@@ -540,9 +523,9 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         string stdout_path = _class_data->_task_process_element.getAttribute("stdout_path");
         string stderr_path = _class_data->_task_process_element.getAttribute("stderr_path");
         if (!stdout_path.empty())
-            if (Process_module_instance *o = dynamic_cast<Process_module_instance*>(+_server->_module_instance)) 
+            if (Process_module_instance *o = dynamic_cast<Process_module_instance*>(+_server->_module_instance))
                 o->set_stdout_path(stdout_path);  // Für Process_module_instance::get_first_line_as_state_text() und verhindert das Öffnen eigener stdout/stderr-Dateien (s. Process_module_instance::begin__start())
-        
+
         Async_operation* operation = _server->_module_instance->begin__start();
 
         if( _log ) {
@@ -579,14 +562,14 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
         _class_data->_remote_instance_pid = _server->_module_instance->pid();
 
         // if( _server->_module->needs_java() )  // Besser needs_java_compiler?                        // JS-540 ...
-        bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java || 
+        bool needs_java_vm = _server->_module->kind() == sos::scheduler::Module::kind_java ||
                              _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine ||
                              _server->_module->kind() == sos::scheduler::Module::kind_scripting_engine_java;
         if(needs_java_vm)
         {
-            _server->_log.debug1("java classpath: " + get_java_vm(false)->class_path()); 
+            _server->_log.debug1("java classpath: " + get_java_vm(false)->class_path());
             _server->_log.debug1("java vm arguments: " + get_java_vm(false)->options());
-        }                                                                                            // ... JS-540 
+        }                                                                                            // ... JS-540
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 
@@ -598,7 +581,7 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
 STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VARIANT* result )
 {
     HRESULT hr = NOERROR;
-    
+
     if( result )  result->vt = VT_EMPTY;
 
     try
@@ -644,7 +627,7 @@ STDMETHODIMP Com_remote_module_instance_server::Wait_for_subprocesses()
     {
         //Com_task_proxy* task_proxy = NULL;
         //com_query_interface( _server->_module_instance->object( "spooler_task" ), &task_proxy );
-        
+
         Com_task_proxy* task_proxy = dynamic_cast< Com_task_proxy* >( _server->_module_instance->object( "spooler_task" ) );
         if( !task_proxy )  assert(0), throw_xc( "Wait_for_subprocesses" );
 
