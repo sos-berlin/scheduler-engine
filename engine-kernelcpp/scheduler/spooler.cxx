@@ -4013,7 +4013,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
         if( send_cmd != "" )  is_service = false;
 
         java_options = subst_env(read_profile_string(factory_ini, "java", "options")) + " " + java_options;
-        java_classpath = subst_env(read_profile_string(factory_ini, "java", "class_path")) + Z_PATH_SEPARATOR + java_classpath;
+        java_classpath = java_classpath + Z_PATH_SEPARATOR + subst_env(read_profile_string(factory_ini, "java", "class_path"));
         
         // scheduler.log
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
