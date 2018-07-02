@@ -68,6 +68,22 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
     }
   }
 
+  "Continuing order at stopped node when all nested job chains are completely skipped (JS-1772)" in {
+    val superOrderKey = superOrderKeys.next()
+    val aOrderKey = AJobChainPath orderKey superOrderKey.id
+    val stoppedNodeId = NodeId("NESTED-A-2")
+    setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds ++ COrderNodeIds)
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-1" action="process"/>
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
+        scheduler executeXml OrderCommand(superOrderKey)
+      } .nodeId shouldEqual stoppedNodeId
+      // Skip the last node, so each node of each nested job chain is skipped
+      scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="next_state"/>
+    }
+  }
+
   "Adding order when all nested job chains are completely skipping" in {
     setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds ++ COrderNodeIds)
     // All nested jobchains are completely skipped
