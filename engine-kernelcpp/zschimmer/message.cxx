@@ -305,7 +305,7 @@ Xc::Xc( const Message_string& m )
     _what( m.as_string() ),
     _return_code(0)
 { 
-    if( _what != "" )  Z_LOG( "[ERROR " << what() << "]\n" );
+    if( _what != "" )  Z_LOG("Exception " << what() << "\n");
 }
 
 //-------------------------------------------------------------------------------------------Xc::Xc
@@ -325,7 +325,7 @@ Xc::Xc( const char* code, const string& text, const Source_pos& pos )
     if( pos._col > 0 )  _what += ", Spalte " + as_string( pos._col + 1 );
     _what += ')';
 
-    if( _what != "" )  Z_LOG( "[ERROR " << what() << "]\n" );
+    if( _what != "" )  Z_LOG("Exception " << what() << "\n");
 }
     
 //------------------------------------------------------------------------------------------Xc::~Xc
@@ -349,7 +349,7 @@ void Xc::set( const exception& x )
         _what        = x.what();
         _return_code = 0;
 
-        if( _what != "" )  Z_LOG( "[ERROR " << _what << "]\n" );
+        if( _what != "" )  Z_LOG("Exception " << _what << "\n");
     }
 }
 
@@ -362,7 +362,7 @@ void Xc::set_xc( const Xc& x )
     _what        = x._what;
     _return_code = x._return_code;
 
-    if( _what != "" )  Z_LOG( "[ERROR " << _what << "]\n" );
+    if( _what != "" )  Z_LOG("Exception " << _what << "\n");
 }
 
 //-------------------------------------------------------------------------------------Xc::set_code
@@ -387,7 +387,7 @@ void Xc::set_code( const char* code )
 void Xc::set_what( const string& text )
 {
     _what = text;
-    if( _what != "" )  Z_LOG( "[ERROR " << what() << "]\n" );
+    if( _what != "" )  Z_LOG("Exception " << what() << "\n");
 }
 
 //-----------------------------------------------------------------------------------------Xc::what

@@ -35,5 +35,5 @@ final class JS1260IT extends FreeSpec with ScalaSchedulerTest {
 private object JS1260IT {
   private val TestJobPath = JobPath("/test")
   private val ErrorCode = MessageCode("SCHEDULER-280")
-  private val UnwantedString = s"[ERROR $ErrorCode"
+  private val UnwantedString = s"Exception $ErrorCode"
 }

@@ -52,7 +52,7 @@ Xc::Xc( const _com_error& x )
     _return_code(0)
 {
     if( _what == "" )  _what = get_mswin_msg_text( x.Error() );
-    Z_LOG( "[ERROR " << _what << "]\n" );
+    Z_LOG("Exception " << _what << "\n");
 }
 
 //-------------------------------------------------------------------------------------------------
