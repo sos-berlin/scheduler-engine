@@ -421,9 +421,9 @@ void Xc_base::log_error()
         Log_ptr log;
         if( log )
         {
-            *log << "[ERROR ";
+            *log << "Exception ";
             get_text( log );
-            *log << "]\n";
+            *log << "\n";
         }
     }
 }
