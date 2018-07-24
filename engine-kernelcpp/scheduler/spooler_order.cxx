@@ -1545,9 +1545,12 @@ void Order_queue_node::withdraw_order_request()
 Order* Order_queue_node::fetch_and_occupy_order(Task* occupying_task, const Time& now, const string& cause, const Process_class* required_process_class)
 {
     Order* order = NULL;
+    const Absolute_path& jobs_process_class_path = occupying_task->job()->default_process_class_path();
     if ((!required_process_class ||
-           _job_chain->default_process_class_path().empty() ||
-           _spooler->_process_class_subsystem->normalized_path(_job_chain->default_process_class_path()) == required_process_class->normalized_path()) &&
+            (!jobs_process_class_path.empty() ?  // JS-1782 Job's process_class has priority 
+                _spooler->_process_class_subsystem->normalized_path(jobs_process_class_path) == required_process_class->normalized_path() 
+             : _job_chain->default_process_class_path().empty() ||
+                _spooler->_process_class_subsystem->normalized_path(_job_chain->default_process_class_path()) == required_process_class->normalized_path())) &&
         is_ready_for_order_processing()) 
     {
         Untouched_is_allowed u = _job_chain->untouched_is_allowed();
