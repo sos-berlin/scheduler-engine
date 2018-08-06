@@ -2738,7 +2738,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
 
     if (job_node) {
         job_node->typed_java_sister().onOrderStepEnded(java_sister(), state_transition.return_code());
-        if (!_is_success_state  &&  job_node->is_on_error_setback()) {
+        if (!_is_success_state  &&  !_moved/*JS-1783*/  &&  job_node->is_on_error_setback()) {
             setback();
         }
     }
