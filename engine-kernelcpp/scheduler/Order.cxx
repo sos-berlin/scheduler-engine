@@ -3014,10 +3014,13 @@ void Order::handle_end_state_repeat_order( const Time& next_start )
     {
         if (!outer_state.is_empty()) {
             _outer_job_chain_state = _initial_state;
-            Job_chain* nested_job_chain = this->nested_job_chain(outer_state);
-            Order::State first_nested_state = nested_job_chain->first_node()->order_state();  // Auftrag bekommt Zustand des ersten Jobs der Jobkette
-            set_state( first_nested_state, next_start );
-            place_in_job_chain( nested_job_chain, jc_leave_in_job_chain_stack );
+            if (Job_chain* nested_job_chain = this->nested_job_chain(outer_state)) {
+                Order::State first_nested_state = nested_job_chain->first_node()->order_state();  // Auftrag bekommt Zustand des ersten Jobs der Jobkette
+                set_state(first_nested_state, next_start);
+                place_in_job_chain(nested_job_chain, jc_leave_in_job_chain_stack);
+            } else {
+                // JS-1772 All nodes are skipped 
+            }
         }
         else
             set_state( _initial_state, next_start );

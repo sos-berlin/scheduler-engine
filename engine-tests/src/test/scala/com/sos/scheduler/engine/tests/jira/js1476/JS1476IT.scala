@@ -62,9 +62,9 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
       eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
       } .nodeId shouldEqual stoppedNodeId
-      scheduler executeXml OrderCommand(aOrderKey, suspended = Some(true))
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(true))
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-2" action="next_state"/>
-      scheduler executeXml OrderCommand(aOrderKey, suspended = Some(false))
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(false))
     }
   }
 
@@ -79,8 +79,34 @@ final class JS1476IT extends FreeSpec with ScalaSchedulerTest {
       eventBus.awaiting[OrderNodeChanged](aOrderKey) {
         scheduler executeXml OrderCommand(superOrderKey)
       } .nodeId shouldEqual stoppedNodeId
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(true))
       // Skip the last node, so each node of each nested job chain is skipped
       scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="next_state"/>
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(false))
+    }
+  }
+
+  "Continuing order at stopped node when all nested job chains are completely skipped (JS-1772) - permanent" in {
+    val superOrderKey = superOrderKeys.next()
+    val aOrderKey = AJobChainPath orderKey superOrderKey.id
+    val stoppedNodeId = NodeId("NESTED-A-2")
+    setSkippingNodes(AOrderNodeIds ++ BOrderNodeIds ++ COrderNodeIds)
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-1" action="process"/>
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="stop"/>
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      eventBus.awaiting[OrderNodeChanged](aOrderKey) {
+        writeConfigurationFile(superOrderKey, <order/>)
+      } .nodeId shouldEqual stoppedNodeId
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(true))
+      // Skip the last node, so each node of each nested job chain is skipped
+      scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state={stoppedNodeId.string} action="next_state"/>
+      scheduler executeXml ModifyOrderCommand(aOrderKey, suspended = Some(false))
+    }
+
+    // Second run after order.xml has been changed
+    scheduler executeXml <job_chain_node.modify job_chain={AJobChainPath.string} state="NESTED-A-1" action="process"/>
+    eventBus.awaiting[OrderFinished](aOrderKey) {
+      writeConfigurationFile(superOrderKey, <order  />)
     }
   }
 
