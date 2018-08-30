@@ -58,6 +58,14 @@ struct Has_includes             // <include live_file="...">
   //void                        remove_include              ( const Absolute_path& );
     void                        remove_includes             ();
     file::File_info*            changed_included_file_info  ();
+
+    protected: void replace_includes(const Has_includes& other) {
+        _configuration = other._configuration;
+        _include_map.clear();
+        Z_FOR_EACH_CONST(Include_map, other._include_map, i) {
+            _include_map[i->first] = i->second;
+        }
+    } 
     
   private:
     typedef stdext::hash_map< string, ptr<file::File_info> >   Include_map;

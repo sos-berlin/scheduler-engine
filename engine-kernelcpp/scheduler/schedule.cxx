@@ -721,6 +721,8 @@ Schedule* Schedule::on_replace_now()
 
     set_inlay( replacement->_inlay );
     replacement->_inlay = NULL;
+    
+    replace_includes(*replacement);
 
     set_replacement( NULL );        // Brauchen wir nicht mehr
 

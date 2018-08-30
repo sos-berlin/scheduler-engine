@@ -106,8 +106,6 @@ string Include_command::read_content_bytes()
 
 string Include_command::register_include_and_read_content_bytes( File_based* source_file_based )
 {
-    //Z_LOG2( "zschimmer", Z_FUNCTION << " " << obj_name() << "\n" );
-
     initialize();
 
     file::Mapped_file file;
@@ -120,6 +118,7 @@ string Include_command::register_include_and_read_content_bytes( File_based* sou
         file_info->call_fstat( file.file_no() );
         file_info->last_write_time();      // Jetzt diesen Wert holen
         _file_info = file_info;
+        //Z_LOG2("scheduler", "### " << Z_FUNCTION << " " << obj_name() << " (for " << _source_file_based->obj_name() <<  "): _file_info=" << Time::of_time_t(file_info->last_write_time()).utc_string() << "\n");
     }
 
 
@@ -146,37 +145,6 @@ string Include_command::obj_name() const
 
     return xml_writer->to_string();
 }
-
-//--------------------------------------------------------------------Include_command::read_content
-    
-//string Include_command::read_content()
-//{
-//    file::Mapped_file file ( file_path(), "rb" );
-//    return string( (const char*)file.map(), file.map_length() );
-//}
-
-//-----------------------------------------------------------------------Include_command::file_info
-
-//file::File_info* Include_command::file_info() 
-//{
-//    if( !_file_info )
-//    {
-//        ptr<file::File_info> file_info = Z_NEW( file::File_info() );
-//        file_info->set_path( file_path() );
-//
-//        try
-//        {
-//            if( file_info->try_call_stat() )    // Datei ist da?
-//            {
-//                file_info->last_write_time();      // Jetzt diesen Wert holen
-//                _file_info = file_info;
-//            }
-//        }
-//        catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }      // Für andere Fehler als ENOENT
-//    }
-//
-//    return _file_info;
-//}
 
 //-----------------------------------------------------------------------Has_includes::Has_includes
     
@@ -205,33 +173,16 @@ void Has_includes::register_include( const Absolute_path& path, file::File_info*
 
     _configuration = spooler()->folder_subsystem()->configuration( configuration_origin() );
 
+    //Z_LOG2("scheduler", "### " << Z_FUNCTION << " " << obj_name() << ": _include_map[" << path << "] = " << Time::of_time_t(file_info->last_write_time()).utc_string() << "\n");
     _include_map[ path ] = file_info;   // NULL, wenn Datei nicht da ist
     //_configuration->_include_register->register_include( this, path );
 }
-
-//---------------------------------------------------------------------Has_includes::remove_include
-
-//void Has_includes::remove_include( const Absolute_path& path )
-//{
-//    //if( _configuration )  _configuration->_include_register->remove_include( this, path );
-//    _include_map.erase( path );
-//}
 
 //--------------------------------------------------------------------Has_includes::remove_includes
 
 void Has_includes::remove_includes()
 {
     _include_map.clear();
-    //Include_map my_include_map = _include_map;
-
-    //Z_FOR_EACH( Path_set, my_path_set, p ) 
-    //{
-    //    try
-    //    {
-    //        remove_include( Absolute_path( *p ) );
-    //    }
-    //    catch( exception& x )  { Z_LOG2( "scheduler", Z_FUNCTION << " ERROR " << x.what() << "\n" ); }
-    //}
 }
 
 //----------------------------------------------------------------Has_includes::include_has_changed
@@ -259,8 +210,8 @@ file::File_info* Has_includes::changed_included_file_info()
                     if( directory_entry->_file_info->last_write_time() != file_info->last_write_time() )  
                     {
                         result = directory_entry->_file_info;  // Datei geändert
-                        Z_LOG2("scheduler", Z_FUNCTION << " " << file_info->path() << " " << Time::of_time_t(file_info->last_write_time()).utc_string() << 
-                            ", was " << Time::of_time_t(directory_entry->_file_info->last_write_time()).utc_string() << "\n");
+                        Z_LOG2("scheduler", Z_FUNCTION << " " << obj_name() << ": " << file_info->path() << " " << Time::of_time_t(file_info->last_write_time()).utc_string() << 
+                            " --> " << Time::of_time_t(directory_entry->_file_info->last_write_time()).utc_string() << "\n");
                     }
                 }
             }
@@ -295,84 +246,6 @@ xml::Element_ptr Has_includes::dom_element( const xml::Document_ptr& document, c
 
     return result;
 }
-
-//---------------------------------------------------------------Include_register::Include_register
-
-//Include_register::Include_register()
-//:
-//    _zero_(this+1)
-//{
-//}
-//
-////--------------------------------------------------------------Include_register::~Include_register
-//
-//Include_register::~Include_register()
-//{
-//}
-//
-////--------------------------------------------------------------------Include_register::register_include
-//
-//void Include_register::register_include( Has_includes* has_includes, const Absolute_path& path )
-//{
-//    _include_map[ path ]._has_includes_set.insert( has_includes );
-//}
-//
-////-----------------------------------------------------------------Include_register::remove_include
-//
-//void Include_register::remove_include( Has_includes* has_includes, const Absolute_path& path )
-//{
-//    Include_map::iterator inc = _include_map.find( path );
-//    if( inc != _include_map.end() )
-//    {
-//        inc->second._has_includes_set.erase( has_includes );
-//        if( inc->second._has_includes_set.empty() )  _include_map.erase( inc );
-//    }
-//}
-
-//--------------------------------------------------------------------Include_register::check_files
-
-//void Include_register::check_files( const Directory* root_directory )
-//{
-//    Z_FOR_EACH( Include_map, _include_map, inc )
-//    {
-//        Path   path  = inc->first;
-//        Entry* entry = &inc->second;
-//
-//        if( const Directory_entry* directory_entry = root_directory->entry_of_path_or_null( path ) )
-//        {
-//            if( directory_entry->_file_info->last_write_time() != entry->_file_info->last_write_time() )
-//            {
-//                Z_FOR_EACH( Has_includes_set, entry->_has_includes_set, inc ) 
-//                {
-//                    try
-//                    {
-//                        (*inc)->on_include_changed();
-//                    }
-//                    catch( exception& x )  { (*inc)->log()->warn( S() << x.what() << ", on_include_changed()" ); }
-//                }
-//            }
-//        }
-//        else
-//        {
-//            Z_LOG2( "zschimmer", Z_FUNCTION << " <include _attribute_live_file='" << path << "'>: Datei fehlt\n" );
-//            // Wenn die inkludierte Datei gelöscht ist, lassen wir den Job in Ruhe
-//        }
-//    }
-//}
-
-//---------------------------------------------------------Include_register::assert_no_has_includes
-
-//void Include_register::assert_no_has_includes( const Has_includes* has_includes )
-//{
-//    #ifndef NDEBUG
-//        Z_FOR_EACH( Include_map, _include_map, inc )
-//        {
-//            Entry* entry = &inc->second;
-//
-//            Z_FOR_EACH( Has_includes_set, entry->_has_includes_set, inc )   assert( *inc != has_includes );
-//        }
-//    #endif
-//}
 
 //-------------------------------------------------------------------------------------------------
 
