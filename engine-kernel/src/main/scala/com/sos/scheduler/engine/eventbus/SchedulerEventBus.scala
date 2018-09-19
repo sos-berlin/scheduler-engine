@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 final class SchedulerEventBus extends EventBus with Runnable {
 
   private val hotEventBus = new HotEventBus
-  private val coldEventBus = new ColdEventBus
+  val coldEventBus = new ColdEventBus
 
   def registerAnnotated(o: EventHandlerAnnotated): Unit = {
     hotEventBus.registerAnnotated(o)

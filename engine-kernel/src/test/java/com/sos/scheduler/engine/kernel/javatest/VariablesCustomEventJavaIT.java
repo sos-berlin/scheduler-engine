@@ -1,8 +1,8 @@
 package com.sos.scheduler.engine.kernel.javatest;
 
-import com.google.common.base.Throwables;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
 import com.sos.scheduler.engine.data.events.custom.VariablesCustomEvent;
+import com.sos.scheduler.engine.eventbus.ColdEventBus;
 import com.sos.scheduler.engine.eventbus.EventBus;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.JavaEventSubscription;
@@ -10,9 +10,7 @@ import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
@@ -23,14 +21,14 @@ import static org.junit.Assert.assertEquals;
 public class VariablesCustomEventJavaIT {
 
     @Test
-    public void test() throws ExecutionException, InterruptedException, TimeoutException {
+    public void test() throws InterruptedException {
         SchedulerEventBus eventBus = new SchedulerEventBus();
         BlockingQueue<KeyedEvent<VariablesCustomEvent>> queue = new LinkedBlockingDeque<>();
 
         EventSubscription subscription = subscribe(eventBus, queue);
         KeyedEvent<VariablesCustomEvent> keyedEvent = newKeyedEvent();
 
-        publishEvent(eventBus, keyedEvent);
+        publishEvent(eventBus.coldEventBus(), keyedEvent);
         emulateSchedulerAction(eventBus);
         assertEquals(keyedEvent, queue.poll(3, SECONDS));
 
@@ -38,7 +36,7 @@ public class VariablesCustomEventJavaIT {
     }
 
     // Publisher side
-    private void publishEvent(EventBus eventBus, KeyedEvent<VariablesCustomEvent> keyedEvent) {
+    private static void publishEvent(ColdEventBus eventBus, KeyedEvent<VariablesCustomEvent> keyedEvent) {
         eventBus.publishJava(keyedEvent);
     }
 
@@ -48,7 +46,7 @@ public class VariablesCustomEventJavaIT {
         return VariablesCustomEvent.keyed("KEY", variables);
     }
 
-    private void emulateSchedulerAction(SchedulerEventBus eventBus) {
+    private static void emulateSchedulerAction(SchedulerEventBus eventBus) {
         eventBus.dispatchEvents();
     }
 
@@ -56,11 +54,11 @@ public class VariablesCustomEventJavaIT {
     private static EventSubscription subscribe(EventBus eventBus, BlockingQueue<KeyedEvent<VariablesCustomEvent>> queue) {
         EventSubscription subscription = new JavaEventSubscription<>(
             VariablesCustomEvent.class,
-            (keyedEvent) -> {
+            keyedEvent -> {
                 try {
                     queue.put(keyedEvent);
                 } catch (InterruptedException e) {
-                    Throwables.propagate(e);  // Nobody will kill the SchedulerEventBus thread
+                    throw new RuntimeException(e);  // Java enforces this. Nobody will kill the SchedulerEventBus thread
                 }
             });
         eventBus.subscribe(subscription);

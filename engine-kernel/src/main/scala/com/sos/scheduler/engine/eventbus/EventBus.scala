@@ -16,8 +16,5 @@ trait EventBus {
   def unsubscribe(o: EventSubscription): Unit
 
   def publish(e: AnyKeyedEvent): Unit
-
-  final def publishJava[E <: Event](e: KeyedEvent[E]): Unit =
-    publish(e)
 }
 

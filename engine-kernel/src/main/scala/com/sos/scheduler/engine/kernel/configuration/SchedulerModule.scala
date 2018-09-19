@@ -19,7 +19,7 @@ import com.sos.scheduler.engine.common.sprayutils.web.auth.{CSRF, GateKeeper}
 import com.sos.scheduler.engine.common.time.timer.TimerService
 import com.sos.scheduler.engine.cplusplus.runtime.DisposableCppProxyRegister
 import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerClusterMemberKey, SchedulerId, SchedulerState, SupervisorUri}
-import com.sos.scheduler.engine.eventbus.{EventBus, SchedulerEventBus}
+import com.sos.scheduler.engine.eventbus.{ColdEventBus, EventBus, SchedulerEventBus}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -67,6 +67,7 @@ with HasCloser {
     bind(classOf[EventCollector]) to classOf[SchedulerEventCollector] in SINGLETON
     provideSingleton[SchedulerThreadCallQueue] { new SchedulerThreadCallQueue(new StandardCallQueue, spoolerC, schedulerThread) }
     bindInstance(controllerBridge.getEventBus: SchedulerEventBus)
+    bindInstance(controllerBridge.getEventBus.coldEventBus: ColdEventBus)
     provideSingleton { SchedulerInstanceId(randomUUID.toString) }
     provideSingleton { new DisposableCppProxyRegister }
     bindInstance(spoolerC.log.getSister: PrefixLog )

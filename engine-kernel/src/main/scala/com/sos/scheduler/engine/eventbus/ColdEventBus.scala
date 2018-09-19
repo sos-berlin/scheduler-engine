@@ -13,6 +13,9 @@ final class ColdEventBus extends AbstractEventBus with Runnable {
 
   private val callQueue = new LinkedBlockingQueue[Call]
 
+  def publishJava[E <: Event](e: KeyedEvent[E]): Unit =
+    publish(e)
+
   def publish(e: KeyedEvent[Event]) {
     publish(calls(e))
   }
