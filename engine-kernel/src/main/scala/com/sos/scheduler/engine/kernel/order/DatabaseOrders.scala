@@ -6,6 +6,7 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing._
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaStax.RichStartElement
 import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXMLEventReader
 import com.sos.scheduler.engine.common.time.ScalaTime._
+import com.sos.scheduler.engine.common.xml.XmlUtils.xmlStringToBoolean
 import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.order.OrderPersistentState.{BlacklistDatabaseDistributedNextTime, NeverDatabaseDistributedNextTime, NowDatabaseDistributedNextTime, ReplacementDatabaseDistributedNextTime}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderSourceType}
@@ -150,9 +151,9 @@ private[order] object DatabaseOrders {
         import eventReader._
         parseElement("order", withAttributeMap = false) {
           peek.asStartElement.attributes map { o ⇒ o.getName.getLocalPart → o.getValue } foreach {
-            case ("suspended"        , value) ⇒ isSuspended   = value.toBoolean
-            case ("on_blacklist"     , value) ⇒ isBlacklisted = value.toBoolean
-            case ("touched"          , value) ⇒ isTouched     = value.toBoolean
+            case ("suspended"        , value) ⇒ isSuspended   = xmlStringToBoolean(value)
+            case ("on_blacklist"     , value) ⇒ isBlacklisted = xmlStringToBoolean(value)
+            case ("touched"          , value) ⇒ isTouched     = xmlStringToBoolean(value)
             case ("setback"          , _    ) ⇒ isSetback = true
             case ("order_source_type", value) ⇒ orderSourceType = OrderSourceType.valueOf(value)
             case _ ⇒
@@ -169,7 +170,7 @@ private[order] object DatabaseOrders {
               case "params" ⇒ parseElement() {
                 forEachStartElement {
                   case "param" ⇒ parseElement() {
-                    if (attributeMap.get("name") == Some(Order.FilePathParameterName)) {
+                    if (attributeMap.get("name") contains Order.FilePathParameterName) {
                       orderSourceType = OrderSourceType.FileOrder
                     }
                   }
