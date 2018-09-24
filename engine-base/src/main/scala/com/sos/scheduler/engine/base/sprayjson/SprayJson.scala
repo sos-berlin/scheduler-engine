@@ -103,4 +103,33 @@ object SprayJson {
     def write(x: T) = delegate.write(x)
     def read(value: JsValue) = delegate.read(value)
   }
+
+  implicit final class JsonStringInterpolator(private val sc: StringContext) extends AnyVal {
+    def json(args: Any*): JsValue = {
+      sc.checkLengths(args)
+      val p = sc.parts.iterator
+      val builder = new StringBuilder(sc.parts.map(_.length).sum + 50)
+      builder.append(p.next())
+      for (arg ← args) {
+        builder.append(toJson(arg))
+        builder.append(p.next())
+      }
+      builder.toString.parseJson
+    }
+
+    private def toJson(arg: Any): String =
+      arg match {
+        case arg: String ⇒
+          val j = JsString(arg.toString).toString
+          j.substring(1, j.length - 1)  // Interpolation is expected to occur already in quotes: "$var"
+        case _ ⇒
+          valueToJsValue(arg).toString
+      }
+
+    /** Dummy interpolator returning the string itself, to allow syntax checking by IntelliJ IDEA. */
+    def jsonString(args: Any*): String = {
+      require(args.isEmpty, "jsonString string interpolator does not accept variables")
+      sc.parts mkString ""
+    }
+  }
 }

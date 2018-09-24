@@ -236,8 +236,30 @@ struct Java_job : Job {
         return _cppNewJobJ.orderSetbackMaximum();
     }
 
+    bool is_order_controlled() const {
+        return false;    
+    }
+    
+    bool enabled() const {
+        return true;
+    }
+    
+    int task_queue_length() const {
+        return 0;
+    }
 
-
+    bool has_error() const {
+        return false;
+    }
+    
+    string error_code() const {
+        return "";
+    }
+    
+    string error_message() const {
+        return "";
+    }
+    
     ptr<Com_job>& com_job(){ 
         z::throw_xc(Z_FUNCTION);
     }

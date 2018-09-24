@@ -3,6 +3,7 @@
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
+            <!--charset>UTF-8</charset-->
             <pattern>%d{dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>

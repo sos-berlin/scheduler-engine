@@ -40,6 +40,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.lang.String description__native(long cppReference);
 
 
+    @Override public boolean enabled() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return enabled__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native boolean enabled__native(long cppReference);
+
+
     @Override public void enqueue_taskPersistentState(com.sos.scheduler.engine.data.job.TaskPersistentState p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -49,6 +60,32 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native void enqueue_taskPersistentState__native(long cppReference, com.sos.scheduler.engine.data.job.TaskPersistentState p0);
+
+
+    @Override public java.lang.String error_code() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = error_code__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String error_code__native(long cppReference);
+
+
+    @Override public java.lang.String error_message() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = error_message__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String error_message__native(long cppReference);
 
 
     @Override public java.lang.String file() {
@@ -110,6 +147,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean has_base_file__native(long cppReference);
 
 
+    @Override public boolean has_error() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return has_error__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native boolean has_error__native(long cppReference);
+
+
     @Override public boolean is_file_based() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -141,6 +189,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native boolean is_in_period__native(long cppReference);
+
+
+    @Override public boolean is_order_controlled() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return is_order_controlled__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native boolean is_order_controlled__native(long cppReference);
 
 
     @Override public boolean is_permanently_stopped() {
@@ -392,6 +451,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String state_text__native(long cppReference);
+
+
+    @Override public int task_queue_length() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return task_queue_length__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int task_queue_length__native(long cppReference);
 
 
     @Override public java.lang.String title() {

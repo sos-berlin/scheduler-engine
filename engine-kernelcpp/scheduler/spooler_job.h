@@ -146,6 +146,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void                disconnect_job_node         ( job_chain::Job_node* )                = 0;
     virtual bool                is_in_job_chain             () const                                = 0;
     virtual void            set_order_controlled            ()                                      = 0;
+    virtual bool                is_order_controlled         () const                                = 0;
+    virtual bool                enabled                     () const                                = 0;
+    virtual int                 task_queue_length           () const                                = 0;
 
     virtual void            set_idle_timeout                ( const Duration& )                     = 0;
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
@@ -164,7 +167,10 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual int running_tasks_count() const = 0;
     virtual bool is_task_ready_for_order(Process_class*) = 0;
     virtual ArrayListJ java_tasks() const = 0;
-
+    virtual bool has_error() const = 0;
+    virtual string error_code() const = 0;
+    virtual string error_message() const = 0;
+    
   private:
     Fill_zero                  _zero_;
     const JobJ                 _typed_java_sister;
@@ -393,8 +399,16 @@ struct Standard_job : Job
     public: Process_class* default_process_class() const;
     public: Process_class* default_process_class_or_null() const;
 
+    public: bool enabled() const {
+        return _enabled;
+    } 
+
     public: bool has_own_process_class() const {
         return !_default_process_class_path.empty();
+    }
+
+    public: int task_queue_length() const {
+        return _task_queue->size();
     }
 
     public: const Absolute_path& default_process_class_path() const {
@@ -407,6 +421,18 @@ struct Standard_job : Job
 
     public: int max_tasks() const {
         return _max_tasks;
+    }
+    
+    public: bool has_error() const {
+        return _error != NULL;
+    }
+    
+    public: string error_code() const {
+        return _error != NULL ? _error->code() : "";
+    }
+    
+    public: string error_message() const {
+        return _error != NULL ? _error->what() : "";
     }
     
   protected:

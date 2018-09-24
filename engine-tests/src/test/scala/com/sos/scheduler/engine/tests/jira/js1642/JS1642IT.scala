@@ -595,9 +595,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           TestJobOverview,
           XTestBJobOverview,
           JobOverview(FileOrderSinkJobPath, FileBasedState.active, defaultProcessClassPath = None,
-              JobState.pending, isInPeriod = true, taskLimit = 1, usedTaskCount = 0, obstacles = Set()),
+            isOrderJob = true, title = "", enabled = true,
+            JobState.pending, stateText = "", isInPeriod = true, nextStartTime = None, taskLimit = 1, usedTaskCount = 0, taskQueueLength = 0,
+            obstacles = Set(), error = None),
           JobOverview(ServiceForwarderJobPath, FileBasedState.active, defaultProcessClassPath = None,
-              JobState.pending, isInPeriod = true, taskLimit = 1, usedTaskCount = 0, obstacles = Set())))
+            isOrderJob = true, title = "Web-service forwarder", enabled = true,
+            JobState.pending, stateText = "", isInPeriod = true, nextStartTime = None, taskLimit = 1, usedTaskCount = 0, taskQueueLength = 0,
+            obstacles = Set(), error = None)))
       }
 
       "Single" in {

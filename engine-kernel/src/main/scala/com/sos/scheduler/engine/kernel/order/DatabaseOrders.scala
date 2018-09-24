@@ -79,7 +79,7 @@ private[order] object DatabaseOrders {
 
   private def fetchDistributedOrderStatistics(resultSet: ResultSet): JocOrderStatistics = {
     blocking {
-      var result = new JocOrderStatistics.Mutable
+      val result = new JocOrderStatistics.Mutable
       while (resultSet.next()) {
         result.count(toQueryableOrder(
           OrderRow(resultSet),

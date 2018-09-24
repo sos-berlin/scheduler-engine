@@ -18,6 +18,7 @@ import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
 import scala.collection.JavaConversions._
 import scala.collection.immutable
+import com.sos.scheduler.engine.base.utils.ScalazStyle._
 
 @ForCpp
 final class Job(
@@ -55,11 +56,18 @@ with JobPersistence {
       path,
       fileBasedState,
       defaultProcessClassPathOption,
+      isOrderJob = isOrderControlled,
+      title,
+      enabled = isEnabled,
       state,
+      stateText,
       isInPeriod = isInPeriod,
+      nextStartTime = nextStartInstantOption,
       taskLimit = taskLimit,
       usedTaskCount = runningTasksCount,
-      obstacles(state, isInPeriod, taskLimit, runningTasksCount))
+      taskQueueLength = taskQueueLength,
+      obstacles(state, isInPeriod, taskLimit, runningTasksCount),
+      cppProxy.has_error option JobOverview.Error(cppProxy.error_code, cppProxy.error_message))
   }
 
   private def jobDescription: JobDescription =
@@ -93,17 +101,23 @@ with JobPersistence {
     builder.result
   }
 
-  private[kernel] def defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+  private[kernel] lazy val defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
+
+  private lazy val isOrderControlled = cppProxy.is_order_controlled
+
+  private def isEnabled = cppProxy.enabled
 
   private def isInPeriod = cppProxy.is_in_period
 
-  private def taskLimit = cppProxy.max_tasks
+  private lazy val taskLimit = cppProxy.max_tasks
 
   private def runningTasksCount = cppProxy.running_tasks_count
 
-  def title: String = inSchedulerThread { cppProxy.title }
+  private def taskQueueLength = cppProxy.task_queue_length
 
-  private def description: String = cppProxy.description
+  lazy val title: String = inSchedulerThread { cppProxy.title }
+
+  private lazy val description: String = cppProxy.description
 
   def scriptText: String = inSchedulerThread { cppProxy.script_text }
 

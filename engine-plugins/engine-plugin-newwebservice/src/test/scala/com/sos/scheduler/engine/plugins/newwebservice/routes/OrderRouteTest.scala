@@ -296,8 +296,9 @@ object OrderRouteTest {
     Vector(
       SimpleJobNodeOverview(AJobChainPath, NodeId("100"), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1)),
     Vector(
-      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, JobState.running, isInPeriod = true,
-        taskLimit = 10, usedTaskCount = 3, obstacles = Set())),
+      JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = None, isOrderJob = false, title = "",
+        enabled = true, JobState.running, stateText = "", isInPeriod = true, nextStartTime = None,
+        taskLimit = 10, usedTaskCount = 3, taskQueueLength = 0, obstacles = Set(), error = None)),
     Vector(
       TaskOverview(TaskId(3), TestJobPath, TaskState.running, Some(ProcessClassPath.Default))),
     Vector(

@@ -11,6 +11,7 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   def is_in_period: Boolean
   def max_tasks: Int
   def running_tasks_count: Int
+  def task_queue_length: Int
   def script_text: String
   def title: String
   def description: String
@@ -23,6 +24,11 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   def enqueue_taskPersistentState(o: TaskPersistentState): Unit
   def waiting_for_process: Boolean
   def unavailable_lock_path_strings: Array[String]
+  def is_order_controlled: Boolean
+  def enabled: Boolean
+  def has_error: Boolean
+  def error_code: String
+  def error_message: String
 
   @CppExpression("$->is_task_ready_for_order((::sos::scheduler::Process_class*)p0)")
   def is_task_ready_for_order(processClassPtr: Long): Boolean
