@@ -231,9 +231,7 @@
     <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="com__sos__scheduler__engine__newkernel__job__CppNewJob.cxx">
-      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
-    </ClCompile>
+    
 
 
 

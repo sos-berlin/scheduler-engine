@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<new_job
->
-    <script language="shell">
-        echo HALLO
-        exit 0
-    </script>
-</new_job>

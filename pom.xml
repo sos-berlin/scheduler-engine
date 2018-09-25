@@ -44,7 +44,6 @@
         <module>engine-http-server</module>
         <module>engine-job-api</module>
         <module>engine-minicom</module>
-        <module>engine-newkernel</module>
         <module>engine-persistence</module>
         <module>engine-test</module>
         <module>engine-tests</module>

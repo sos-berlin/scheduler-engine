@@ -252,7 +252,7 @@
     <ClCompile Include="com__sos__scheduler__engine__kernel__cppproxy__Timed_callC.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__kernel__async__CppCall.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__common__scalautil__Resources.cxx" />
-    <ClCompile Include="com__sos__scheduler__engine__newkernel__job__CppNewJob.cxx" />
+    
     <ClCompile Include="java__lang__Class.cxx" />
     <ClCompile Include="scala__util__Try.cxx" />
     <ClCompile Include="com__sos__scheduler__engine__data__job__JobPersistentState.cxx" />

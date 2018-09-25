@@ -1,7 +1,6 @@
 // $Id: spooler_job.cxx 15019 2011-08-24 16:47:42Z jz $        Joacim Zschimmer, Zschimmer GmbH, http://www.zschimmer.com
 
 #include "spooler.h"
-#include "spooler_job_java.h"
 #include "Timed_call.h"
 #include "../zschimmer/z_signals.h"
 #include "../zschimmer/z_sql.h"
@@ -253,12 +252,8 @@ bool Job_subsystem_impl::subsystem_activate()
 
 ptr<Job> Job_subsystem_impl::new_file_based(const string& source)
 {
-    if (source.find("<new_job") != string::npos) {
-        return new_java_job(_spooler);
-    } else {
-        ptr<Standard_job> result = Z_NEW( Standard_job( _spooler ) );
-        return +result;
-    }
+    ptr<Standard_job> result = Z_NEW( Standard_job( _spooler ) );
+    return +result;
 }
 
 //-------------------------------------------------Job_subsystem_impl::append_calendar_dom_elements

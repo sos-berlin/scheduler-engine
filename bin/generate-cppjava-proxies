@@ -3,5 +3,5 @@
 set -e
 cd "$(dirname "$0")/.." 
 
-mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-base,engine-data,:engine-common,:engine-persistence,:engine-client,:engine-kernel,:engine-newkernel clean install
+mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-base,engine-data,:engine-common,:engine-persistence,:engine-client,:engine-kernel clean install
 mvn --no-snapshot-updates --threads 1C -D maven.test.skip -pl :engine-kernelcpp-generated,:engine-kernelcpp generate-sources
