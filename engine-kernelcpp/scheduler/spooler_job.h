@@ -148,7 +148,8 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual void            set_order_controlled            ()                                      = 0;
     virtual bool                is_order_controlled         () const                                = 0;
     virtual bool                enabled                     () const                                = 0;
-    virtual int                 task_queue_length           () const                                = 0;
+    virtual int                 queued_task_count           () const                                = 0;
+    virtual int                 late_task_count             () const                                = 0;
 
     virtual void            set_idle_timeout                ( const Duration& )                     = 0;
     void                        set_job_chain_priority      ( int pri )                             { if( _job_chain_priority < pri )  _job_chain_priority = pri; }
@@ -230,6 +231,7 @@ struct Standard_job : Job
         Time                    next_start_time             ();
         void                    append_calendar_dom_elements( const xml::Element_ptr&, Show_calendar_options* );
         xml::Element_ptr        why_dom_element             (const xml::Document_ptr&, const Time& now, bool in_period);
+        int                     late_task_count             () const;
 
       private:
         Job*                   _job;
@@ -407,8 +409,12 @@ struct Standard_job : Job
         return !_default_process_class_path.empty();
     }
 
-    public: int task_queue_length() const {
+    public: int queued_task_count() const {
         return _task_queue->size();
+    }
+
+    public: int late_task_count() const {
+        return _task_queue->late_task_count();
     }
 
     public: const Absolute_path& default_process_class_path() const {
@@ -439,7 +445,7 @@ struct Standard_job : Job
     bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)
 
     public: int running_tasks_count() const {
-        return _running_tasks.size();
+        return (int)(_running_tasks.size());
     }
 
     public: bool is_task_ready_for_order(Process_class*);

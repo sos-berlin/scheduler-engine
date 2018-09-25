@@ -4,6 +4,7 @@ import com.sos.scheduler.engine.base.utils.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.data.jobchain.NodeId
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderProcessingState, OrderSourceType}
 import org.jetbrains.annotations.TestOnly
+import scala.language.existentials
 import scala.reflect.ClassTag
 
 /**

@@ -14,6 +14,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
         setSister(com.sos.scheduler.engine.kernel.cppproxy.TaskC$.MODULE$.sisterType().sister(this, context));
     }
 
+    @Override public long at_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return at_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long at_millis__native(long cppReference);
+
+
     @Override public int id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

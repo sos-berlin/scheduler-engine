@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.plugins.newwebservice.routes
 import com.sos.scheduler.engine.client.web.common.HasViewCompanionDirectives.viewReturnParameter
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
+import com.sos.scheduler.engine.common.utils.IntelliJUtils.intelliJuseImports
 import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView}
 import com.sos.scheduler.engine.data.queries.PathQuery
@@ -12,8 +13,8 @@ import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import scala.concurrent._
-import spray.routing.Directives._
 import spray.json.DefaultJsonProtocol._
+import spray.routing.Directives._
 import spray.routing._
 
 /**

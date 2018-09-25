@@ -5,17 +5,20 @@ import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits.SuccessFuture
-import com.sos.scheduler.engine.common.scalautil.{Closers, Logger}
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.event.{KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
 import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
+import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{TaskRun, startJob}
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.webservices.WebServicesIT._
+import java.time.Instant.now
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
@@ -37,6 +40,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
   protected lazy val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
 
   "/api/job/test, running" in {
+    scheduler executeXml StartJobCommand(TestJobPath, at = Some(StartJobCommand.At(now + 100.h)))
     var run: TaskRun = null
     eventBus.awaitingWhen[TaskStarted.type](_.key.jobPath == TestJobPath) {
       run = startJob(TestJobPath)
@@ -53,7 +57,8 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
         "enabled": true,
         "isInPeriod": true,
         "usedTaskCount": 1,
-        "taskQueueLength": 0,
+        "queuedTaskCount": 1,
+        "lateTaskCount": 0,
         "taskLimit": 1,
         "obstacles": [
           {
@@ -80,7 +85,8 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
           "stateText": "",
           "isInPeriod": true,
           "usedTaskCount": 0,
-          "taskQueueLength": 0,
+          "queuedTaskCount": 1,
+          "lateTaskCount": 0,
           "taskLimit": 1,
           "obstacles": []
         }""")

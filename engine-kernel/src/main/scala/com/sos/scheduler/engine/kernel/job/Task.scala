@@ -20,7 +20,7 @@ import com.sos.scheduler.engine.kernel.order.Order
 import com.sos.scheduler.engine.kernel.processclass.ProcessClass
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.security.AccessTokenRegister
-import com.sos.scheduler.engine.kernel.time.CppTimeConversions
+import com.sos.scheduler.engine.kernel.time.CppTimeConversions.zeroCppMillisToNoneInstant
 import java.nio.file.Paths
 import java.time.Instant
 
@@ -87,11 +87,13 @@ extends UnmodifiableTask with Sister with EventSource {
       case o ⇒ Some(o.getSister)
     }
 
-  def processStartedAt: Option[Instant] = inSchedulerThread { CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.processStartedAt) }
+  def processStartedAt: Option[Instant] = inSchedulerThread { zeroCppMillisToNoneInstant(cppProxy.processStartedAt) }
 
-  private[kernel] def stepOrProcessStartedAt = CppTimeConversions.zeroCppMillisToNoneInstant(cppProxy.stepOrProcessStartedAt)
+  private[kernel] def stepOrProcessStartedAt = zeroCppMillisToNoneInstant(cppProxy.stepOrProcessStartedAt)
 
-  private def state: TaskState = TaskState.of(cppProxy.state_name)
+  private[kernel] def state: TaskState = TaskState.of(cppProxy.state_name)
+
+  private[kernel] def at: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.at_millis)
 
   def parameterValue(name: String): String =
     inSchedulerThread {

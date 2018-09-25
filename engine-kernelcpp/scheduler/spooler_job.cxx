@@ -1754,6 +1754,15 @@ xml::Element_ptr Standard_job::Task_queue::why_dom_element(const xml::Document_p
     return result;
 }
 
+int Standard_job::Task_queue::late_task_count() const {
+    int count = 0;
+    Time now = Time::now();
+    Z_FOR_EACH_CONST(Queue, _queue, it) {
+        if ((*it)->at() < now) count += 1;
+    }
+    return count;
+}
+
 jlong Standard_job::next_possible_start_millis() const { 
     Time result = _period.begin();
     Task_queue::iterator i = _task_queue->begin();

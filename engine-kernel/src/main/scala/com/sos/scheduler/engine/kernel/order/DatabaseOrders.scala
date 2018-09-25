@@ -64,7 +64,7 @@ private[order] final class DatabaseOrders @Inject private(
       select ++= s" and ($conditionSql)"
     }
     if (ordered) {
-        select ++= """ order by "JOB_CHAIN", "STATE", "DISTRIBUTED_NEXT_TIME", "PRIORITY", "ORDERING""""
+      select ++= """ order by "JOB_CHAIN", "STATE", "DISTRIBUTED_NEXT_TIME", "PRIORITY", "ORDERING""""
     }
     select.toString
   }

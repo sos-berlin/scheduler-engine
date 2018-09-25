@@ -27,6 +27,9 @@ trait TaskC extends CppProxyWithSister[Task] {
   def process_class_or_null: Process_classC
 
   def is_waiting_for_remote_scheduler: Boolean
+
+  @CppExpression("$->at().millis()")
+  def at_millis: Long
 }
 
 object TaskC {

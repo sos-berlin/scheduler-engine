@@ -360,11 +360,11 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val TestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = Some(TestProcessClassPath),
     isOrderJob = true, title = "", enabled = true,
     JobState.running, stateText = "", isInPeriod = true, nextStartTime = None,
-    taskLimit = 10, usedTaskCount = 3, taskQueueLength = 0, obstacles = Set(), error = None)
+    taskLimit = 10, usedTaskCount = 3, queuedTaskCount = 0, lateTaskCount = 0, obstacles = Set(), error = None)
   val XTestBJobOverview = JobOverview(XTestBJobPath, FileBasedState.incomplete, defaultProcessClassPath = Some(ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS")),
     isOrderJob = true, title = "", enabled = true,
     JobState.loaded, stateText = "", isInPeriod = false, nextStartTime = None,
-    taskLimit = 1, usedTaskCount = 0, taskQueueLength = 0,
+    taskLimit = 1, usedTaskCount = 0, queuedTaskCount = 0, lateTaskCount = 0,
     obstacles = Set(
       JobObstacle.FileBasedObstacles(Set(
         FileBasedObstacle.BadState(FileBasedState.incomplete),
@@ -602,7 +602,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "isOrderJob": true,
       "title": "",
       "stateText": "",
-      "taskQueueLength": 0,
+      "queuedTaskCount": 0,
+      "lateTaskCount": 0,
       "taskLimit": 10,
       "state": "running",
       "isInPeriod": true,
@@ -617,7 +618,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "isOrderJob": true,
       "title": "",
       "stateText": "",
-      "taskQueueLength": 0,
+      "queuedTaskCount": 0,
+      "lateTaskCount": 0,
       "taskLimit": 1,
       "state": "loaded",
       "isInPeriod": false,

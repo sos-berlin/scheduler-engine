@@ -5,7 +5,7 @@ import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.job.{JobDescription, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState, TaskState}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
 import scala.collection.JavaConversions._
+import com.sos.scheduler.engine.common.time.ScalaTime._
 import scala.collection.immutable
 import com.sos.scheduler.engine.base.utils.ScalazStyle._
 
@@ -65,7 +66,8 @@ with JobPersistence {
       nextStartTime = nextStartInstantOption,
       taskLimit = taskLimit,
       usedTaskCount = runningTasksCount,
-      taskQueueLength = taskQueueLength,
+      queuedTaskCount = cppProxy.queued_task_count,
+      lateTaskCount = cppProxy.late_task_count,
       obstacles(state, isInPeriod, taskLimit, runningTasksCount),
       cppProxy.has_error option JobOverview.Error(cppProxy.error_code, cppProxy.error_message))
   }
@@ -112,8 +114,6 @@ with JobPersistence {
   private lazy val taskLimit = cppProxy.max_tasks
 
   private def runningTasksCount = cppProxy.running_tasks_count
-
-  private def taskQueueLength = cppProxy.task_queue_length
 
   lazy val title: String = inSchedulerThread { cppProxy.title }
 

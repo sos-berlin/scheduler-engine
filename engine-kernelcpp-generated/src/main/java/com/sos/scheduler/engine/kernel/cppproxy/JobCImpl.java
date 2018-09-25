@@ -259,6 +259,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native java.util.ArrayList java_tasks__native(long cppReference);
 
 
+    @Override public int late_task_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return late_queued_tasks__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int late_queued_tasks__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -353,6 +364,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String path__native(long cppReference);
+
+
+    @Override public int queued_task_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return queued_task_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int queued_task_count__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.filebased.FileBased replacement_java() {
@@ -451,17 +473,6 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     }
 
     private static native java.lang.String state_text__native(long cppReference);
-
-
-    @Override public int task_queue_length() {
-        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
-        try {
-            return task_queue_length__native(cppReference());
-        }
-        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
-    }
-
-    private static native int task_queue_length__native(long cppReference);
 
 
     @Override public java.lang.String title() {

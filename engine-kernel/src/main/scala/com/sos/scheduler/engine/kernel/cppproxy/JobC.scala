@@ -11,7 +11,8 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   def is_in_period: Boolean
   def max_tasks: Int
   def running_tasks_count: Int
-  def task_queue_length: Int
+  def queued_task_count: Int
+  def late_task_count: Int
   def script_text: String
   def title: String
   def description: String

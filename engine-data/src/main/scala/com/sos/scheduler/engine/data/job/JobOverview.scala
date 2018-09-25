@@ -23,11 +23,12 @@ final case class JobOverview(
   nextStartTime: Option[Instant],
   taskLimit: Int,
   usedTaskCount: Int,
-  taskQueueLength: Int,
+  queuedTaskCount: Int,
+  lateTaskCount: Int,
   obstacles: Set[JobObstacle],
   error: Option[JobOverview.Error])
-extends JobView {
-
+extends JobView
+{
   def taskLimitReached = usedTaskCount >= taskLimit
 }
 
@@ -42,6 +43,6 @@ object JobOverview extends JobView.Companion[JobOverview] {
   implicit val jsonFormat: RootJsonFormat[JobOverview] = {
     implicit val x = FileBasedState.MyJsonFormat
     implicit val y = JobState.MyJsonFormat
-    jsonFormat15(apply)
+    jsonFormat16(apply)
   }
 }
