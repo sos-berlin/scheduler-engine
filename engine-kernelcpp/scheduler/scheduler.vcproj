@@ -124,8 +124,6 @@
 			</File>
 			<File RelativePath=".\spooler_module_internal.cxx">
 			</File>
-			<File RelativePath=".\spooler_module_java.cxx">
-			</File>
 			<File RelativePath=".\spooler_module_process.cxx">
 			</File>
 			<File RelativePath=".\spooler_module_remote.cxx">
@@ -236,8 +234,6 @@
 			<File RelativePath="spooler_module_com.h">
 			</File>
 			<File RelativePath=".\spooler_module_internal.h">
-			</File>
-			<File RelativePath="spooler_module_java.h">
 			</File>
 			<File RelativePath=".\spooler_module_process.h">
 			</File>

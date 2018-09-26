@@ -377,7 +377,6 @@
     <ClCompile Include="Monitor.cxx" />
     <ClCompile Include="Monitor_folder.cxx" />
     <ClCompile Include="Monitor_subsystem.cxx" />
-    <ClCompile Include="spooler_job_java.cxx" />
     <ClCompile Include="Timed_call.cxx" />
     <ClCompile Include="Settings.cxx" />
     <ClCompile Include="_precompiled_headers.cxx">
@@ -500,7 +499,6 @@
     <ClInclude Include="Module_monitor.h" />
     <ClInclude Include="Module_monitors.h" />
     <ClInclude Include="Module_monitor_instance.h" />
-    <ClInclude Include="spooler_job_java.h" />
     <ClInclude Include="Timed_call.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="spooler_xslt_stylesheet.h" />

@@ -291,9 +291,6 @@
     <ClCompile Include="jni__sos__scheduler__Timed_call.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
-    <ClCompile Include="spooler_job_java.cxx">
-      <Filter>Quellcodedateien</Filter>
-    </ClCompile>
     <ClCompile Include="jni__sos__scheduler__Task_subsystem.cxx">
       <Filter>Quellcodedateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
@@ -525,9 +522,6 @@
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="Timed_call.h">
-      <Filter>Header-Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="spooler_job_java.h">
       <Filter>Header-Dateien</Filter>
     </ClInclude>
     <ClInclude Include="Module_monitor.h">
