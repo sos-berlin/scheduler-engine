@@ -1,6 +1,5 @@
 package com.sos.scheduler.engine.taskserver.modules.shell
 
-import com.sos.scheduler.engine.common.scalautil.Logger
 import java.time.format.{DateTimeFormatter, FormatStyle}
 import java.time.{Instant, ZoneId, ZonedDateTime}
 import java.util.Locale
@@ -8,7 +7,6 @@ import scala.io
 
 object TaskVariables {
   private val LocalDateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM) withLocale Locale.getDefault
-  Logger(getClass).info("### " + Locale.getDefault)
 
   /** JS-429 */
   private[shell] def taskStartVariables(instant: Instant): Map[String, String] = {
