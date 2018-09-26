@@ -24,6 +24,7 @@ object SprayJson {
       case v: Array[_] ⇒ new JsArray((v map valueToJsValue).toVector)
       case v: Iterable[_] ⇒ new JsArray((v map valueToJsValue).toVector)
       case v: JsValue ⇒ v
+      case v: scala.math.BigDecimal ⇒ JsNumber(v)
       case v: java.math.BigDecimal ⇒ JsNumber(v)
       case v: java.lang.Iterable[_] ⇒ JsArray((v map valueToJsValue).toVector)
       case v: java.util.Map[_, _] ⇒ mapToJsObject(v.asInstanceOf[java.util.Map[String, Any]])

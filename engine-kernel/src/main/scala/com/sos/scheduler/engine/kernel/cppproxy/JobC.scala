@@ -34,7 +34,9 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   @CppExpression("$->is_task_ready_for_order((::sos::scheduler::Process_class*)p0)")
   def is_task_ready_for_order(processClassPtr: Long): Boolean
 
-  def java_tasks: java.util.ArrayList[Task]
+  def java_tasks: java.util.List[Task]
+
+  def default_params: Variable_setC
 }
 
 object JobC {

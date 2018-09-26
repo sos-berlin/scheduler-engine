@@ -25,6 +25,30 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native long at_millis__native(long cppReference);
 
 
+    @Override public java.lang.String cause_string() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = cause_string__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String cause_string__native(long cppReference);
+
+
+    @Override public long enqueued_at_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return enqueued_at_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long enqueued_at_millis__native(long cppReference);
+
+
     @Override public int id() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -99,6 +123,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     private static native java.lang.String log_string__native(long cppReference);
 
 
+    @Override public java.lang.String node_key_string() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = node_key_string__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String node_key_string__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -123,6 +160,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC params__native(long cppReference);
+
+
+    @Override public int pid() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return pid__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int pid__native(long cppReference);
 
 
     @Override public long processStartedAt() {
@@ -160,6 +208,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native java.lang.String remote_scheduler_address__native(long cppReference);
+
+
+    @Override public long running_since_millis() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return running_since_millis__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long running_since_millis__native(long cppReference);
 
 
     @Override public java.lang.String state_name() {
@@ -210,6 +269,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.TaskC {
     }
 
     private static native long stepOrProcessStartedAt__native(long cppReference);
+
+
+    @Override public int step_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return step_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int step_count__native(long cppReference);
 
 
     // </editor-fold>

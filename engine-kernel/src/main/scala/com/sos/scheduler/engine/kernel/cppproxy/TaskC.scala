@@ -30,6 +30,19 @@ trait TaskC extends CppProxyWithSister[Task] {
 
   @CppExpression("$->at().millis()")
   def at_millis: Long
+
+  def enqueued_at_millis: Long
+
+  def running_since_millis: Long
+
+  def pid: Int
+
+  @CppExpression("start_cause_name($->cause())")
+  def cause_string: String
+
+  def step_count: Int
+
+  def node_key_string: String
 }
 
 object TaskC {

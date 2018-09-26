@@ -11,5 +11,5 @@ trait JobView {
 
 object JobView extends HasViewCompanion.WithKnownSubtypes[JobView] {
 
-  protected val subtypes: Subtypes = Set(JobOverview, JobDescription)
+  protected val subtypes: Subtypes = Set(JobOverview, JobDetailed, JobDescription)
 }

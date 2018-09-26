@@ -1,7 +1,9 @@
 package com.sos.scheduler.engine.data.xmlcommands
 
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.time.SchedulerDateTime
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand._
+import java.time.Instant
 
 final case class StartJobCommand(jobPath: JobPath, variables: Iterable[(String, String)] = Nil, at: Option[At] = None) extends XmlCommand {
   def xmlElem =
@@ -15,6 +17,10 @@ object StartJobCommand {
     def toXmlValue: String
   }
   object At {
+    def apply(instant: Instant): At = new At {
+      def toXmlValue = SchedulerDateTime.formatUtc(instant)
+    }
+
     object Period extends At {
       def toXmlValue = "period"
     }

@@ -1,11 +1,12 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.sos.scheduler.engine.base.utils.ScalaUtils.SwitchStatement
+import com.sos.scheduler.engine.base.utils.ScalazStyle._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
-import com.sos.scheduler.engine.data.job.{JobDescription, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState, TaskState}
+import com.sos.scheduler.engine.data.job.{JobDescription, JobDetailed, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
@@ -17,9 +18,7 @@ import com.sos.scheduler.engine.kernel.scheduler.HasInjector
 import com.sos.scheduler.engine.kernel.time.CppTimeConversions._
 import java.time.Instant
 import scala.collection.JavaConversions._
-import com.sos.scheduler.engine.common.time.ScalaTime._
 import scala.collection.immutable
-import com.sos.scheduler.engine.base.utils.ScalazStyle._
 
 @ForCpp
 final class Job(
@@ -45,8 +44,27 @@ with JobPersistence {
   private[kernel] def view[V <: JobView: JobView.Companion]: V =
     implicitly[JobView.Companion[V]] match {
       case JobOverview ⇒ jobOverview
+      case JobDetailed ⇒ jobDetailed
       case JobDescription ⇒ jobDescription
     }
+
+  private def jobDetailed: JobDetailed = {
+    val tasks = cppProxy.java_tasks.toVector
+    val (runningTasks, queuedTasks) = tasks partition (_.startedAt.isDefined)
+    JobDetailed(
+      jobOverview,
+      cppProxy.default_params.getSister.toMap,
+      queuedTasks map { t ⇒ JobDetailed.QueuedTask(t.taskId, t.enqueuedAt, t.at) },
+      runningTasks map { t ⇒
+        JobDetailed.RunningTask(
+          t.taskId, t.causeString, t.startedAt.get, t.pid, t.stepCount,
+          (t.orderOption, t.nodeKeyOption) match {
+            case (Some(o), Some(n)) ⇒ Some(JobDetailed.TaskOrder(o.id, n.jobChainPath, n.nodeId))
+            case _ ⇒ None
+          }
+        )
+      })
+  }
 
   private def jobOverview: JobOverview = {
     val state = this.state

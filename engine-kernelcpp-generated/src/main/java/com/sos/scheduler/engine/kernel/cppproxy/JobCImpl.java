@@ -14,6 +14,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
         setSister(com.sos.scheduler.engine.kernel.cppproxy.JobC$.MODULE$.sisterType().sister(this, context));
     }
 
+    @Override public com.sos.scheduler.engine.kernel.cppproxy.Variable_setC default_params() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            com.sos.scheduler.engine.kernel.cppproxy.Variable_setC result = default_params__native(cppReference());
+            checkIsNotReleased(com.sos.scheduler.engine.kernel.cppproxy.Variable_setC.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native com.sos.scheduler.engine.kernel.cppproxy.Variable_setC default_params__native(long cppReference);
+
+
     @Override public java.lang.String default_process_class_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -246,28 +259,28 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_visible__native(long cppReference);
 
 
-    @Override public java.util.ArrayList java_tasks() {
+    @Override public java.util.List java_tasks() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
-            java.util.ArrayList result = java_tasks__native(cppReference());
-            checkIsNotReleased(java.util.ArrayList.class, result);
+            java.util.List result = java_tasks__native(cppReference());
+            checkIsNotReleased(java.util.List.class, result);
             return result;
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
     }
 
-    private static native java.util.ArrayList java_tasks__native(long cppReference);
+    private static native java.util.List java_tasks__native(long cppReference);
 
 
     @Override public int late_task_count() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
-            return late_queued_tasks__native(cppReference());
+            return late_task_count__native(cppReference());
         }
         catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
     }
 
-    private static native int late_queued_tasks__native(long cppReference);
+    private static native int late_task_count__native(long cppReference);
 
 
     @Override public com.sos.scheduler.engine.kernel.cppproxy.Prefix_logC log() {

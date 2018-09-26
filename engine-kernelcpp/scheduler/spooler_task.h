@@ -305,6 +305,17 @@ struct Task : Object,
     public: TaskJ& typed_java_sister() { 
         return _typed_java_sister; 
     }
+    
+    public: int step_count() const {
+        return _step_count;
+    }
+    
+    public: string node_key_string() const {
+        if (const Order* o = _order) 
+            return o->job_chain_path_string() + ":" + o->string_state();
+        else
+            return "";
+    }
 
   protected:
     friend struct               Stdout_reader;
@@ -331,8 +342,9 @@ struct Task : Object,
     void                        send_collected_log          ();
 
     void                        set_cause                   ( Start_cause );
-    Start_cause                 cause                       () const                                { return _cause; }
-
+    public: Start_cause         cause                       () const                                { return _cause; }
+    
+  protected:
     void                        set_history_field           ( const string& name, const Variant& value );
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom( Com_variable_set::xml_element_name(), "variable" ); }
@@ -384,6 +396,14 @@ struct Task : Object,
 
     bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
     virtual bool                has_step_count              ()                                      { return true; }
+    
+    public: int64 running_since_millis() const {
+        return _running_since.millis();
+    }
+    
+    public: int64 enqueued_at_millis() const {
+        return _enqueue_time.millis();
+    }
 
  private:
     void                        set_enqueued_state          ();

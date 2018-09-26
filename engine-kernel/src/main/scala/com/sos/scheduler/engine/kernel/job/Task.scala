@@ -11,6 +11,7 @@ import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.job.{JobPath, TaskDetailed, TaskId, TaskKey, TaskObstacle, TaskOverview, TaskState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.eventbus.EventSource
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
@@ -74,6 +75,13 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
 
+  private[kernel] def nodeKeyOption: Option[NodeKey] = cppProxy.node_key_string match {
+    case "" ⇒ None
+    case string ⇒
+      val parts = string split ':'
+      Some(NodeKey(JobChainPath(parts(0)), NodeId(parts(1))))
+  }
+
   private[kernel] def orderOption: Option[Order] = Option(cppProxy.order.getSister)
 
   private[kernel] def taskId = taskIdOnce getOrUpdate TaskId(cppProxy.id)
@@ -93,7 +101,25 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def state: TaskState = TaskState.of(cppProxy.state_name)
 
+  private[kernel] def causeString: String =
+    cppProxy.cause_string
+
+  private[kernel] def pid: Option[Int] =
+    cppProxy.pid match {
+      case 0 ⇒ None
+     case n ⇒ Some(n)
+    }
+
+  private[kernel] def enqueuedAt: Option[Instant] =
+    zeroCppMillisToNoneInstant(cppProxy.enqueued_at_millis)
+
   private[kernel] def at: Option[Instant] = zeroCppMillisToNoneInstant(cppProxy.at_millis)
+
+  private[kernel] def startedAt: Option[Instant] =
+    zeroCppMillisToNoneInstant(cppProxy.running_since_millis)
+
+  private[kernel] def stepCount: Int =
+    cppProxy.step_count
 
   def parameterValue(name: String): String =
     inSchedulerThread {

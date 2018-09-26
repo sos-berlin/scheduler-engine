@@ -11,18 +11,21 @@ import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.event.{KeyedEvent, Snapshot}
 import com.sos.scheduler.engine.data.filebased.FileBasedActivated
-import com.sos.scheduler.engine.data.job.{JobPath, TaskStarted}
+import com.sos.scheduler.engine.data.job.{JobPath, TaskClosed, TaskKey, TaskStarted}
+import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.SchedulerTestUtils.{TaskRun, startJob}
+import com.sos.scheduler.engine.test.SchedulerTestUtils.startOrder
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.webservices.WebServicesIT._
 import java.time.Instant.now
+import java.time.temporal.ChronoField.MILLI_OF_SECOND
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
+import scala.concurrent.Promise
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -38,41 +41,77 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
   protected override lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = s"-http-port=$httpPort" :: "-log-level=warn" :: Nil)
   protected lazy val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
+  private val enqueuedTaskStartAt = (now + 100.h).`with`(MILLI_OF_SECOND, 0)
+  private var whenTaskClosed = Promise[TaskClosed.type]()
 
   "/api/job/test, running" in {
-    scheduler executeXml StartJobCommand(TestJobPath, at = Some(StartJobCommand.At(now + 100.h)))
-    var run: TaskRun = null
+    scheduler executeXml StartJobCommand(TestJobPath, at = Some(StartJobCommand.At(enqueuedTaskStartAt)))
     eventBus.awaitingWhen[TaskStarted.type](_.key.jobPath == TestJobPath) {
-      run = startJob(TestJobPath)
+      startOrder(TestJobChainPath orderKey "TEST-ORDER").finished
     }
-    val jsObject = client.getByUri[JsObject]("api/job/someFolder/test").await(TestTimeout)
+    eventBus.on[TaskClosed.type] {
+      case KeyedEvent(TaskKey(TestJobPath, _), event) ⇒
+        whenTaskClosed.success(event)
+    }
+    val jsObject = client.getByUri[JsObject]("api/job/someFolder/test") await TestTimeout
+    val enqueuedAt = jsObject.fields("queuedTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("enqueuedAt").asInstanceOf[JsString].value
+    val pid = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("pid").asInstanceOf[JsNumber].value
+    val startedAt = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("startedAt").asInstanceOf[JsString].value
+    val stepCount = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("stepCount").asInstanceOf[JsNumber].value
+    assert(jsObject.fields contains "eventId")
     assert(jsObject.copy(fields = jsObject.fields - "eventId") ==
       json"""{
-        "path": "/someFolder/test",
-        "fileBasedState": "active",
-        "isOrderJob": false,
-        "title": "JOB TITLE",
-        "state": "running",
-        "stateText": "",
-        "enabled": true,
-        "isInPeriod": true,
-        "usedTaskCount": 1,
-        "queuedTaskCount": 1,
-        "lateTaskCount": 0,
-        "taskLimit": 1,
-        "obstacles": [
+        "overview": {
+          "path": "/someFolder/test",
+          "fileBasedState": "active",
+          "isOrderJob": false,
+          "title": "JOB TITLE",
+          "state": "running",
+          "stateText": "",
+          "enabled": true,
+          "isInPeriod": true,
+          "usedTaskCount": 1,
+          "queuedTaskCount": 1,
+          "lateTaskCount": 0,
+          "taskLimit": 1,
+          "obstacles": [
+            {
+              "TYPE": "TaskLimitReached",
+              "limit": 1
+            }
+          ]
+        },
+        "defaultParameters": {
+          "JOB-PARAM": "JOB-VALUE"
+        } ,
+        "queuedTasks": [
           {
-            "TYPE": "TaskLimitReached",
-            "limit": 1
+            "taskId": "3",
+            "enqueuedAt": "$enqueuedAt",
+            "startAt": "${enqueuedTaskStartAt.toString}"
+          }
+        ],
+        "runningTasks": [
+          {
+            "taskId": "4",
+            "cause": "order",
+            "pid": $pid,
+            "startedAt": "$startedAt",
+            "stepCount": $stepCount,
+            "order": {
+              "orderId": "TEST-ORDER",
+              "jobChainPath": "/someFolder/test-jobchain",
+              "nodeId": "100"
+            }
           }
         ]
       }""")
-    run.closed await TestTimeout
   }
 
   "/api/job/someFolder/" - {
     "one job" in {
-      val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/").await(TestTimeout)
+      whenTaskClosed.future await TestTimeout
+      val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/") await TestTimeout
       val jsObject = snapshot.value.elements.head.asJsObject
       assert(jsObject ==
         json"""{
@@ -133,4 +172,5 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
 object WebServicesIT {
   private val logger = Logger(getClass)
   private val TestJobPath = JobPath("/someFolder/test")
+  private val TestJobChainPath = JobChainPath("/someFolder/test-jobchain")
 }
