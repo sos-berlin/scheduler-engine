@@ -167,6 +167,9 @@ with UnmodifiableJobChain {
   private[kernel] def orderOption(id: OrderId): Option[Order] =
     Option(cppProxy.order_or_null(id.string)) map { _.getSister }
 
+  private[order] def orderIterator(nodeId: NodeId): Iterator[Order] =
+    orderIterator filter (_.nodeId == nodeId)
+
   private[order] def orderIterator: Iterator[Order] =
     cppProxy.java_orders.toIterator map { _.asInstanceOf[OrderC].getSister }
 

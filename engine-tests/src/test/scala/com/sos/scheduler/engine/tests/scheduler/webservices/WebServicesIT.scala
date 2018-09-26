@@ -26,12 +26,13 @@ import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.concurrent.Promise
+import spray.http.StatusCodes.BadRequest
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
 /**
-  * JS_1793 Web services for Jobs.
+  * JS-1793 Web services for Jobs.
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
@@ -42,9 +43,9 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
     mainArguments = s"-http-port=$httpPort" :: "-log-level=warn" :: Nil)
   protected lazy val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   private val enqueuedTaskStartAt = (now + 100.h).`with`(MILLI_OF_SECOND, 0)
-  private var whenTaskClosed = Promise[TaskClosed.type]()
+  private val whenTaskClosed = Promise[TaskClosed.type]()
 
-  "/api/job/test, running" in {
+  "/api/job/someFolder/test, running" in {
     scheduler executeXml StartJobCommand(TestJobPath, at = Some(StartJobCommand.At(enqueuedTaskStartAt)))
     eventBus.awaitingWhen[TaskStarted.type](_.key.jobPath == TestJobPath) {
       startOrder(TestJobChainPath orderKey "TEST-ORDER").finished
@@ -106,6 +107,34 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
           }
         ]
       }""")
+  }
+
+  "/api/job/someFolder/?return=JocOrderStatistics&isDistributed=false" in {
+    val jsObject = client.getByUri[JsObject]("api/job/someFolder/?return=JocOrderStatistics&isDistributed=false") await TestTimeout
+    assert(jsObject.fields("/someFolder/test") ==
+      json"""{
+        "total": 1,
+        "notPlanned": 0,
+        "planned": 0,
+        "due": 0,
+        "started": 1,
+        "inTask": 1,
+        "inTaskProcess": 1,
+        "occupiedByClusterMember": 0,
+        "setback": 0,
+        "waitingForResource": 0,
+        "suspended": 0,
+        "blacklisted": 0,
+        "permanent": 0,
+        "fileOrder": 0
+      }""")
+  }
+
+  "/api/job/someFolder/?return=JocOrderStatistics is rejected" in {
+    val response = intercept[spray.httpx.UnsuccessfulResponseException] {
+      client.getByUri[JsObject]("api/job/someFolder/?return=JocOrderStatistics") await TestTimeout
+    }.response
+    assert(response.status == BadRequest && response.entity.asString == "return=JocOrderStatistics requires isDistributed=false")
   }
 
   "/api/job/someFolder/" - {

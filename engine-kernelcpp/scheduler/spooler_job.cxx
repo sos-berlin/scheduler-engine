@@ -14,7 +14,7 @@ typedef ::javaproxy::com::sos::scheduler::engine::data::job::JobPersistentState 
 #   include <sys/signal.h>
 #   include <sys/wait.h>
 #endif
-
+#include "../zschimmer/java.h"
 
 namespace sos {
 namespace scheduler {
@@ -179,6 +179,7 @@ struct Combined_job_nodes : Object
     Fill_zero                  _zero_;
     Standard_job*              _job;
     Spooler*                   _spooler;
+  public:
     typedef stdext::hash_set< job_chain::Job_node* >  Job_node_set;
     Job_node_set               _job_node_set;
 };
@@ -1830,12 +1831,22 @@ void Standard_job::remove_running_task( Task* task )
 }
 
 ArrayListJ Standard_job::java_tasks() const {
-    ArrayListJ result = ArrayListJ::new_instance(_running_tasks.size() + _task_queue->_queue.size());
+    ArrayListJ result = ArrayListJ::new_instance((int)_running_tasks.size() + _task_queue->_queue.size());
     Z_FOR_EACH_CONST(Task_set, _running_tasks, i) {
         result.add((*i)->java_sister());
     }
     Z_FOR_EACH_CONST(Task_queue::Queue, _task_queue->_queue, i) {
         result.add((*i)->java_sister());
+    }
+    return result;
+}
+
+ArrayListJ Standard_job::java_node_keys() const {
+    javabridge::Env java_env;
+    ArrayListJ result = ArrayListJ::new_instance((int)_combined_job_nodes->_job_node_set.size());
+    Z_FOR_EACH_CONST(Combined_job_nodes::Job_node_set, _combined_job_nodes->_job_node_set, i) {
+        string s = (*i)->job_chain_path() + "," + (*i)->string_order_state();
+        result.add(java_env.jstring_from_string(s));
     }
     return result;
 }

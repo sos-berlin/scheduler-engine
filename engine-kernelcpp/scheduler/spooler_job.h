@@ -172,8 +172,9 @@ struct Job : file_based< Job, Job_folder, Job_subsystem >,
     virtual string error_code() const = 0;
     virtual string error_message() const = 0;
     virtual ptr<Com_variable_set> default_params() const = 0;
+    virtual ArrayListJ java_node_keys() const = 0;
 
-  private:
+private:
     Fill_zero                  _zero_;
     const JobJ                 _typed_java_sister;
     int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
@@ -445,6 +446,8 @@ struct Standard_job : Job
     public: ptr<Com_variable_set> default_params() const {
         return _default_params;
     }
+
+    public: ArrayListJ java_node_keys() const;
     
   protected:
     bool                       _stop_on_error;              // Nach Task-Fehler Job stoppen (default)

@@ -312,7 +312,7 @@ struct Task : Object,
     
     public: string node_key_string() const {
         if (const Order* o = _order) 
-            return o->job_chain_path_string() + ":" + o->string_state();
+            return o->job_chain_path_string() + "," + o->string_state();
         else
             return "";
     }

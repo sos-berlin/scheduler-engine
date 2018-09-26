@@ -150,6 +150,24 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       jobSubsystem.job(jobPath).view[V]
     }
 
+  def jobsJocOrderStatistics(query: PathQuery, isDistributed: Option[Boolean]): Future[Map[JobPath, JocOrderStatistics]] =
+    directOrSchedulerThreadFuture {
+      jobSubsystem.fileBasedsBy(query).map(job ⇒ job.path → directJobJocOrderStatistics(job.path, isDistributed)).toMap
+    }
+
+  def jobJocOrderStatistics(jobPath: JobPath, isDistributed: Option[Boolean]): Future[JocOrderStatistics] =
+    directOrSchedulerThreadFuture {
+      directJobJocOrderStatistics(jobPath, isDistributed = isDistributed)
+    }
+
+  private def directJobJocOrderStatistics(jobPath: JobPath, isDistributed: Option[Boolean]): JocOrderStatistics = {
+    if (!isDistributed.contains(false)) throw new IllegalArgumentException("return=JocOrderStatistics requires isDistributed=false")
+    val nodeKeys = jobSubsystem.job(jobPath).nodeKeys
+    val (distributedNodeKeys, localNodeKeys) = nodeKeys partition (o ⇒ orderSubsystem.jobChain(o.jobChainPath).isDistributed)
+    //val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(distributedNodeKeys)
+    orderSubsystem.nonDistributedOrderStatistics(localNodeKeys)
+  }
+
   def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
     respondWithSnapshotFuture {
       processClassSubsystem.fileBased(processClassPath).view[V]

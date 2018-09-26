@@ -34,20 +34,38 @@ trait JobRoute {
     }
 
   private def singleJobRoute(jobPath: JobPath): Route =
-    viewReturnParameter(JobView, default = JobDetailed) { implicit viewCompanion ⇒
-      val future = client.job(jobPath)
-      completeTryHtml(future)
-    } ~
-    singleKeyEvents[AnyEvent](jobPath)
+    parameter("return".?) {
+      case Some("JocOrderStatistics") ⇒
+        parameter("isDistributed".as[Boolean].?) { isDistributed ⇒
+          complete(
+            client.jobJocOrderStatistics(jobPath, isDistributed = isDistributed))
+        }
+
+      case _ ⇒
+        viewReturnParameter(JobView, default = JobDetailed) { implicit viewCompanion ⇒
+          val future = client.job(jobPath)
+          completeTryHtml(future)
+        } ~
+        singleKeyEvents[AnyEvent](jobPath)
+    }
 
   private def multipleJobsRoute(query: PathQuery): Route =
-    viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
-      val future = client.jobs(query)
-      completeTryHtml(future)
-    } ~
-    events[Event](
-      predicate = {
-        case KeyedEvent(jobPath: JobPath, _) ⇒ query.matches(jobPath)
-        case _ ⇒ false
-      })
+    parameter("return".?) {
+      case Some("JocOrderStatistics") ⇒
+        parameter("isDistributed".as[Boolean].?) { isDistributed ⇒
+          complete(
+            client.jobsJocOrderStatistics(query, isDistributed = isDistributed))
+        }
+
+      case _ ⇒
+        viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
+          val future = client.jobs(query)
+          completeTryHtml(future)
+        } ~
+        events[Event](
+          predicate = {
+            case KeyedEvent(jobPath: JobPath, _) ⇒ query.matches(jobPath)
+            case _ ⇒ false
+          })
+    }
 }

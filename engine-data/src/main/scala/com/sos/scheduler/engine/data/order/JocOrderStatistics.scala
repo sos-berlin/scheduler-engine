@@ -47,7 +47,8 @@ final case class JocOrderStatistics(
     permanent = permanent + o.permanent,
     fileOrder = fileOrder + o.fileOrder)
 
-  override def toString = List(
+  override def toString =
+    Array(
       format("total", total),
       format("notPlanned", notPlanned),
       format("planned", planned),
@@ -61,8 +62,8 @@ final case class JocOrderStatistics(
       format("suspended", suspended),
       format("blacklisted", blacklisted),
       format("permanent", permanent),
-      format("fileOrder", fileOrder))
-    .mkString("JocOrderStatistics(", " ", ")")
+      format("fileOrder", fileOrder)
+    ).mkString("JocOrderStatistics(", " ", ")")
 }
 
 object JocOrderStatistics {

@@ -7,6 +7,7 @@ import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{Sister, SisterType}
 import com.sos.scheduler.engine.data.job.{JobDescription, JobDetailed, JobObstacle, JobOverview, JobPath, JobState, JobView, TaskPersistentState}
+import com.sos.scheduler.engine.data.jobchain.{JobChainPath, NodeId, NodeKey}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.{inSchedulerThread, schedulerThreadFuture}
@@ -124,6 +125,14 @@ with JobPersistence {
   private[kernel] lazy val defaultProcessClassPathOption = emptyToNone(cppProxy.default_process_class_path) map ProcessClassPath.apply
 
   private lazy val isOrderControlled = cppProxy.is_order_controlled
+
+  private[kernel] lazy val nodeKeys: Set[NodeKey] =
+    cppProxy.java_node_keys
+      .map { string ⇒
+        val parts = string split ','
+        NodeKey(JobChainPath(parts(0)), NodeId(parts(1)))
+      }
+      .toSet
 
   private def isEnabled = cppProxy.enabled
 

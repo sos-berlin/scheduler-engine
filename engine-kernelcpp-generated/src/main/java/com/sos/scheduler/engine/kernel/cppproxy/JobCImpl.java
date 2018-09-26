@@ -259,6 +259,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.JobC {
     private static native boolean is_visible__native(long cppReference);
 
 
+    @Override public java.util.List java_node_keys() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.util.List result = java_node_keys__native(cppReference());
+            checkIsNotReleased(java.util.List.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.util.List java_node_keys__native(long cppReference);
+
+
     @Override public java.util.List java_tasks() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {

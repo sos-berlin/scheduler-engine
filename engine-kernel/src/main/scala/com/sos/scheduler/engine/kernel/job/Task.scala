@@ -78,7 +78,7 @@ extends UnmodifiableTask with Sister with EventSource {
   private[kernel] def nodeKeyOption: Option[NodeKey] = cppProxy.node_key_string match {
     case "" ⇒ None
     case string ⇒
-      val parts = string split ':'
+      val parts = string split ','
       Some(NodeKey(JobChainPath(parts(0)), NodeId(parts(1))))
   }
 

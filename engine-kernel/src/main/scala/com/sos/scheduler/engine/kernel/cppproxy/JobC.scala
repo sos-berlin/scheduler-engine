@@ -37,6 +37,8 @@ trait JobC extends CppProxyWithSister[Job] with File_basedC[Job] {
   def java_tasks: java.util.List[Task]
 
   def default_params: Variable_setC
+
+  def java_node_keys: java.util.List[String]
 }
 
 object JobC {

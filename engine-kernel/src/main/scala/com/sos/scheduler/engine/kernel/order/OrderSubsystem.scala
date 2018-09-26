@@ -63,6 +63,14 @@ extends FileBasedSubsystem {
     }
   }
 
+  private[kernel] def nonDistributedOrderStatistics(nodeKeys: Iterable[NodeKey]): JocOrderStatistics = {
+    val result = new JocOrderStatistics.Mutable
+    for (nodeKey ← nodeKeys; order ← jobChain(nodeKey.jobChainPath).orderIterator(nodeKey.nodeId)) {
+      result.count(order.queryable)
+    }
+    result.toImmutable
+  }
+
   private[kernel] def nonDistributedOrderStatistics(query: JobChainNodeQuery, nonDistributedJobChains: TraversableOnce[JobChain]): JocOrderStatistics = {
     val result = new JocOrderStatistics.Mutable
     for (order ← nonDistributedOrderIteratorBy(query, nonDistributedJobChains)) {
@@ -79,7 +87,7 @@ extends FileBasedSubsystem {
     else
       for (jobChain ← jobChains.toIterator;
            node ← jobChain.jobNodes(query);
-           order ← jobChain.orderIterator if order.nodeId == node.nodeId)
+           order ← jobChain.orderIterator(node.nodeId))
         yield order
 
   private[kernel] def distributedOrderStatistics(query: JobChainNodeQuery, jobChains: TraversableOnce[JobChain]): Future[JocOrderStatistics] = {
