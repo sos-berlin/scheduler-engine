@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.kernel.job
 import com.google.inject.ImplementedBy
 import com.sos.scheduler.engine.data.filebased.FileBasedType
 import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.queries.JobQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
@@ -22,6 +23,9 @@ extends FileBasedSubsystem {
   val companion = JobSubsystem
 
   private[kernel] def job(path: JobPath) = inSchedulerThread { fileBased(path) }
+
+  private[kernel] final def jobsBy(query: JobQuery): Vector[Job] =
+    fileBasedsBy(query.pathQuery) filter (o ⇒ query.isInState(o.state))
 
   private[job] def entityManagerFactory: EntityManagerFactory
   private[job] def jobStore: HibernateJobStore

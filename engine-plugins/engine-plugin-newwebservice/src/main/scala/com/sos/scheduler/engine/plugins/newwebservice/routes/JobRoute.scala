@@ -1,20 +1,24 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
+import com.google.common.base.Splitter
 import com.sos.scheduler.engine.client.web.common.HasViewCompanionDirectives.viewReturnParameter
 import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
-import com.sos.scheduler.engine.data.job.{JobDetailed, JobOverview, JobPath, JobView}
-import com.sos.scheduler.engine.data.queries.PathQuery
+import com.sos.scheduler.engine.data.job.{JobDetailed, JobOverview, JobPath, JobState, JobView}
+import com.sos.scheduler.engine.data.queries.{JobQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
+import java.util.regex.Pattern
 import scala.concurrent._
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing._
+import JobRoute._
+import scala.collection.JavaConversions._
 
 /**
   * @author Joacim Zschimmer
@@ -49,23 +53,34 @@ trait JobRoute {
         singleKeyEvents[AnyEvent](jobPath)
     }
 
-  private def multipleJobsRoute(query: PathQuery): Route =
-    parameter("return".?) {
-      case Some("JocOrderStatistics") ⇒
-        parameter("isDistributed".as[Boolean].?) { isDistributed ⇒
-          complete(
-            client.jobsJocOrderStatistics(query, isDistributed = isDistributed))
-        }
+  private def multipleJobsRoute(pathQuery: PathQuery): Route =
+    parameter("state" ? "") { state ⇒
+      val isInJobState: JobState ⇒ Boolean = SpaceSplitter.split(state).map(JobState.valueOf).toSet match {
+        case o if o.isEmpty ⇒ _ ⇒ true
+        case o ⇒ o.contains
+      }
+      val query = JobQuery(pathQuery, isInJobState)
+      parameter("return".?) {
+        case Some("JocOrderStatistics") ⇒
+          parameter("isDistributed".as[Boolean].?) { isDistributed ⇒
+            complete(
+              client.jobsJocOrderStatistics(query, isDistributed = isDistributed))
+          }
 
-      case _ ⇒
-        viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
-          val future = client.jobs(query)
-          completeTryHtml(future)
-        } ~
-        events[Event](
-          predicate = {
-            case KeyedEvent(jobPath: JobPath, _) ⇒ query.matches(jobPath)
-            case _ ⇒ false
-          })
+        case _ ⇒
+          viewReturnParameter(JobView, default = JobOverview) { implicit viewCompanion ⇒
+            val future = client.jobs(query)
+            completeTryHtml(future)
+          } ~
+          events[Event](
+            predicate = {
+              case KeyedEvent(jobPath: JobPath, _) ⇒ query.pathQuery.matches(jobPath)
+              case _ ⇒ false
+            })
+      }
     }
+}
+
+object JobRoute {
+  private val SpaceSplitter = Splitter.on(Pattern.compile(",")).trimResults.omitEmptyStrings
 }

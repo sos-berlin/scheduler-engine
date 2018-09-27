@@ -18,7 +18,7 @@ import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, JobQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import java.time.Duration
 import scala.collection.immutable
@@ -144,7 +144,7 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   def job[V <: JobView: JobView.Companion](path: JobPath) =
     get[Snapshot[V]](_.job[V](path))
 
-  def jobs[V <: JobView: JobView.Companion](query: PathQuery) =
+  def jobs[V <: JobView: JobView.Companion](query: JobQuery) =
     get[Snapshot[immutable.Seq[V]]](_.job[V](query))
 
   def jobEvents[E <: Event](jobPath: JobPath, eventRequest: SomeEventRequest[E]) =

@@ -11,7 +11,7 @@ import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView, TaskId,
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, JobQuery, OrderQuery, PathQuery}
 import com.sos.scheduler.engine.data.scheduler.SchedulerOverview
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures._
@@ -140,9 +140,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       orderSubsystem.jobChain(jobChainPath).details
     }
 
-  def jobs[V <: JobView: JobView.Companion](query: PathQuery = PathQuery.All): Future[Snapshot[Vector[V]]] =
+  def jobs[V <: JobView: JobView.Companion](query: JobQuery = JobQuery.All): Future[Snapshot[Vector[V]]] =
     respondWithSnapshotFuture {
-      jobSubsystem.fileBasedsBy(query) map { _.view[V] }
+      jobSubsystem.jobsBy(query) map { _.view[V] }
     }
 
   def job[V <: JobView: JobView.Companion](jobPath: JobPath): Future[Snapshot[V]] =
@@ -150,9 +150,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
       jobSubsystem.job(jobPath).view[V]
     }
 
-  def jobsJocOrderStatistics(query: PathQuery, isDistributed: Option[Boolean]): Future[Map[JobPath, JocOrderStatistics]] =
+  def jobsJocOrderStatistics(query: JobQuery, isDistributed: Option[Boolean]): Future[Map[JobPath, JocOrderStatistics]] =
     directOrSchedulerThreadFuture {
-      jobSubsystem.fileBasedsBy(query).map(job ⇒ job.path → directJobJocOrderStatistics(job.path, isDistributed)).toMap
+      jobSubsystem.jobsBy(query).map(job ⇒ job.path → directJobJocOrderStatistics(job.path, isDistributed)).toMap
     }
 
   def jobJocOrderStatistics(jobPath: JobPath, isDistributed: Option[Boolean]): Future[JocOrderStatistics] =
@@ -167,6 +167,10 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
     //val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(distributedNodeKeys)
     orderSubsystem.nonDistributedOrderStatistics(localNodeKeys)
   }
+
+  def jobMatches(jobPath: JobPath, query: JobQuery): Boolean =
+    query.pathQuery.matches(jobPath) &&
+      jobSubsystem.fileBasedOption(jobPath).exists(o ⇒ query.isInState(o.state))
 
   def processClass[V <: ProcessClassView: ProcessClassView.Companion](processClassPath: ProcessClassPath): Future[Snapshot[V]] =
     respondWithSnapshotFuture {

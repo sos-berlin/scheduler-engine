@@ -6,11 +6,11 @@ import com.sos.scheduler.engine.client.web.SchedulerUris._
 import com.sos.scheduler.engine.common.scalautil.Collections._
 import com.sos.scheduler.engine.data.event.{Event, EventId, SomeEventRequest}
 import com.sos.scheduler.engine.data.filebased.TypedPath
-import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.order.{OrderKey, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
-import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
+import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, JobQuery, OrderQuery, PathQuery}
 import java.time.Duration
 import spray.http.Uri
 
@@ -122,10 +122,12 @@ final class SchedulerUris private(schedulerUri: Uri) {
 
   object job {
     def apply[V <: JobView: JobView.Companion](path: JobPath): String =
-      apply[V](PathQuery(path))
+      apply[V](JobQuery(path))
 
-    def apply[V <: JobView: JobView.Companion](query: PathQuery): String =
+    def apply[V <: JobView: JobView.Companion](query: JobQuery): String = {
+      require(JobState.values forall query.isInState, "JobQuery.isInState not implemented")
       uriString(Uri.Path("api/job" + query.toUriPath), "return" → JobView.companion[V].name)
+    }
 
     def events[E <: Event](query: PathQuery, eventRequest: SomeEventRequest[E]): String = {
       val (subpath, parameters) = query.toPathAndParameters[JobPath]

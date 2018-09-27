@@ -138,6 +138,21 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
   }
 
   "/api/job/someFolder/" - {
+    "state=running" in {
+      val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/?state=running") await TestTimeout
+      assert(snapshot.value.elements.size == 1)
+    }
+
+    "state=pending,running" in {
+      val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/?state=running") await TestTimeout
+      assert(snapshot.value.elements.size == 1)
+    }
+
+    "state=stopped" in {
+      val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/?state=stopped") await TestTimeout
+      assert(snapshot.value.elements.size == 0)
+    }
+
     "one job" in {
       whenTaskClosed.future await TestTimeout
       val snapshot = client.getByUri[Snapshot[JsArray]]("api/job/someFolder/") await TestTimeout
