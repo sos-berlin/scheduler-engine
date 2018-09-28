@@ -2298,6 +2298,7 @@ void Order::reset()
     assert_no_task( Z_FUNCTION );
 
     _last_error = "";
+    _state_text = "";
     set_suspended( false );
     clear_setback();
     if (Nested_job_chain_node* first_nested_job_chain_node = Nested_job_chain_node::cast(
@@ -3056,6 +3057,7 @@ void Order::check_for_replacing_or_removing_with_distributed(When_to_act when_to
 
 void Order::prepare_for_next_roundtrip() {
     _last_error = "";
+    _state_text = "";
     _end_state = _original_end_state;
     if (is_in_folder()) {
         if (!_spooler->settings()->_keep_order_content_on_reschedule) {
