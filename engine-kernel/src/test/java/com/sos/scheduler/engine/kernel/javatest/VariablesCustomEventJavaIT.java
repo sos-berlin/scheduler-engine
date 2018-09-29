@@ -1,9 +1,11 @@
 package com.sos.scheduler.engine.kernel.javatest;
 
+import com.sos.scheduler.engine.data.event.Event;
 import com.sos.scheduler.engine.data.event.KeyedEvent;
+import com.sos.scheduler.engine.data.events.custom.CustomEvent;
 import com.sos.scheduler.engine.data.events.custom.VariablesCustomEvent;
-import com.sos.scheduler.engine.eventbus.ColdEventBus;
 import com.sos.scheduler.engine.eventbus.EventBus;
+import com.sos.scheduler.engine.eventbus.EventPublisher;
 import com.sos.scheduler.engine.eventbus.EventSubscription;
 import com.sos.scheduler.engine.eventbus.JavaEventSubscription;
 import com.sos.scheduler.engine.eventbus.SchedulerEventBus;
@@ -18,17 +20,22 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Joacim Zschimmer
  */
-public class VariablesCustomEventJavaIT {
+public final class VariablesCustomEventJavaIT {
 
     @Test
     public void test() throws InterruptedException {
         SchedulerEventBus eventBus = new SchedulerEventBus();
+        EventPublisher eventPublisher = new EventPublisher() {
+            public <E extends CustomEvent> void publishCustomEvent(KeyedEvent<E> keyedEvent) {
+                eventBus.publishJava(keyedEvent);
+            }
+        };
         BlockingQueue<KeyedEvent<VariablesCustomEvent>> queue = new LinkedBlockingDeque<>();
 
         EventSubscription subscription = subscribe(eventBus, queue);
         KeyedEvent<VariablesCustomEvent> keyedEvent = newKeyedEvent();
 
-        publishEvent(eventBus.coldEventBus(), keyedEvent);
+        publishEvent(eventPublisher, keyedEvent);
         emulateSchedulerAction(eventBus);
         assertEquals(keyedEvent, queue.poll(3, SECONDS));
 
@@ -36,11 +43,11 @@ public class VariablesCustomEventJavaIT {
     }
 
     // Publisher side
-    private static void publishEvent(ColdEventBus eventBus, KeyedEvent<VariablesCustomEvent> keyedEvent) {
-        eventBus.publishJava(keyedEvent);
+    private static void publishEvent(EventPublisher eventPublisher, KeyedEvent<VariablesCustomEvent> keyedEvent) {
+        eventPublisher.publishCustomEvent(keyedEvent);
     }
 
-    private KeyedEvent<VariablesCustomEvent> newKeyedEvent() {
+    private static KeyedEvent<VariablesCustomEvent> newKeyedEvent() {
         Map<String,String> variables = new HashMap<>();
         variables.put("test-key", "test-variable");
         return VariablesCustomEvent.keyed("KEY", variables);

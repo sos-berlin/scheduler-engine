@@ -11,8 +11,9 @@ trait EventIdGenerating {
 
   protected val eventIdGenerator: EventIdGenerator
 
-  protected final def putEvent(keyedEvent: AnyKeyedEvent): Unit = {
-    val eventId = eventIdGenerator.next()
-    putEventSnapshot(Snapshot(eventId, keyedEvent))
-  }
+  protected final def putEvent(keyedEvent: AnyKeyedEvent): Unit =
+    synchronized {
+      val eventId = eventIdGenerator.next()
+      putEventSnapshot(Snapshot(eventId, keyedEvent))
+    }
 }

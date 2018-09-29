@@ -7,7 +7,9 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
  */
 trait Plugin extends HasCloser {
 
+  @volatile
   private var _isPrepared = false
+  @volatile
   private var _isActive = false
 
   onClose {

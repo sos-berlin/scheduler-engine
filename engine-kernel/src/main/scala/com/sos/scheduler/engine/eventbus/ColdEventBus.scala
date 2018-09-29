@@ -13,12 +13,8 @@ final class ColdEventBus extends AbstractEventBus with Runnable {
 
   private val callQueue = new LinkedBlockingQueue[Call]
 
-  def publishJava[E <: Event](e: KeyedEvent[E]): Unit =
-    publish(e)
-
-  def publish(e: KeyedEvent[Event]) {
+  def publish(e: KeyedEvent[Event]): Unit =
     publish(calls(e))
-  }
 
   private[eventbus] def publish(calls: Iterable[Call]) =
     callQueue.addAll(calls)
@@ -27,7 +23,7 @@ final class ColdEventBus extends AbstractEventBus with Runnable {
 
   def dispatchEvents(): Unit = dispatchEvents(false)
 
-  private def dispatchEvents(wait: Boolean) {
+  private def dispatchEvents(wait: Boolean): Unit = {
     while (true) {
       val call = poll(wait)
       if (call == null)

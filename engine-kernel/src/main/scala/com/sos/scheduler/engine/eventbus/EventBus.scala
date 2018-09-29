@@ -15,6 +15,9 @@ trait EventBus {
 
   def unsubscribe(o: EventSubscription): Unit
 
+  /** Not thread-safe. Not for plugin usage! */
+  def publishJava[E <: Event](e: KeyedEvent[E]): Unit =
+    publish(e)
+
   def publish(e: AnyKeyedEvent): Unit
 }
-
