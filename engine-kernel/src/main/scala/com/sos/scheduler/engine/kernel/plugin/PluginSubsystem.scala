@@ -2,6 +2,7 @@ package com.sos.scheduler.engine.kernel.plugin
 
 import com.google.common.collect.ImmutableList
 import com.google.inject.Injector
+import com.sos.scheduler.engine.base.utils.ScalaUtils
 import com.sos.scheduler.engine.common.scalautil.AssignableFrom.assignableFrom
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
@@ -66,6 +67,9 @@ extends Subsystem with HasCommandHandlers with AutoCloseable {
 
   @TestOnly
   def activatePlugin(c: Class[_ <: Plugin]): Unit = classNameToPluginAdapter(c.getName).activate()
+
+  def plugin[A <: Plugin: ClassTag]: A =
+    pluginByClass(ScalaUtils.implicitClass[A])
 
   def pluginByClass[A <: Plugin](c: Class[A]): A = classNameToPluginAdapter(c.getName).pluginInstance.asInstanceOf[A]
 
