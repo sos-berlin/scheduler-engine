@@ -82,7 +82,7 @@ extends UnmodifiableTask with Sister with EventSource {
       Some(NodeKey(JobChainPath(parts(0)), NodeId(parts(1))))
   }
 
-  private[kernel] def orderOption: Option[Order] = Option(cppProxy.order.getSister)
+  private[kernel] def orderOption: Option[Order] = Option(cppProxy.order) map (_.getSister)
 
   private[kernel] def taskId = taskIdOnce getOrUpdate TaskId(cppProxy.id)
 
