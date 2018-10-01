@@ -105,14 +105,16 @@ object ApiRoute {
     ExceptionHandler {
       case NonFatal(t) ⇒
         // These are an internally used web services, we expose internal error messages
-        val message =
-          if (ErrorCodePattern.pattern.matcher(t.getMessage).matches) {
+        val msg = t.getMessage
+        val message = {
+          if (msg != null && ErrorCodePattern.pattern.matcher(msg).matches) {
             logger.debug(t.toString, t)
-            t.getMessage
+            msg
           } else {
             logger.warn(t.toString, t)
             t.toSimplifiedString
           }
+        }
         completeWithError(BadRequest, message)
     }
   }
