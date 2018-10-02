@@ -360,7 +360,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
   val TestJobOverview = JobOverview(TestJobPath, FileBasedState.active, defaultProcessClassPath = Some(TestProcessClassPath),
     isOrderJob = true, title = "", enabled = true,
     JobState.running, stateText = "", isInPeriod = true, nextStartTime = None,
-    taskLimit = 10, usedTaskCount = 3, queuedTaskCount = 0, lateTaskCount = 0, obstacles = Set(), error = None)
+    taskLimit = 10, usedTaskCount = 3, queuedTaskCount = 0, lateTaskCount = 0, obstacles = Set.empty, taskObstacles = Map.empty, error = None)
   val XTestBJobOverview = JobOverview(XTestBJobPath, FileBasedState.incomplete, defaultProcessClassPath = Some(ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS")),
     isOrderJob = true, title = "", enabled = true,
     JobState.loaded, stateText = "", isInPeriod = false, nextStartTime = None,
@@ -373,7 +373,7 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
           MonitorPath("/xFolder/MISSING-MONITOR"),
           ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS"),
           SchedulePath("/xFolder/MISSING-SCHEDULE")))))),
-    error = None)
+    taskObstacles = Map.empty, error = None)
 
   val ExpectedOrdersComplemented = OrdersComplemented(
     ExpectedOrderOverviews,
@@ -609,7 +609,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       "isInPeriod": true,
       "defaultProcessClassPath": "/test",
       "usedTaskCount": 3,
-      "obstacles": []
+      "obstacles": [],
+      "taskObstacles": {}
     },
     {
       "path": "/xFolder/test-b",
@@ -644,7 +645,8 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
             }
           ]
         }
-      ]
+      ],
+      "taskObstacles": {}
     }
   ]"""
   val UsedTasksJson = jsonString"""[

@@ -33,6 +33,8 @@ object JobDetailed extends JobView.Companion[JobDetailed]
   final case class RunningTask(
     taskId: TaskId,
     cause: String,
+    enqueuedAt: Option[Instant],
+    startAt: Option[Instant],
     startedAt: Instant,
     pid: Option[Int],
     stepCount: Int,
@@ -42,7 +44,7 @@ object JobDetailed extends JobView.Companion[JobDetailed]
     implicit val x = FileBasedState.MyJsonFormat
     implicit val y = jsonFormat3(QueuedTask.apply)
     implicit val z = jsonFormat3(TaskOrder.apply)
-    implicit val ä = jsonFormat6(RunningTask.apply)
+    implicit val ä = jsonFormat8(RunningTask.apply)
     jsonFormat4(apply)
   }
 }

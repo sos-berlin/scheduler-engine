@@ -58,7 +58,7 @@ with JobPersistence {
       queuedTasks map { t ⇒ JobDetailed.QueuedTask(t.taskId, t.enqueuedAt, t.at) },
       runningTasks map { t ⇒
         JobDetailed.RunningTask(
-          t.taskId, t.causeString, t.startedAt.get, t.pid, t.stepCount,
+          t.taskId, t.causeString, t.enqueuedAt, t.at, t.startedAt.get, t.pid, t.stepCount,
           (t.orderOption, t.nodeKeyOption) match {
             case (Some(o), Some(n)) ⇒ Some(JobDetailed.TaskOrder(o.id, n.jobChainPath, n.nodeId))
             case _ ⇒ None
@@ -88,6 +88,7 @@ with JobPersistence {
       queuedTaskCount = cppProxy.queued_task_count,
       lateTaskCount = cppProxy.late_task_count,
       obstacles(state, isInPeriod, taskLimit, runningTasksCount),
+      tasks.map(t ⇒ t.taskId → t.obstacles).filter(_._2.nonEmpty).toMap,
       cppProxy.has_error option JobOverview.Error(cppProxy.error_code, cppProxy.error_message))
   }
 

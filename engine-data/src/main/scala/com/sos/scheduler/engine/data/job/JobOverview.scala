@@ -1,11 +1,11 @@
 package com.sos.scheduler.engine.data.job
 
+import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 import com.sos.scheduler.engine.data.filebased.FileBasedState
 import com.sos.scheduler.engine.data.processclass.ProcessClassPath
 import java.time.Instant
 import spray.json.DefaultJsonProtocol._
 import spray.json.RootJsonFormat
-import com.sos.scheduler.engine.base.sprayjson.JavaTimeJsonFormats.implicits._
 
 /**
   * @author Joacim Zschimmer
@@ -26,6 +26,7 @@ final case class JobOverview(
   queuedTaskCount: Int,
   lateTaskCount: Int,
   obstacles: Set[JobObstacle],
+  taskObstacles: Map[TaskId, Set[TaskObstacle]],
   error: Option[JobOverview.Error])
 extends JobView
 {
@@ -43,6 +44,6 @@ object JobOverview extends JobView.Companion[JobOverview] {
   implicit val jsonFormat: RootJsonFormat[JobOverview] = {
     implicit val x = FileBasedState.MyJsonFormat
     implicit val y = JobState.MyJsonFormat
-    jsonFormat16(apply)
+    jsonFormat17(apply)
   }
 }

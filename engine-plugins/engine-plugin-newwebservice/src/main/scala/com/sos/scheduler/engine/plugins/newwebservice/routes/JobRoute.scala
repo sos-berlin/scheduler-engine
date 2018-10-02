@@ -55,7 +55,7 @@ trait JobRoute {
 
   private def multipleJobsRoute(pathQuery: PathQuery): Route =
     parameter("state" ? "") { state ⇒
-      val isInJobState: JobState ⇒ Boolean = SpaceSplitter.split(state).map(JobState.valueOf).toSet match {
+      val isInJobState: JobState ⇒ Boolean = CommaSplitter.split(state).map(JobState.valueOf).toSet match {
         case o if o.isEmpty ⇒ _ ⇒ true
         case o ⇒ o.contains
       }
@@ -82,5 +82,5 @@ trait JobRoute {
 }
 
 object JobRoute {
-  private val SpaceSplitter = Splitter.on(Pattern.compile(",")).trimResults.omitEmptyStrings
+  private val CommaSplitter = Splitter.on(Pattern.compile(",")).trimResults.omitEmptyStrings
 }

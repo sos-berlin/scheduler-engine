@@ -49,7 +49,7 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def overview = TaskOverview(taskId, jobPath, state, processClassOption map { _.path }, agentAddress, obstacles)
 
-  private def obstacles: Set[TaskObstacle] = {
+  private[job] def obstacles: Set[TaskObstacle] = {
     import TaskObstacle._
     val builder = Set.newBuilder[TaskObstacle]
     state switch {
@@ -75,11 +75,12 @@ extends UnmodifiableTask with Sister with EventSource {
 
   private[kernel] def agentAddress: Option[AgentAddress] = emptyToNone(cppProxy.remote_scheduler_address) map AgentAddress.apply
 
-  private[kernel] def nodeKeyOption: Option[NodeKey] = cppProxy.node_key_string match {
-    case "" ⇒ None
-    case string ⇒
-      val parts = string split ','
-      Some(NodeKey(JobChainPath(parts(0)), NodeId(parts(1))))
+  private[kernel] def nodeKeyOption: Option[NodeKey] = {
+    val nodeKeyString = cppProxy.node_key_string
+    nodeKeyString indexOf ',' match {
+      case -1 | 0 ⇒ None
+      case n ⇒ Some(NodeKey(JobChainPath(nodeKeyString take n), NodeId(nodeKeyString drop n + 1)))
+    }
   }
 
   private[kernel] def orderOption: Option[Order] = Option(cppProxy.order) map (_.getSister)
