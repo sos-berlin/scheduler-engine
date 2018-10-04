@@ -36,13 +36,18 @@ private[jobchain] trait JobChainNodeParserAndHandler {
     returnCodeToOnReturnCode = parseNodeXml(xmlSource, namespaceToOnReturnCodeParser)
   }
 
-  def orderStateTransitionToState(t: OrderStateTransition): OrderState =
+  def orderStateTransitionToState(t: OrderStateTransition): Option[OrderState] =
     t match {
-      case KeepOrderStateTransition ⇒ orderState
+      case KeepOrderStateTransition ⇒
+        Some(orderState)
+
       case ProceedingOrderStateTransition(returnCode) ⇒
         returnCodeToOnReturnCode.lift(returnCode) match {
-          case Some(OnReturnCode(_, Some(state), _)) ⇒ state
-          case _ ⇒ if (t == SuccessOrderStateTransition) nextState else errorState
+          case Some(OnReturnCode(_, Some(state), _)) ⇒  // <to_state>
+            Some(state)
+
+          case _ ⇒
+            if (t == SuccessOrderStateTransition) Some(nextState) else None/*error*/
         }
     }
 
@@ -76,7 +81,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
               val returnCodes = RangeSet(attributeMap("return_code"))
               val actions = forEachStartElement[ReturnCodeAction] {
                 case "to_state" ⇒ parseToState()
-                case unknown ⇒
+                case _ ⇒
                   val namespace = xmlEventReader.peek.asStartElement.getName.getNamespaceURI
                   namespaceToOnReturnCodeParser(namespace) match {
                     case Some(parse) ⇒
@@ -101,7 +106,7 @@ private[jobchain] object JobChainNodeParserAndHandler {
           case class OnReturnCodes(onReturnCodes: immutable.Seq[OnReturnCode])
           val elementMap = forEachStartElement {
             case "on_return_codes" ⇒ OnReturnCodes(parseOnReturnCodes())
-            case unknown ⇒ ignoreElement(); Unit
+            case _ ⇒ ignoreElement(); Unit
           }
           NodeConfiguration(elementMap.byClass[OnReturnCodes] flatMap { _.onReturnCodes })
         }

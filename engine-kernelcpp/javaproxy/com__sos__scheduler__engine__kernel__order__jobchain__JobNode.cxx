@@ -7,6 +7,7 @@
 #include "com__sos__scheduler__engine__kernel__order__jobchain__OrderQueueNode.h"
 #include "java__lang__String.h"
 #include "org__w3c__dom__Element.h"
+#include "scala__Option.h"
 
 namespace javaproxy { namespace com { namespace sos { namespace scheduler { namespace engine { namespace kernel { namespace order { namespace jobchain { 
 

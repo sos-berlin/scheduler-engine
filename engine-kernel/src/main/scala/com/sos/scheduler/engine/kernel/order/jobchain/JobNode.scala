@@ -39,8 +39,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   @ForCpp
   def orderStateTransitionToState(cppInternalValue: Long): String =
-    orderStateTransitionToState(OrderStateTransition.ofCppInternalValue(cppInternalValue)).string
-
+    orderStateTransitionToState(OrderStateTransition.ofCppInternalValue(cppInternalValue)) map (_.string) getOrElse ""/*error_state*/
 }
 
 object JobNode {

@@ -6,7 +6,6 @@ import com.sos.scheduler.engine.common.scalautil.HasCloser
 import com.sos.scheduler.engine.common.scalautil.ScalaUtils.implicitClass
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.event.{Event, KeyedEvent}
-import com.sos.scheduler.engine.data.order.OrderKey
 import com.sos.scheduler.engine.eventbus._
 import com.sos.scheduler.engine.main.event.TerminatedEvent
 import com.sos.scheduler.engine.test.EventPipe._
@@ -27,16 +26,16 @@ extends EventHandlerAnnotated with HasCloser {
     eventBus.on[Event] { case e ⇒ queue.add(e) }
   }
 
-  def nextKeyedEvents[E <: KeyedEvent : ClassTag](orderKeys: Iterable[OrderKey]): immutable.Seq[E] = {
-    val remainingKeys = HashMultiset.create(asJavaIterable(orderKeys))
-    val events = mutable.Buffer[E]()
+  def nextKeyedEvents[E <: KeyedEvent : ClassTag](keys: Iterable[E#Key]): immutable.Seq[E] = {
+    val remainingKeys = HashMultiset.create(asJavaIterable(keys))
+    val events = mutable.Map[E#Key, E]()
     while (!remainingKeys.isEmpty) {
       val e = nextAny[E]
       if (remainingKeys.remove(e.key)) {
-        events += e
+        events += e.key → e
       }
     }
-    events.toVector
+    keys.map(events).toVector
   }
 
   def nextAny[E <: Event : ClassTag]: E = next[E]()

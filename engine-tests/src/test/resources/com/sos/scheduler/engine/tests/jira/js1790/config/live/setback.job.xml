@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     stop_on_error="false"
+     tasks="10"
+>
+    <script language="shell">
+        :;if false; then :
+        goto WINDOWS
+        fi
+
+        exit $SCHEDULER_PARAM_EXIT
+        exit
+
+        :WINDOWS
+        exit %SCHEDULER_PARAM_EXIT%
+    </script>
+    <delay_order_after_setback setback_count="1" delay="0"/>
+    <delay_order_after_setback setback_count="2" is_maximum="true"/>
+</job>

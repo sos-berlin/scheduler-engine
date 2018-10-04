@@ -2712,7 +2712,11 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
     Job_node* job_node          = Job_node::cast( _job_chain_node );
     bool      force_error_state = false;
 
+    string next_state = job_node ? job_node->next_order_state_string(state_transition) : "/UNUSED/";
     if (job_node) {
+        if (!next_state.empty()) {  // <on_return_code><to_state> ?
+            _is_success_state = true;
+        }
         job_node->typed_java_sister().onOrderStepEnded(java_sister(), state_transition.return_code());
         if (!_is_success_state  &&  job_node->is_on_error_setback()) {
             setback();
@@ -2741,7 +2745,6 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
         if( job_node )
         {
             assert( _job_chain );
-
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
                 set_suspended();  // Like processing_error()
             else
@@ -2751,7 +2754,10 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
                 handle_end_state();
             }
             else
-                set_state1(job_node->order_state(state_transition));
+            if (!next_state.empty())
+                set_state1(normalized_state(next_state));
+            else
+                set_state1(job_node->error_state());
         }
     }
     else
