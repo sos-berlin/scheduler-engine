@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
     <job_chain_node state="INIT" job="test-a" next_state="NEXT" error_state="ERROR">
         <on_return_codes>
             <on_return_code return_code="0">

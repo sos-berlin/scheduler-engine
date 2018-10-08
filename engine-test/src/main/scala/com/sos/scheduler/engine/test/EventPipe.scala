@@ -28,14 +28,14 @@ extends EventHandlerAnnotated with HasCloser {
 
   def next[E <: Event: ClassTag](keys: Iterable[E#Key]): immutable.Seq[KeyedEvent[E]] = {
     val remainingKeys = HashMultiset.create(asJavaIterable(keys))
-    val events = mutable.Buffer[KeyedEvent[E]]()
+    val events = mutable.Map[E#Key, KeyedEvent[E]]()
     while (!remainingKeys.isEmpty) {
       val e = nextAny[E]
       if (remainingKeys.remove(e.key)) {
-        events += e
+        events += e.key → e
       }
     }
-    events.toVector
+    keys.map(events).toVector
   }
 
   def next[E <: Event: ClassTag](key: E#Key, timeout: Duration = defaultTimeout): E =

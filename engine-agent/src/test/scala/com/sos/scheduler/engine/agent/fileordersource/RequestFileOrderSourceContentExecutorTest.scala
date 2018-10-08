@@ -11,7 +11,8 @@ import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.touchAndDeleteWithCloser
 import com.sos.scheduler.engine.common.scalautil.Futures._
-import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.system.OperatingSystem.{isMac, isWindows}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.nio.file.Files._
 import java.nio.file.Paths
@@ -23,6 +24,7 @@ import org.scalatest.FreeSpec
 import org.scalatest.concurrent.Futures
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.matching.Regex
 
 /**
@@ -63,7 +65,7 @@ final class RequestFileOrderSourceContentExecutorTest extends FreeSpec with Futu
         regex = Regex.quote(MatchingString),
         duration = Duration.ofMillis(Long.MaxValue),
         knownFiles = Set(knownFile.toString)))
-      val response = awaitResult(future, 10.s)
+      val response = awaitResult(future, if (isMac) MacTimeout else 10.s)
       assert(response == expectedResponse)
     }
   }
@@ -87,16 +89,36 @@ final class RequestFileOrderSourceContentExecutorTest extends FreeSpec with Futu
       assert(!future.isCompleted)
       touchAndDeleteWithCloser(file)
       setLastModifiedTime(file, FileTime.from(Timestamp))  // Sometimes, this does not take effect under Windows ???
-      awaitResult(future, 5.s)
+      awaitResult(future, if (isMac) MacTimeout else 5.s)
       val response = awaitResult(future, 10.s)
       // lastModifiedTime may be wrong ??? Anyway, JobScheduler's <file_order_source> doesn't use the timestamp.
       val bResponse = response.copy(files = response.files map { _.copy(lastModifiedTime = Timestamp.toEpochMilli) })
       assert(bResponse == expectedResponse)
     }
   }
+
+  "Ressources are released (JS-1789)" in {
+    if (isWindows)
+      pending
+    else {
+      val dir = createTempDirectory("agent-")
+      val n = 10000
+      val parallelism = 10
+      for (_ ← 1 to n / parallelism) {
+        val whenResponded = for (_ ← 1 to parallelism) yield exec(RequestFileOrderSourceContent(
+          directory = dir.toString,
+          regex = Regex.quote(MatchingString),
+          duration = 1.ms,
+          knownFiles = Set.empty))
+        assert(whenResponded.await(if (isMac) MacTimeout else 5.s) == Vector.fill(parallelism)(FileOrderSourceContent(Nil)))
+      }
+      delete(dir)
+    }
+  }
 }
 
-private object RequestFileOrderSourceContentExecutorTest{
+private object RequestFileOrderSourceContentExecutorTest {
+  private val MacTimeout = 60.s
   private val Timestamp = ZonedDateTime.of(2015, 5, 1, 12, 0, 0, 0, UTC).toInstant
   private val MatchingString = "MATCHING"
 }

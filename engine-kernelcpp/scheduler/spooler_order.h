@@ -84,11 +84,11 @@ struct Order_state_transition {
         return !(*this == o);
     }
 
-    public: bool is_success() {
+    public: bool is_success() const {
         return *this == success;
     }
 
-    public: bool is_error() {
+    public: bool is_error() const {
         return *this != success && *this != keep;
     }
 
@@ -811,7 +811,7 @@ struct Job_node : Order_queue_node,
     void                        connect_job                 ( Job* );
     void                        disconnect_job              ();
     void wake_orders();
-    Order::State order_state(const Order_state_transition&);
+    string next_order_state_string(const Order_state_transition &);
 
   private:
     friend struct               order::Job_chain;           // add_job_node()
