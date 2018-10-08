@@ -2979,8 +2979,6 @@ void Order::move_to_nested_job_chain(Job_chain* next_job_chain)
     _log->info( message_string( "SCHEDULER-862", next_job_chain->obj_name() ) );
 
     close_log_and_write_history();// Historie schreiben, aber Auftrag beibehalten
-    _start_time = Time(0);
-    _end_time = Time(0);
     open_log();
 
     Job_chain* previous_job_chain = _job_chain;
@@ -2991,6 +2989,8 @@ void Order::move_to_nested_job_chain(Job_chain* next_job_chain)
     } else {
         place_in_job_chain( next_job_chain, jc_leave_in_job_chain_stack );  // Entfernt Auftrag aus der bisherigen Jobkette
     }
+    _start_time = Time(0);
+    _end_time = Time(0);
     _outer_job_chain_path = Absolute_path( root_path, outer_job_chain_path );  // place_in_job_chain() hat's gelöscht
 
     _log->info( message_string( "SCHEDULER-863", previous_job_chain->obj_name() ) );
