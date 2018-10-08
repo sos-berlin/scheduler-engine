@@ -26,10 +26,10 @@ final class JobChainNodeParserAndHandlerTest extends FreeSpec {
     System.err.println(JobchainNodeElem.toString)
     val x = new X
     x.initializeWithNodeXml(JobchainNodeElem, Map(TestNamespace → testNamespaceParse _).lift)
-    x.orderStateTransitionToState(OrderNodeTransition.Success) shouldEqual NodeId0
-    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(1))) shouldEqual NodeId1
-    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(7))) shouldEqual NodeId7
-    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(99))) shouldEqual ErrorNodeId
+    x.orderStateTransitionToState(OrderNodeTransition.Success) shouldEqual Some(NodeId0)
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(1))) shouldEqual Some(NodeId1)
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(7))) shouldEqual Some(NodeId7)
+    x.orderStateTransitionToState(OrderNodeTransition.Error(ReturnCode(99))) shouldEqual None
     x.returnCodeToOrderFunctions(ReturnCode(0)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(1)) shouldEqual Nil
     x.returnCodeToOrderFunctions(ReturnCode(2)) shouldEqual Nil

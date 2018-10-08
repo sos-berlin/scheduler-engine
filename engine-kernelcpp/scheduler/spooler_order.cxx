@@ -1796,10 +1796,9 @@ Job* Job_node::job_or_null() const
     return _job;
 }
 
-//----------------------------------------------------------------------------Job_node::order_state
-
-Order::State Job_node::order_state(const Order_state_transition& t) {
-    return normalized_state((string)_typed_java_sister.orderStateTransitionToState(t.internal_value()));
+// Returns "" if error_state should apply.
+string Job_node::next_order_state_string(const Order_state_transition &t) {
+    return _typed_java_sister.orderStateTransitionToState(t.internal_value());
 }
 
 //-----------------------------------------------------Nested_job_chain_node::Nested_job_chain_node

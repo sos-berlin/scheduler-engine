@@ -49,7 +49,7 @@ abstract class JobNode extends OrderQueueNode with JobChainNodeParserAndHandler 
 
   @ForCpp
   private def orderStateTransitionToState(cppInternalValue: Long): String =
-    orderStateTransitionToState(OrderNodeTransition.ofCppInternalValue(cppInternalValue)).string
+    orderStateTransitionToState(OrderNodeTransition.ofCppInternalValue(cppInternalValue)) map (_.string) getOrElse ""/*error_state*/
 
   private[order] val queryable: QueryableJobNode =
     new QueryableJobNode {
