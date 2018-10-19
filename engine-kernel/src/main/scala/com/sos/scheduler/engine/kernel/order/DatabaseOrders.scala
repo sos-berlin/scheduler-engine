@@ -15,7 +15,8 @@ import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import java.io.Reader
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.defaultEncoding
+import java.io.{InputStreamReader, Reader}
 import java.sql
 import java.sql.ResultSet
 import java.time.Instant
@@ -83,7 +84,7 @@ private[order] object DatabaseOrders {
       while (resultSet.next()) {
         result.count(toQueryableOrder(
           OrderRow(resultSet),
-          autoClosing(resultSet.getClob("ORDER_XML").getCharacterStream)(OrderXmlResolved.apply)))
+          autoClosing(new InputStreamReader(resultSet.getAsciiStream("ORDER_XML"), defaultEncoding/*like C++*/))(OrderXmlResolved.apply)))
       }
       result.toImmutable
     }
