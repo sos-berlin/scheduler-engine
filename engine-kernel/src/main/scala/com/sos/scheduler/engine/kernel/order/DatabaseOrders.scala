@@ -75,16 +75,22 @@ private[order] object DatabaseOrders {
   private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String): JocOrderStatistics =
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()
-      fetchDistributedOrderStatistics(resultSet)
+      fetchDistributedOrderStatistics(connection, resultSet)
     }
 
-  private def fetchDistributedOrderStatistics(resultSet: ResultSet): JocOrderStatistics = {
+  private def fetchDistributedOrderStatistics(connection: sql.Connection, resultSet: ResultSet): JocOrderStatistics = {
     blocking {
+      val isPostgres = connection.getMetaData.getDatabaseProductName == "PostgreSQL"
       val result = new JocOrderStatistics.Mutable
       while (resultSet.next()) {
+        def newOrderXmlReader(): Reader =
+          if (isPostgres)
+            resultSet.getCharacterStream("ORDER_XML")
+          else
+            resultSet.getClob("ORDER_XML").getCharacterStream
         result.count(toQueryableOrder(
           OrderRow(resultSet),
-          autoClosing(new InputStreamReader(resultSet.getAsciiStream("ORDER_XML"), defaultEncoding/*like C++*/))(OrderXmlResolved.apply)))
+          autoClosing(newOrderXmlReader())(OrderXmlResolved.apply)))
       }
       result.toImmutable
     }
