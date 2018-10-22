@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.agent.fileordersource
 
 import com.sos.scheduler.engine.agent.fileordersource.BlockingDirectoryWatcher._
-import com.sos.scheduler.engine.common.scalautil.Closers.implicits.RichClosersAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.closeOnError
 import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import java.nio.file.StandardWatchEventKinds._
@@ -17,13 +17,29 @@ import scala.concurrent._
  *
  * @param pathMatches Predicate for a `Path` resolved against `directory`
  */
-private[fileordersource] final class BlockingDirectoryWatcher(directory: Path, pathMatches: Path ⇒ Boolean) extends HasCloser {
+private[fileordersource] final class BlockingDirectoryWatcher(directory: Path, pathMatches: Path ⇒ Boolean)
+extends HasCloser {
+  private val logPrefix = s"Watching directory $directory"
 
-  private val watchService = FileSystems.getDefault.newWatchService().closeWithCloser
+  logger.trace(s"$logPrefix FileSystems.getDefault.newWatchService()")
+  private val watchService = FileSystems.getDefault.newWatchService()
+  onClose {
+    watchService.close()
+    logger.trace(s"$logPrefix close: watchService.close() called")
+  }
 
-  directory.register(watchService, ENTRY_CREATE)
+  private val registeredWatchKey = closeOnError(closer) {
+    logger.trace(s"$logPrefix directory.register(watchService, ENTRY_CREATE)")
+    directory.register(watchService, ENTRY_CREATE)
+  }
+  onClose {
+    // Paranoid?
+    registeredWatchKey.cancel()
+    logger.trace(s"$logPrefix close: registeredWatchKey.cancel() called")
+  }
 
-  def waitForMatchingDirectoryChange(until: Instant): Unit = while (!waitForNextChange(until)) {}
+  def waitForMatchingDirectoryChange(until: Instant): Unit =
+    while (!waitForNextChange(until)) {}
 
   /**
    * Waits until any directory change.
@@ -33,9 +49,8 @@ private[fileordersource] final class BlockingDirectoryWatcher(directory: Path, p
   def waitForNextChange(until: Instant): Boolean = {
     val remainingMillis = (until - now()).toMillis
     remainingMillis <= 0 || {
-      lazy val logPrefix = s"Watching directory $directory"
-      logger.trace(s"$logPrefix for ${remainingMillis}ms ...")
       val watchKey = blocking {
+        logger.trace(s"$logPrefix watchService.poll($remainingMillis, MILLISECONDS), blocking")
         watchService.poll(remainingMillis, MILLISECONDS)
       }
       if (watchKey == null) {
@@ -45,9 +60,14 @@ private[fileordersource] final class BlockingDirectoryWatcher(directory: Path, p
         try
           watchKey.pollEvents().asInstanceOf[java.util.List[WatchEvent[Path]]] exists { event ⇒
             logger.trace(s"$logPrefix, event ${event.kind} ${event.context}")
-            event.kind == OVERFLOW || pathMatches(directory resolve event.context)
+            val result = event.kind == OVERFLOW || pathMatches(directory resolve event.context)
+            logger.trace(s"event.kind=${event.kind} result=$result")
+            result
           }
-        finally watchKey.reset()
+        finally {
+          watchKey.reset()
+          logger.trace(s"$logPrefix watchKey.reset() called")
+        }
     }
   }
 }
