@@ -14,7 +14,6 @@ import com.sos.scheduler.engine.common.scalautil.Futures._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.system.OperatingSystem.{isMac, isWindows}
 import com.sos.scheduler.engine.common.time.ScalaTime._
-import java.lang.management.ManagementFactory
 import java.nio.file.Files._
 import java.nio.file.Paths
 import java.nio.file.attribute.FileTime
