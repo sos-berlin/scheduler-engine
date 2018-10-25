@@ -203,7 +203,9 @@ struct Task : Object,
     void                        on_call                     (const job::Kill_timeout_call&);
     void on_call(const job::Process_class_available_call&);
     void on_call(const job::Task_do_something_call&);
-    
+
+    void on_waiting_for_agent();
+
     void notify_a_process_is_available();
     string                      name                        () const                                { return obj_name(); }
     virtual string              obj_name                    () const                                { return _obj_name; }
@@ -256,7 +258,7 @@ struct Task : Object,
     const Time&                 at                          () const                                { return _start_at; }
     const string                log_string                  ()                                      { return log()->as_string(); }
     const File_path             stdout_path                 () const                                { return _module_instance? _module_instance->stdout_path() : File_path(); }
-    const File_path             stderr_path                 () const                                { return _module_instance? _module_instance->stderr_path() : File_path(); }    
+    const File_path             stderr_path                 () const                                { return _module_instance? _module_instance->stderr_path() : File_path(); }
 
     public: Process_class* process_class() const {
         if (!_process_class) z::throw_xc(Z_FUNCTION);

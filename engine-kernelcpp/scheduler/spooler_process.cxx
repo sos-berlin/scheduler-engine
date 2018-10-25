@@ -781,6 +781,9 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         } else {
             log()->warn(Message_string("SCHEDULER-489"));   // "Waiting"
         }
+        if (Task* t = task()) {
+            t->on_waiting_for_agent();
+        }
     }
 
     public: void on_call(const Start_remote_task_callback& call) {

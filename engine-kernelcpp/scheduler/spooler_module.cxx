@@ -787,6 +787,9 @@ bool Module_instance::try_to_get_process(const Api_process_configuration* c)
         _process = process_class()->select_process_if_available(*c, _task? _task->log() : NULL);
         // _process wird nur von Remote_module_instance_proxy benutzt. 
         // Sonst ist _process ein Dummy, um die Zahl der Prozesse gegen max_processes der Prozessklasse zu prüfen.
+        if (Process* p = _process) {
+            p->attach_task(_task);
+        }
     }
 
     return _process != NULL;
@@ -845,6 +848,7 @@ void Module_instance::detach_process()
 {
     if( _process )
     {
+        _process->attach_task(NULL);
         process_class()->remove_process(_process);
         _process = NULL;
     }

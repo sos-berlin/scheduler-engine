@@ -48,13 +48,27 @@ struct Api_process_configuration : javabridge::has_proxy<Api_process_configurati
 /** Ein Prozess, in dem ein Module oder eine Task ablaufen kann. Kann auch ein Thread sein. */
 struct Process : zschimmer::Object, Scheduler_object {
     using Scheduler_object::obj_name;
-
+    
+    Process() :
+        _task(NULL) 
+    {}
+    
     virtual Process_id process_id() const = 0;
     virtual string short_name() const = 0;
     virtual double async_next_gmtime() = 0;
     virtual object_server::Connection* connection() const = 0;
     virtual xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&) = 0;
     virtual bool async_continue() = 0;
+
+    public: void attach_task(Task* task) {
+        _task = task; 
+    }
+    
+    protected: Task* task() const {
+        return _task;
+    } 
+    
+    private: Task* _task;
 };
 
 

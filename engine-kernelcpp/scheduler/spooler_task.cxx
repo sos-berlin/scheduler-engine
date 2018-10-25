@@ -1138,6 +1138,12 @@ void Task::on_call(const job::Task_do_something_call&) {
     do_something();
 }
 
+void Task::on_waiting_for_agent() {
+    if (_job->_history.min_steps() == 0) {
+        _history.start();
+    }
+}
+
 //----------------------------------------------------------------------Task::wake_when_longer_than
 
 void Task::wake_when_longer_than()

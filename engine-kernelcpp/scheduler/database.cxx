@@ -2142,22 +2142,24 @@ void Task_history::write( bool start )
 
 void Task_history::start()
 {
-    if( !_job_history->_history_yes )  return;
-
-    if( _task_id == _task->id() )  return;        // start() bereits gerufen
-    _task_id = _task->id();
-
-    _start_called = true;
-
-
-    try
-    {
-        write( true );
-    }
-    catch( exception& x )  
-    { 
-        _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
-        //_error = true;
+    if (!_start_called) {
+        if( !_job_history->_history_yes )  return;
+    
+        if( _task_id == _task->id() )  return;        // start() bereits gerufen
+        _task_id = _task->id();
+    
+        _start_called = true;
+    
+    
+        try
+        {
+            write( true );
+        }
+        catch( exception& x )  
+        { 
+            _task->_log->warn( message_string( "SCHEDULER-266", x ) );      // "FEHLER BEIM SCHREIBEN DER HISTORIE: "
+            //_error = true;
+        }
     }
 }
 
