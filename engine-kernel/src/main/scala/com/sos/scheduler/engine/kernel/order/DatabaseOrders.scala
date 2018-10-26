@@ -80,17 +80,11 @@ private[order] object DatabaseOrders {
 
   private def fetchDistributedOrderStatistics(connection: sql.Connection, resultSet: ResultSet): JocOrderStatistics = {
     blocking {
-      val isPostgres = connection.getMetaData.getDatabaseProductName == "PostgreSQL"
       val result = new JocOrderStatistics.Mutable
       while (resultSet.next()) {
-        def newOrderXmlReader(): Reader =
-          if (isPostgres)
-            resultSet.getCharacterStream("ORDER_XML")
-          else
-            resultSet.getClob("ORDER_XML").getCharacterStream
         result.count(toQueryableOrder(
           OrderRow(resultSet),
-          autoClosing(newOrderXmlReader())(OrderXmlResolved.apply)))
+          autoClosing(resultSet.getCharacterStream("ORDER_XML"))(OrderXmlResolved.fromReader)))
       }
       result.toImmutable
     }
@@ -146,7 +140,7 @@ private[order] object DatabaseOrders {
     sourceType: OrderSourceType)
 
   private[order] object OrderXmlResolved {
-    def apply(reader: Reader): OrderXmlResolved = {
+    def fromReader(reader: Reader): OrderXmlResolved = {
       var orderSourceType: OrderSourceType = null
       var isSuspended = false
       var isBlacklisted = false

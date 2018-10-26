@@ -17,7 +17,7 @@ final class DatabaseOrdersTest extends FreeSpec {
   "OrderXmlResolved" - {
     "Empty XML" in {
       val orderXml = <order/>
-      assert(OrderXmlResolved(new StringReader(orderXml.toString)) == OrderXmlResolved(
+      assert(OrderXmlResolved.fromReader(new StringReader(orderXml.toString)) == OrderXmlResolved(
         isSuspended = false,
         isBlacklisted = false,
         isSetback = false,
@@ -32,7 +32,7 @@ final class DatabaseOrdersTest extends FreeSpec {
             <param name="scheduler_file_path" value="PATH"/>
           </params>
         </order>
-        assert(OrderXmlResolved(new StringReader(orderXml.toString)) == OrderXmlResolved(
+        assert(OrderXmlResolved.fromReader(new StringReader(orderXml.toString)) == OrderXmlResolved(
           isSuspended = true,
           isBlacklisted = true,
           isSetback = true,
@@ -45,7 +45,7 @@ final class DatabaseOrdersTest extends FreeSpec {
         <order>
           <file_based last_write_time="2016-10-04T11:22:33Z"/>
         </order>
-      assert(OrderXmlResolved(new StringReader(orderXml.toString)) == OrderXmlResolved(
+      assert(OrderXmlResolved.fromReader(new StringReader(orderXml.toString)) == OrderXmlResolved(
         isSuspended = false,
         isBlacklisted = false,
         isSetback = false,
@@ -72,7 +72,7 @@ final class DatabaseOrdersTest extends FreeSpec {
               <log>{text}</log>
             </order>.toString
           for (_ ← 1 to 5) Stopwatch.measureTime(iterations, s"XML(${lineCount}x$lineLength)") {
-            OrderXmlResolved(new StringReader(orderXml))
+            OrderXmlResolved.fromReader(new StringReader(orderXml))
           }
         }
       }

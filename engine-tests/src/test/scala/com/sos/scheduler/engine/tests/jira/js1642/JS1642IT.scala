@@ -70,12 +70,12 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   private lazy val httpPort = findRandomFreeTcpPort()
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
-  protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
+  protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://mysql:$httpPort").closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-http-port=127.0.0.1:$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
     database = Some(
       if (sys.props contains "test.mysql")
-        HostwareDatabaseConfiguration("jdbc -class=com.mysql.jdbc.Driver -user=jobscheduler -password=jobscheduler jdbc:mysql://127.0.0.1/jobscheduler")
+        HostwareDatabaseConfiguration("jdbc -user=jobscheduler -password=jobscheduler jdbc:mysql://mysql/jobscheduler")
       else
         InMemoryDatabaseConfiguration))
   private implicit lazy val executionContext = instance[ExecutionContext]
@@ -415,6 +415,48 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
       val stopwatch = new Stopwatch
       (for (_ ← 1 to parallelFactor) yield testAllJocOrderStatisticsFuture(webSchedulerClient)) await TestTimeout
       logger.info(stopwatch.itemsPerSecondString(parallelFactor, "testAllOrderStatistics"))
+    }
+
+    "isDistributed=false" in {
+      val orderStatistics: JocOrderStatistics = fetchWebAndDirect {
+        _.jocOrderStatistics(JobChainQuery.All.copy(isDistributed = Some(false)))
+      }
+      assert(orderStatistics == JocOrderStatistics(
+        total = 7,
+        notPlanned = 0,
+        planned = 0,
+        due = 1,
+        started = 3,
+        inTask = 3,
+        inTaskProcess = 3,
+        occupiedByClusterMember = 0,
+        setback = 0,
+        waitingForResource = 0,
+        suspended = 3,
+        blacklisted = 0,
+        permanent = 6,
+        fileOrder = 0))
+    }
+
+    "isDistributed=true" in {
+      val orderStatistics: JocOrderStatistics = fetchWebAndDirect {
+        _.jocOrderStatistics(JobChainQuery.All.copy(isDistributed = Some(true)))
+      }
+      assert(orderStatistics == JocOrderStatistics(
+        total = 2,
+        notPlanned = 0,
+        planned = 0,
+        due = 2,
+        started = 0,
+        inTask = 0,
+        inTaskProcess = 0,
+        occupiedByClusterMember = 0,
+        setback = 0,
+        waitingForResource = 0,
+        suspended = 0,
+        blacklisted = 0,
+        permanent = 1,
+        fileOrder = 0))
     }
 
     s"$xFolderPath" in {

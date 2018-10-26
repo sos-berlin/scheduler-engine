@@ -128,8 +128,8 @@
                                     <artifactId>h2</artifactId>
                                 </artifactItem>
                                 <dependency>
-                                    <groupId>org.mariadb.jdbc</groupId>
-                                    <artifactId>mariadb-java-client</artifactId>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
                                 </dependency>
                                 <artifactItem>
                                     <groupId>org.postgresql</groupId>

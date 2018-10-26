@@ -24,12 +24,6 @@ final case class JocOrderStatistics(
   permanent: Int,
   fileOrder: Int)
 {
-  assert(total < 0 ||  // Negative values only to simplify tests
-         total == notPlanned + planned + due + started + suspended + blacklisted &&
-         started == inTask + occupiedByClusterMember + setback + waitingForResource &&
-         inTask >= inTaskProcess &&
-         total >= permanent + fileOrder,
-    s"$this does not sum up correctly")
 
   def +(o: JocOrderStatistics) = JocOrderStatistics(
     total = total + o.total,
