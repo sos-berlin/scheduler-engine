@@ -70,7 +70,7 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
 
   private lazy val httpPort = findRandomFreeTcpPort()
   protected lazy val directSchedulerClient = instance[DirectSchedulerClient]
-  protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://mysql:$httpPort").closeWithCloser
+  protected lazy val webSchedulerClient = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
   protected override lazy val testConfiguration = TestConfiguration(getClass,
     mainArguments = List(s"-http-port=127.0.0.1:$httpPort", "-distributed-orders", "-suppress-watchdog-thread"),
     database = Some(
