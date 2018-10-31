@@ -15,8 +15,7 @@ import com.sos.scheduler.engine.data.scheduler.{ClusterMemberId, SchedulerId}
 import com.sos.scheduler.engine.kernel.database.DatabaseSubsystem._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
-import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.defaultEncoding
-import java.io.{InputStreamReader, Reader}
+import java.io.Reader
 import java.sql
 import java.sql.ResultSet
 import java.time.Instant

@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.kernel.database
 
 import com.sos.scheduler.engine.common.concurrent.ThrottledExecutionContext
-import com.sos.scheduler.engine.common.scalautil.HasCloser
+import com.sos.scheduler.engine.common.scalautil.{HasCloser, Logger}
 import com.sos.scheduler.engine.kernel.database.JdbcConnectionPool._
 import com.typesafe.config.Config
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
@@ -26,20 +26,30 @@ extends HasCloser {
   def readOnly[A](body: sql.Connection ⇒ A): Future[A] =
     future { connection ⇒
       connection.setReadOnly(true)
-      body(connection)
+      try body(connection)
+      finally connection.rollback()
     }
 
   def future[A](body: sql.Connection ⇒ A): Future[A] =
     Future {
       blocking {
         val connection = dataSource.getConnection
-        try body(connection)
+        try {
+          if (connection.getMetaData.getDatabaseProductName startsWith "MySQL") {
+            val stmt = "set session sql_mode='ANSI_QUOTES';"
+            logger.debug(s"MySQL: $stmt")
+            connection.createStatement().execute(stmt)
+          }
+          body(connection)
+        }
         finally connection.close()
       }
     } (throttledExecutionContext)
 }
 
 object JdbcConnectionPool {
+  private val logger = Logger(getClass)
+
   private def newConnectionPool(globalConfig: Config, cppProperties: CppDatabaseProperties): HikariDataSource = {
     new HikariDataSource(toHikariConfig(globalConfig, cppProperties))
   }
