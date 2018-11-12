@@ -1,5 +1,6 @@
 package com.sos.scheduler.engine.taskserver.task.process
 
+import com.sos.scheduler.engine.base.generic.Completed
 import com.sos.scheduler.engine.base.process.ProcessSignal
 import com.sos.scheduler.engine.base.process.ProcessSignal.{SIGKILL, SIGTERM}
 import com.sos.scheduler.engine.common.process.Processes
@@ -68,15 +69,16 @@ extends HasCloser with ClosedFuture {
       }
     }
 
-  private def executeKillScript(args: Seq[String]) = Future[Unit] {
+  private def executeKillScript(args: Seq[String]): Future[Completed] = {
     logger.info("Executing kill script: " + args.mkString("  "))
     val onKillProcess = new ProcessBuilder(args).redirectOutput(INHERIT).redirectError(INHERIT).start()
     namedThreadFuture("Kill script") {
       waitForProcessTermination(onKillProcess)
-      onKillProcess.exitValue match {
-        case 0 ⇒
-        case o ⇒ logger.warn(s"Kill script '${args(0)}' has returned exit code $o")
-      }
+      val exitCode = onKillProcess.exitValue
+      val msg = s"Kill script '${args(0)}' has returned exit code $exitCode"
+      if (exitCode == 0) logger.debug(msg)
+      else logger.warn(msg)
+      Completed
     }
   }
 
