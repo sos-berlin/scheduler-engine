@@ -7,7 +7,7 @@ import com.sos.scheduler.engine.data.agent.AgentAddress
 import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersComplemented}
 import com.sos.scheduler.engine.data.event.Snapshot
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
-import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobView, TaskId, TaskOverview}
+import com.sos.scheduler.engine.data.job.{JobHistoryEntry, JobOverview, JobPath, JobView, TaskId, TaskOverview}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderProcessingState, OrderView}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath, ProcessClassView}
@@ -167,6 +167,9 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
     //val distributedStatisticsFuture = orderSubsystem.distributedOrderStatistics(distributedNodeKeys)
     orderSubsystem.nonDistributedOrderStatistics(localNodeKeys)
   }
+
+  def jobsHistory(jobPath: JobPath, limit: Int): Future[Seq[JobHistoryEntry]] =
+    jobSubsystem.jobsHistory(jobPath, limit)
 
   def jobMatches(jobPath: JobPath, query: JobQuery): Boolean =
     query.pathQuery.matches(jobPath) &&

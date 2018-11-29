@@ -10,15 +10,15 @@ import com.sos.scheduler.engine.data.queries.{JobQuery, PathQuery}
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.plugins.newwebservice.html.HtmlDirectives._
 import com.sos.scheduler.engine.plugins.newwebservice.html.WebServiceContext
+import com.sos.scheduler.engine.plugins.newwebservice.routes.JobRoute._
 import com.sos.scheduler.engine.plugins.newwebservice.routes.event.EventRoutes.{events, singleKeyEvents}
 import com.sos.scheduler.engine.plugins.newwebservice.simplegui.YamlHtmlPage.implicits.jsonToYamlHtmlPage
 import java.util.regex.Pattern
+import scala.collection.JavaConversions._
 import scala.concurrent._
 import spray.json.DefaultJsonProtocol._
 import spray.routing.Directives._
 import spray.routing._
-import JobRoute._
-import scala.collection.JavaConversions._
 
 /**
   * @author Joacim Zschimmer
@@ -43,6 +43,12 @@ trait JobRoute {
         parameter("isDistributed".as[Boolean].?) { isDistributed ⇒
           complete(
             client.jobJocOrderStatistics(jobPath, isDistributed = isDistributed))
+        }
+
+      case Some("History") ⇒
+        parameter("limit".as[Int]) { limit ⇒
+          complete(
+            client.jobsHistory(jobPath, limit))
         }
 
       case _ ⇒

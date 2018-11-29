@@ -1,14 +1,17 @@
 package com.sos.scheduler.engine.kernel.job
 
 import com.google.inject.ImplementedBy
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
 import com.sos.scheduler.engine.data.filebased.FileBasedType
-import com.sos.scheduler.engine.data.job.JobPath
+import com.sos.scheduler.engine.data.job.{JobHistoryEntry, JobPath}
 import com.sos.scheduler.engine.data.queries.JobQuery
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
 import com.sos.scheduler.engine.kernel.cppproxy.JobC
 import com.sos.scheduler.engine.kernel.filebased.FileBasedSubsystem
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobStore, HibernateTaskStore}
 import javax.persistence.EntityManagerFactory
+import scala.collection.immutable.Seq
+import scala.concurrent.Future
 
 @ImplementedBy(classOf[CppJobSubsystem])
 private[kernel] trait JobSubsystem
@@ -30,6 +33,9 @@ extends FileBasedSubsystem {
   private[job] def entityManagerFactory: EntityManagerFactory
   private[job] def jobStore: HibernateJobStore
   private[job] def taskStore: HibernateTaskStore
+
+  private[kernel] def jobsHistory(jobPath: JobPath, limit: Int): Future[Seq[JobHistoryEntry]] =
+    injector.instance[DatabaseJobs].fetchJobHistory(jobPath, limit)
 }
 
 
