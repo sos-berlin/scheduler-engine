@@ -2066,8 +2066,10 @@ void Task_history::write( bool start )
                         
                         if( int pid = _task->pid() )
                         insert[ "pid"               ] = pid;
-                        if (_task->remote_scheduler_address() != "") {
-                            insert["agent_url"] = _task->remote_scheduler_address();
+                        
+                        string agent_url = _task->remote_scheduler_address();
+                        if (agent_url != "") {
+                            insert["agent_url"] = agent_url;
                         }
 
                         ta.execute( insert, Z_FUNCTION );
@@ -2089,6 +2091,11 @@ void Task_history::write( bool start )
                         update[ "steps"      ] = _task->_step_count;
                         update[ "exit_code"  ] = _task->_exit_code;
                         update[ "error"      ] = _task->has_error();
+
+                        string agent_url = _task->remote_scheduler_address();
+                        if (agent_url != "") {
+                            update["agent_url"] = agent_url;
+                        }
 
                         if( !_task->_error.code().empty() )  update[ "error_code" ] = _task->_error.code();
                         if( !_task->_error.what().empty() )  update[ "error_text" ] = _task->_error.what().substr( 0, max_column_length );    // Für MySQL 249 statt 250. jz 7.1.04

@@ -2701,7 +2701,7 @@ Async_operation* Task::do_step__start()
 }
 
 string Task::message_726() const {
-    string a = _module_instance->remote_scheduler_address();
+    string a = remote_scheduler_address();
     string insertion = 
         a.empty() ? 
             "this JobScheduler '" + _spooler->http_url() + "'" + 

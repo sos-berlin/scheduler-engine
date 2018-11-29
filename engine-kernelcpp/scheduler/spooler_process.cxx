@@ -729,10 +729,6 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
     public: bool async_remote_start_continue(Async_operation::Continue_flags);
 
-    public: string remote_scheduler_address() {
-        return _remote_scheduler_address.as_string();
-    }
-
     friend struct Async_tcp_operation;
 
     private: Host_and_port const _remote_scheduler_address;
@@ -790,6 +786,9 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         assert(&call == +_start_remote_task_callback);
         try {
             _remote_scheduler = (StringJ)((TryJ)call.value()).get();   // get() wirft Exception, wenn call.value() ein Failure ist
+            if (Task* t = task()) {
+                t->set_remote_scheduler_address(_remote_scheduler);
+            }
             _is_started = true;
         }
         catch (exception& x) {
@@ -833,10 +832,6 @@ struct Http_remote_api_process : Abstract_remote_api_process {
         if (_clientJ) {
             _clientJ.closeRemoteTask(false);
         }
-    }
-
-    public: string remote_scheduler_address() {
-        return _remote_scheduler;
     }
 
     private: Process_class* const _process_class;

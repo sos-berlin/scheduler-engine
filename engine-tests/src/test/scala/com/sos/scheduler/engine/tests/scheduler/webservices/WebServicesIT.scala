@@ -17,6 +17,7 @@ import com.sos.scheduler.engine.data.message.MessageCode
 import com.sos.scheduler.engine.data.xmlcommands.StartJobCommand
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.SchedulerTestUtils.{startJob, startOrder}
+import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.scheduler.webservices.WebServicesIT._
@@ -37,7 +38,7 @@ import spray.json._
   * @author Joacim Zschimmer
   */
 @RunWith(classOf[JUnitRunner])
-final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
+final class WebServicesIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest
 {
   private lazy val httpPort = findRandomFreeTcpPort()
   protected override lazy val testConfiguration = TestConfiguration(getClass,
@@ -61,7 +62,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
       }
       val jsObject = client.getByUri[JsObject]("api/job/someFolder/test") await TestTimeout
       val enqueuedAt = jsObject.fields("queuedTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("enqueuedAt").asInstanceOf[JsString].value
-      val pid = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("pid").asInstanceOf[JsNumber].value
+      //val pid = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("pid").asInstanceOf[JsNumber].value
       val startAt   = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("startAt").asInstanceOf[JsString].value
       val startedAt = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("startedAt").asInstanceOf[JsString].value
       val stepCount = jsObject.fields("runningTasks").asInstanceOf[JsArray].elements(0).asJsObject.fields("stepCount").asInstanceOf[JsNumber].value
@@ -81,7 +82,8 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
             "queuedTaskCount": 1,
             "lateTaskCount": 0,
             "taskLimit": 1,
-            "obstacles": [
+            "defaultProcessClassPath": "/test-agent",
+             "obstacles": [
               {
                 "TYPE": "TaskLimitReached",
                 "limit": 1
@@ -103,7 +105,6 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
             {
               "taskId": "5",
               "cause": "order",
-              "pid": $pid,
               "startAt": "$startAt",
               "startedAt": "$startedAt",
               "stepCount": $stepCount,
@@ -202,6 +203,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
             "queuedTaskCount": 1,
             "lateTaskCount": 0,
             "taskLimit": 1,
+            "defaultProcessClassPath": "/test-agent",
             "obstacles": [],
             "taskObstacles": {}
           }
@@ -209,7 +211,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
     }
 
     "WaitingForAgent" in {
-      scheduler executeXml <job name="waiting-for-process" title="JOB TITLE" process_class="/test"><script language="shell">exit</script></job>
+      scheduler executeXml <job name="waiting-for-process" title="JOB TITLE" process_class="/missing-agent"><script language="shell">exit</script></job>
       val taskId = startJob(JobPath("/waiting-for-process")).taskId
       sleep(3.s)  // Let JobSchedule start the task
       val jsObject = client.getByUri[JsObject]("api/job/waiting-for-process?return=JobOverview") await TestTimeout
@@ -220,7 +222,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
           "fileBasedState": "active",
           "isOrderJob": false,
           "title": "JOB TITLE",
-          "defaultProcessClassPath": "/test",
+          "defaultProcessClassPath": "/missing-agent",
           "state": "running",
           "stateText": "",
           "enabled": true,
@@ -247,7 +249,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
       // JS-1806: Failed job start of /waiting-for-process is noted in history (but without error)
       val history = client.getByUri[JsArray]("api/job/someFolder/test?return=History&limit=100") await TestTimeout
       println(s"### $history")
-      val checkKeys = Set("taskId", "jobPath", "cause", "stepCount", "returnCode", "parameters", "error")
+      val checkKeys = Set("taskId", "jobPath", "cause", "agentUri", "stepCount", "returnCode", "parameters", "error")
       assert(JsArray(history.elements map (o ⇒ JsObject(o.asJsObject.fields filterKeys checkKeys))) == json"""
         [
           {
@@ -260,6 +262,7 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest
             "taskId": "5",
             "jobPath": "/someFolder/test",
             "cause": "order",
+            "agentUri": "${agentUri.string}",
             "stepCount": 1,
             "returnCode": 3,
             "parameters": {

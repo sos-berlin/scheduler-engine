@@ -270,9 +270,13 @@ struct Task : Object,
     }
 
     public: string remote_scheduler_address() const {
-        return _module_instance ? _module_instance->remote_scheduler_address() : "";
+        return _remote_scheduler_address;
     }
 
+    public: void set_remote_scheduler_address(const string& url) {
+        _remote_scheduler_address = url;
+    }
+    
     public: bool on_requisite_loaded(File_based* file_based);
 
     public: bool on_requisite_to_be_removed(File_based*) { 
@@ -499,6 +503,7 @@ struct Task : Object,
 
     private:
     TaskJ _typed_java_sister;
+    string _remote_scheduler_address;
 };
 
 //----------------------------------------------------------------------------------------Task_list
