@@ -6,8 +6,20 @@
 
 set -e
 
+#waiting time until a SIGKILL is sent after a SIGTERM
+KILL_WITHIN=15
+
 log() {
-    echo "[$1]  $2" 1>&2
+    date "+%Y-%m-%d %T,%3N %z [$1]  $2" 1>&2
+}
+
+running()
+{
+  if kill -0 $1 2>/dev/null
+  then
+    return 0
+  fi
+  return 1
 }
 
 PID=""
@@ -54,6 +66,25 @@ else
     psTree="ps ax -o pid,ppid"
 fi
 
+stopTask() {
+    if [ $KILL_WITHIN -gt 0 ]
+    then
+        log info "kill -TERM $TASK_PID  (the task process)"
+        kill -15 $TASK_PID
+        LOOP_COUNTER=0
+        while [ $LOOP_COUNTER -lt $KILL_WITHIN ]
+        do
+            if running $TASK_PID
+            then
+                LOOP_COUNTER=`expr ${LOOP_COUNTER} + 1`
+                sleep 1
+            else
+                break
+            fi
+        done
+    fi
+}
+
 collectAndStopAllPids() {
     # First stop all processes to inhibit quickly forking parent from producing children between child killing and parent killing
     # $1: Parent PID
@@ -66,11 +97,20 @@ collectAndStopAllPids() {
     done
 }
 
-collectAndStopAllPids "$TASK_PID"
+
+stopTask
+if running $TASK_PID
+then
+  collectAndStopAllPids "$TASK_PID"
+fi
 
 exitCode=0
-log info "kill -KILL $TASK_PID  (the task process)"
-kill -KILL $TASK_PID || exitCode=1
+
+if running $TASK_PID
+then
+  log info "kill -KILL $TASK_PID  (the task process)"
+  kill -KILL $TASK_PID || exitCode=1
+fi
 
 for pid in $descendants; do
     log info "kill -KILL $pid"
