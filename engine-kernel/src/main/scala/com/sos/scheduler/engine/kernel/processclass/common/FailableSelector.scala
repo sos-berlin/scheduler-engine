@@ -26,9 +26,9 @@ class FailableSelector[Failable, Result](
   @volatile private[this] var timedCall: TimedCall[Unit] = null
   @volatile private[this] var selected: Option[Failable] = None
   @volatile private[this] var cancelled = false
-  private[this] val promise = Promise[(Failable, Result)]()
+  private[this] val promise = Promise[(Failable, Try[Result])]()
 
-  final def start(): Future[(Failable, Result)] = {
+  final def start(): Future[(Failable, Try[Result])] = {
     val connectUntil = connectionTimeout map now.+
     if (timedCall != null) throw new IllegalStateException("Single start only")
     def loopUntilConnected(): Unit = {
@@ -41,26 +41,26 @@ class FailableSelector[Failable, Result](
         catchInFuture { callbacks.apply(failable).appendCurrentStackTrace } onComplete {
           case Success(Success(result)) ⇒
             failables.clearFailure(failable)
-            promise.success(failable → result)
+            promise.success(failable → Success(result))
           case x if cancelled ⇒
             logger.debug(s"$x")
-            promise.failure(new CancelledException)
+            promise.success(failable → Failure(new CancelledException))
           case Success(Failure(ExpectedException(e))) ⇒
-            promise.failure(e)
+            promise.success(failable → Failure(e))
           case Success(Failure(throwable)) ⇒
             failables.setFailure(failable, throwable)
             if (connectUntil exists (now >= _)) {
               logger.debug(s"Failing after connectionTimeout=${connectionTimeout.get.pretty}")
-              promise.failure(throwable)
+              promise.success(failable → Failure(throwable))
             } else {
               loopUntilConnected()  // Tolerated failure
             }
           case f @ Failure(_: TimedCall.CancelledException) ⇒
             logger.debug(s"$f")
-            promise.failure(new CancelledException)
+            promise.success(failable → Failure(new CancelledException))
           case Failure(throwable) ⇒ // Failure lets abort FailableSelector
             failables.setFailure(failable, throwable)
-            promise.failure(throwable)
+            promise.success(failable → Failure(throwable))
         }
       })
       callQueue.add(t)
@@ -70,7 +70,7 @@ class FailableSelector[Failable, Result](
           case _: TimedCall.CancelledException ⇒ new CancelledException
           case _ ⇒ throwable
         }
-        promise.tryFailure(x)
+        promise.trySuccess(failable → Failure(x))
       }
     }
     loopUntilConnected()

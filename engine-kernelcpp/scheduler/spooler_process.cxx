@@ -742,7 +742,7 @@ struct Tcp_remote_api_process : Abstract_remote_api_process {
 
 
 struct Http_remote_api_process;
-DEFINE_SIMPLE_CALL(Http_remote_api_process , Start_remote_task_callback)
+DEFINE_SIMPLE_CALL(Http_remote_api_process, Start_remote_task_callback)
 DEFINE_SIMPLE_CALL(Http_remote_api_process, Waiting_callback)
 
 struct Http_remote_api_process : Abstract_remote_api_process {
@@ -785,10 +785,12 @@ struct Http_remote_api_process : Abstract_remote_api_process {
     public: void on_call(const Start_remote_task_callback& call) {
         assert(&call == +_start_remote_task_callback);
         try {
-            _remote_scheduler = (StringJ)((TryJ)call.value()).get();   // get() wirft Exception, wenn call.value() ein Failure ist
+            StartResultJ startResult = (StartResultJ)call.value(); 
+            _remote_scheduler = (StringJ)startResult.agentUri(); 
             if (Task* t = task()) {
                 t->set_remote_scheduler_address(_remote_scheduler);
             }
+            startResult.result().get();   // get() wirft Exception, wenn call.value() ein Failure ist
             _is_started = true;
         }
         catch (exception& x) {
