@@ -1,5 +1,7 @@
 package com.sos.scheduler.engine.tests.jira.js1483
 
+import com.sos.scheduler.engine.common.guice.GuiceImplicits.RichInjector
+import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.soslicense.LicenseKeyParameterIsMissingException
@@ -8,6 +10,8 @@ import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.time.Stopwatch
 import com.sos.scheduler.engine.common.time.WaitForCondition.waitForCondition
 import com.sos.scheduler.engine.data.job.{JobPath, JobState}
+import com.sos.scheduler.engine.kernel.database.JdbcConnectionPool
+import com.sos.scheduler.engine.kernel.scheduler.SchedulerConfiguration
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
 import com.sos.scheduler.engine.test.agent.AgentWithSchedulerTest
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
@@ -41,10 +45,26 @@ final class JS1483IT extends FreeSpec with ScalaSchedulerTest with AgentWithSche
     val firstRun = startJob(SleepJobPath)
     awaitSuccess(firstRun.started)
     controller.toleratingErrorCodes(_ ⇒ true) {
-      startJob(TestJobPath)
+      val taskId = startJob(TestJobPath).taskId
       waitForCondition(TestTimeout, 100.ms) { jobOverview(TestJobPath).state == JobState.stopped }
       assert(job(TestJobPath).stateText startsWith classOf[LicenseKeyParameterIsMissingException].getSimpleName)
       assert(job(TestJobPath).stateText contains "No license key provided by master to execute jobs in parallel")
+
+      injector.instance[JdbcConnectionPool].readOnly { connection ⇒
+        val table = injector.instance[SchedulerConfiguration].jobHistoryTableName
+        val sql = s"""select "ID", "JOB_NAME", "AGENT_URL", "ERROR" from $table where "ID"=?"""
+        autoClosing(connection.prepareStatement(sql)) { stmt ⇒
+          stmt.setInt(1, taskId.number)
+          val resultSet = stmt.executeQuery()
+          if (!resultSet.next()) fail(s"Missing record in $table for $taskId")
+          logger.info(s"ID=${resultSet.getInt("ID")} JOB_NAME=${resultSet.getString("JOB_NAME")} ERROR=${resultSet.getBoolean("ERROR")} AGENT_URL=${resultSet.getString("AGENT_URL")}")
+          assert(resultSet.getInt("ID") == taskId.number)
+          assert(resultSet.getString("JOB_NAME") == TestJobPath.withoutStartingSlash)
+          assert(resultSet.getBoolean("ERROR"))
+          assert(resultSet.getString("AGENT_URL") == agentUri.string)
+        }
+      } await 99.s
+
       scheduler executeXml <kill_task job="/test-sleep" id={firstRun.taskId.string} immediately="true"/>
       awaitSuccess(firstRun.closed)
     }
