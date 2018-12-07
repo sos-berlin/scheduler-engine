@@ -245,55 +245,71 @@ final class WebServicesIT extends FreeSpec with ScalaSchedulerTest with AgentWit
         }""")
     }
 
-    "api/job/someFolder/test?return=History&limit=100" in {
-      // JS-1806: Failed job start of /waiting-for-process is noted in history (but without error)
-      val history = client.getByUri[JsArray]("api/job/someFolder/test?return=History&limit=100") await TestTimeout
-      println(s"### $history")
-      val checkKeys = Set("taskId", "jobPath", "cause", "agentUri", "stepCount", "returnCode", "parameters", "error")
-      assert(JsArray(history.elements map (o ⇒ JsObject(o.asJsObject.fields filterKeys checkKeys))) == json"""
-        [
-          {
-            "taskId": "6",
-            "jobPath": "/waiting-for-process",
-            "cause": "queue_at",
-            "stepCount": 0,
-            "returnCode": 0
-          }, {
-            "taskId": "5",
-            "jobPath": "/someFolder/test",
-            "cause": "order",
-            "agentUri": "${agentUri.string}",
-            "stepCount": 1,
-            "returnCode": 3,
-            "parameters": {
-              "JOB-PARAM": "JOB-VALUE"
-             },
-            "error": {
-              "code": "SCHEDULER-280",
-              "message": "SCHEDULER-280  Process terminated with exit code 3 (0x3)"
+    "api/job/...?return=History" - {
+      "api/job/waiting-for-process?return=History&limit=100" in {
+        // JS-1806: Failed job start of /waiting-for-process is noted in history (but without error)
+        val history = client.getByUri[JsArray]("api/job/waiting-for-process?return=History&limit=100") await TestTimeout
+        val checkKeys = Set("taskId", "jobPath", "cause", "agentUri", "stepCount", "returnCode", "parameters", "error")
+        assert(JsArray(history.elements map (o ⇒ JsObject(o.asJsObject.fields filterKeys checkKeys))) == json"""
+          [
+            {
+              "taskId": "6",
+              "jobPath": "/waiting-for-process",
+              "cause": "queue_at",
+              "stepCount": 0,
+              "returnCode": 0
             }
-          }, {
-            "taskId": "3",
-            "jobPath": "/someFolder/error",
-            "cause": "queue_at",
-            "stepCount": 1,
-            "returnCode": 7,
-            "error": {
-              "code": "SCHEDULER-280",
-              "message": "SCHEDULER-280  Process terminated with exit code 7 (0x7)"
-            }
-          }, {
-            "taskId": "2",
-            "jobPath": "/(Spooler)",
-            "stepCount": 0,
-            "returnCode": 0
-          }
-        ]""")
-      for (h ← history.elements) {
-        assert(h.asJsObject.fields("startedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
-        h.asJsObject.fields("pid").asInstanceOf[JsNumber].value.toLongExact
+          ]""")
       }
-      assert(history.elements(1).asJsObject.fields("endedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
+
+      "api/job/someFolder/test?return=History&limit=100" in {
+        // JS-1806: Failed job start of /waiting-for-process is noted in history (but without error)
+        val history = client.getByUri[JsArray]("api/job/someFolder/test?return=History&limit=100") await TestTimeout
+        val checkKeys = Set("taskId", "jobPath", "cause", "agentUri", "stepCount", "returnCode", "parameters", "error")
+        assert(JsArray(history.elements map (o ⇒ JsObject(o.asJsObject.fields filterKeys checkKeys))) == json"""
+          [
+            {
+              "taskId": "5",
+              "jobPath": "/someFolder/test",
+              "cause": "order",
+              "agentUri": "${agentUri.string}",
+              "stepCount": 1,
+              "returnCode": 3,
+              "parameters": {
+                "JOB-PARAM": "JOB-VALUE"
+               },
+              "error": {
+                "code": "SCHEDULER-280",
+                "message": "SCHEDULER-280  Process terminated with exit code 3 (0x3)"
+              }
+            }
+          ]""")
+        assert(history.elements(0).asJsObject.fields("startedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
+        history.elements(0).asJsObject.fields("pid").asInstanceOf[JsNumber].value.toLongExact
+        assert(history.elements(0).asJsObject.fields("endedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
+      }
+
+      "api/job/someFolder/error?return=History&limit=100" in {
+        val history = client.getByUri[JsArray]("api/job/someFolder/error?return=History&limit=100") await TestTimeout
+        val checkKeys = Set("taskId", "jobPath", "cause", "agentUri", "stepCount", "returnCode", "parameters", "error")
+        assert(JsArray(history.elements map (o ⇒ JsObject(o.asJsObject.fields filterKeys checkKeys))) == json"""
+          [
+            {
+              "taskId": "3",
+              "jobPath": "/someFolder/error",
+              "cause": "queue_at",
+              "stepCount": 1,
+              "returnCode": 7,
+              "error": {
+                "code": "SCHEDULER-280",
+                "message": "SCHEDULER-280  Process terminated with exit code 7 (0x7)"
+              }
+            }
+          ]""")
+        assert(history.elements(0).asJsObject.fields("startedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
+        history.elements(0).asJsObject.fields("pid").asInstanceOf[JsNumber].value.toLongExact
+        assert(history.elements(0).asJsObject.fields("endedAt").asInstanceOf[JsString].value matches """\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z""" )
+      }
     }
   }
 
