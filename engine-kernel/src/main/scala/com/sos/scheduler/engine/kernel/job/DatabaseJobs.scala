@@ -41,7 +41,9 @@ private[job] final class DatabaseJobs @Inject private(
     select ++= """"ID", "JOB_NAME", "START_TIME", "END_TIME", "CAUSE", "CLUSTER_MEMBER_ID", "STEPS", "EXIT_CODE", "PID", "AGENT_URL", "PARAMETERS", "ERROR", "ERROR_CODE", "ERROR_TEXT" """
     select ++= " from "
     select ++= schedulerConfiguration.jobHistoryTableName
-    select ++= """  where "SPOOLER_ID"="""
+    select ++= """  where "JOB_NAME"="""
+    select ++= DatabaseSubsystem.quoteSqlString(jobPath.withoutStartingSlash)
+    select ++= """ and "SPOOLER_ID"="""
     select ++= DatabaseSubsystem.quoteSqlString(schedulerId.string.substitute("", "-"))
     select ++= """ order by "ID" desc"""
     inSchedulerThread {
@@ -78,12 +80,10 @@ private[job] object DatabaseJobs {
             pid             = Option(resultSet.getInt(9)),
             agentUri        = Option(resultSet.getString(10)),
             parameters      = Option(resultSet.getString(11)) map VariableSets.parseXml,
-            error = {
-              Option(resultSet.getBoolean(12)) filter identity map (_ ⇒
-                JobOverview.Error(
-                  code = Option(resultSet.getString(13)) getOrElse "",
-                  message = Option(resultSet.getString(14)) getOrElse ""))
-            })
+            error           = Option(resultSet.getBoolean(12)) filter identity map (_ ⇒
+                                JobOverview.Error(
+                                  code = Option(resultSet.getString(13)) getOrElse "",
+                                  message = Option(resultSet.getString(14)) getOrElse "")))
         }
       }
     }
