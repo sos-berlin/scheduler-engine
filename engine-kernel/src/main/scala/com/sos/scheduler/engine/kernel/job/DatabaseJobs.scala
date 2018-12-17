@@ -71,7 +71,7 @@ private[job] object DatabaseJobs {
           builder += JobHistoryEntry(
             taskId          = Option(resultSet.getInt(1)) map TaskId.apply,
             jobPath         = JobPath.makeAbsolute(readNonNull("JOB_NAME", resultSet.getString)),
-            startedAt       = dateToInstant(readNonNull("START_TIME", resultSet.getDate)),
+            startedAt       = dateToInstant(readNonNull("START_TIME", resultSet.getTimestamp)),
             endedAt         = Option(resultSet.getTimestamp(4)) map dateToInstant,
             cause           = Option(resultSet.getString(5)),
             clusterMemberId = Option(resultSet.getString(6)) map ClusterMemberId.apply,

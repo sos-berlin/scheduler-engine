@@ -118,7 +118,7 @@ private[order] object DatabaseOrders {
   private object OrderRow {
     def apply(resultSet: ResultSet) = {
       val orderKey = JobChainPath("/" + resultSet.getString("JOB_CHAIN")) orderKey "" + resultSet.getString("ID")
-      val distributedNextTime = Option(resultSet.getDate("DISTRIBUTED_NEXT_TIME")) map dateToInstant
+      val distributedNextTime = Option(resultSet.getTimestamp("DISTRIBUTED_NEXT_TIME")) map dateToInstant
       val resolvedDistributedNextTime = resolveDatabaseDistributedNextTime(distributedNextTime)
       val occupiedByClusterMember = Option(resultSet.getString("occupying_cluster_member_id")) map ClusterMemberId.apply
       new OrderRow(
