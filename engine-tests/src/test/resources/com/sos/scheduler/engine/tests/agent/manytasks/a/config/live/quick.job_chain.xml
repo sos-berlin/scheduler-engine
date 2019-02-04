@@ -3,6 +3,6 @@
            xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
            process_class="/test-agent"
 >
-    <job_chain_node state="100" job="/test"/>
+    <job_chain_node state="100" job="/quick"/>
     <job_chain_node.end state="END"/>
 </job_chain>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     tasks="1000"
+>
+    <script language="shell">
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        # Time longer then keep-alive time of Master/Agent tunnel
+        sleep 70
+        exit
+
+        :WINDOWS
+        ping -n 71 127.0.0.1 >nul
+    </script>
+</job>

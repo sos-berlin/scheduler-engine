@@ -21,7 +21,7 @@ import java.nio.file.Files.delete
 import java.nio.file.Path
 import org.jetbrains.annotations.TestOnly
 import scala.collection.JavaConversions._
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise, blocking}
 import scala.util.control.NonFatal
 
 /**
@@ -93,7 +93,9 @@ extends HasCloser with ClosedFuture {
   private[task] final def isAlive = process.isAlive
 
   final def waitForTermination(): ReturnCode = {
-    waitForProcessTermination(process)
+    blocking {
+      waitForProcessTermination(process)
+    }
     ReturnCode(process.exitValue)
   }
 

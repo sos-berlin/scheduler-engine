@@ -22,19 +22,27 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class ManyAgentTasksIT extends FreeSpec with ScalaSchedulerTest with AgentWithSchedulerTest {
 
-  "ManyTasks" in {
-    val n = if (sys.props contains "test.speed") 1000 else 100
+  private val n = sys.props.get("ManyAgentTasksIT").fold(100)(_.toInt)
+
+  "Many quick tasks" in {
+    testOrders(JobChainPath("/quick"))
+  }
+
+  "Many slow and parallel tasks" in {
+    testOrders(JobChainPath("/one-minute"))
+  }
+
+  private def testOrders(jobChainPath: JobChainPath): Unit = {
     scheduler executeXml <process_class name={AgentProcessClassPath.withoutStartingSlash} remote_scheduler={agentUri} max_processes={n.toString}/>
-    val stopwatch = new Stopwatch
     val orderIds = for (i ← 1 to n) yield OrderId(s"ORDER-$i")
+    val stopwatch = new Stopwatch
     (for (orderId ← orderIds) yield
-      startOrder(OrderCommand(TestJobChainPath orderKey orderId)).result
+      startOrder(OrderCommand(jobChainPath orderKey orderId)).result
     ) await 600.s
-    logger.info(stopwatch.itemsPerSecondString(n, "order"))
+    logger.info(jobChainPath.withoutStartingSlash + " " + stopwatch.itemsPerSecondString(n, "order"))
   }
 }
 
 private object ManyAgentTasksIT {
-  private val TestJobChainPath = JobChainPath("/test")
   private val logger = Logger(getClass)
 }
