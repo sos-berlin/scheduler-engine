@@ -35,6 +35,7 @@ import spray.httpx.encoding.Gzip
 import spray.httpx.marshalling.Marshaller
 import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
+import spray.json.JsValue
 
 /**
  * Client for JobScheduler Agent.
@@ -187,6 +188,9 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
 
   final def getByUri[A: FromResponseUnmarshaller](relativeUri: String, accept: MediaType = `application/json`): Future[A] =
     get[A](_.uriString(relativeUri), accept)
+
+  final def postByUri[A: Marshaller, B: FromResponseUnmarshaller](relativeUri: String, data: A): Future[B] =
+    post[A, B](_.uriString(relativeUri), data)
 
   final def get[A: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, accept: MediaType = `application/json`): Future[A] =
     if (accept == `application/json`)
