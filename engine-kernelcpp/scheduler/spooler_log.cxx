@@ -402,25 +402,29 @@ void Log::write( Log_level level, Prefix_log* extra_log, Prefix_log* order_log, 
 
     if( len > 0 )
     {
-        if( _file != -1  && 
-            ( !_spooler->_log_to_stderr ||  _file != fileno(stderr) ) )     // Nicht doppelt nach stderr schreiben
-        {
-            int ret = my_write( _spooler, _filename, _file, text, len );
-            if( ret != len )  
+        if (!(extra_log && extra_log->_task) && !order_log) {
+            if( _file != -1  && 
+                ( !_spooler->_log_to_stderr ||  _file != fileno(stderr) ) )     // Nicht doppelt nach stderr schreiben
             {
-                _err_no = errno;
-                throw_errno( errno, "write", _filename.c_str() );
+                int ret = my_write( _spooler, _filename, _file, text, len );
+                if( ret != len )  
+                {
+                    _err_no = errno;
+                    throw_errno( errno, "write", _filename.c_str() );
+                }
             }
-        }
-        else
-        {
-            _log_buffer.append( text, len );  // Das ist derselbe Mechanismus wie in Prefix_log. Das könnte man zusammenfassen.
+            else
+            {
+                _log_buffer.append( text, len );  // Das ist derselbe Mechanismus wie in Prefix_log. Das könnte man zusammenfassen.
+            }
+            if (_spooler->_log_to_stderr && level >= _spooler->_log_to_stderr_level) {
+                my_write(_spooler, "(stderr)", fileno(stderr), text, len);
+            }
         }
 
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
 
-        if( _spooler->_log_to_stderr  &&  level >= _spooler->_log_to_stderr_level )  my_write( _spooler, "(stderr)", fileno(stderr), text, len );
         if (_corresponding_prefix_log) _corresponding_prefix_log->on_logged();
     }
 }
@@ -509,7 +513,9 @@ void Log::log2( Log_level level, bool log_to_files, const string& prefix, const 
             if (log_to_files) {
                 write(level, extra_log, order_log, time_buffer, int_strlen(time_buffer));   // Zeit
                 write(level, extra_log, order_log, level_buffer, level_len);            // [info]
-                write(level, NULL, order_log, prefix_string);                           // (Job ...)
+                if (!(extra_log && extra_log->_task)) {
+                    write(level, NULL, order_log, prefix_string);                           // (Job ...)
+                }
                 write(level, extra_log, order_log, line.c_str() + begin, int_cast(len));    // Text
                 write(level, extra_log, order_log, line_end.data(), int_cast(line_end.length())); // "\n"
             }
