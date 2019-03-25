@@ -12,4 +12,6 @@ trait Event {
     * The type of the key in [[KeyedEvent]] or [[KeyedEvent.NoKey]].
     */
   type Key
+
+  final def <-:(key: Key) = new KeyedEvent[this.type](key, this)
 }
