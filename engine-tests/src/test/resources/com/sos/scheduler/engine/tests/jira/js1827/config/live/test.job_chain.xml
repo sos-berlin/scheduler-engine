@@ -2,6 +2,6 @@
 <job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
 >
-  <job_chain_node state="100" job="test"/>
+  <job_chain_node state="100" job="/test"/>
   <job_chain_node.end state="END"/>
 </job_chain>

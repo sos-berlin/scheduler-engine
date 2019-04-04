@@ -127,7 +127,7 @@ with JobPersistence {
 
   private lazy val isOrderControlled = cppProxy.is_order_controlled
 
-  private[kernel] lazy val nodeKeys: Set[NodeKey] =
+  private[kernel] def nodeKeys: Set[NodeKey] =
     cppProxy.java_node_keys
       .map { string ⇒
         val parts = string split ','
