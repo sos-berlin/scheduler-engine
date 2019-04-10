@@ -570,9 +570,6 @@ void Vm::start()
 #       endif
     }
 
-    _options.push_back( Option( "-Xfuture"        ) );  // Perform strict class-file format checks.
-    _options.push_back( Option( "-XX:+UseAltSigs" ) );  // Statt SIGUSR1 und SIGUSR2 soll Java andere Signale (welche?) benutzen. Relevant to Solaris only.
-  //_options.push_back( Option( "-Xnocatch"       ) );  // disable the catch all signal handler
 
 //#   ifdef Z_UNIX
     _options.push_back( Option( "-Xrs"            ) );  // signal masks for SIGINT, SIGTERM, SIGHUP, and SIGQUIT are not changed by the JVM, and signal handlers for these signals are not installed
