@@ -3387,6 +3387,8 @@ Job_chain* Job_chain::on_replace_now()
 
     if( !replacement()         )  assert(0), z::throw_xc( Z_FUNCTION, obj_name() );
     if( !can_be_replaced_now() )  assert(0), z::throw_xc( Z_FUNCTION, obj_name(), "!can_be_removed_now" );
+    
+    bool first_node_changed = first_node() != replacement()->first_node();
 
     //2012-10-29 Sollte hier nicht der Zustand zurückgeladen werden? Etwa so: replacement()->database_record_load(...);
     Z_FOR_EACH( Node_list, replacement()->_node_list, it )
@@ -3403,7 +3405,11 @@ Job_chain* Job_chain::on_replace_now()
                     ptr<Order> order = *it;
 
                     // dateibasierte Aufträge des lokalen Standing_order_subsystems werden unten behandelt
-                    if (!_spooler->standing_order_subsystem()->order_or_null(path(), order->id().as_string())) {
+                    if (!first_node_changed || 
+                        !_spooler->standing_order_subsystem()->order_or_null(path(), order->id().as_string()) ||
+                        order->is_touched() || 
+                        order->string_state() != first_node()->string_order_state())
+                    {
                         remove_order(order);
                         replacement()->add_order(order);
                     }
@@ -3413,15 +3419,18 @@ Job_chain* Job_chain::on_replace_now()
     }
 
     // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
-    // Alle dateibasierten Aufträge entfernen:
+    // JS-1326 When the first node has changed, non-started permanent order are replaced, too
     string normalized_job_chain_path = order_subsystem()->normalized_path(path());
     
 
     bool is_nesting = contains_nested_job_chains();
-    if (!is_nesting) {
+    if (!is_nesting && first_node_changed) {
+        // Zunächst alle nicht gestarteten, am Anfang stehenden, permanente Aufträge entfernen:
         Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
             Order* o = i->second;
-            if (o->_job_chain && order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
+            if (o->_job_chain && order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path &&
+                !o->is_touched() && o->string_state() == first_node()->string_order_state())
+            {
                 remove_order(o);
             }
         }
@@ -3429,12 +3438,14 @@ Job_chain* Job_chain::on_replace_now()
 
     close();
 
-    if (!is_nesting) {
+    if (!is_nesting && first_node_changed) {
         // JS-1281 When a job chain has been replaced, the permanent orders are replaced, too
-        // Alle dateibasierten Aufträge zum neu laden markieren:
+        // Alle nicht gestarteten, am Anfang stehenden, permanente Aufträge als "erneut zu laden" markieren:
         Z_FOR_EACH_CONST(Standing_order_subsystem::File_based_map, _spooler->standing_order_subsystem()->_file_based_map, i) {
             Order* o = i->second;
-            if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path) {
+            if (order_subsystem()->normalized_path(o->_file_based_job_chain_path) == normalized_job_chain_path &&
+                !o->is_touched() && o->string_state() == first_node()->string_order_state()) 
+            {
                 assert(!o->_job_chain);
                 o->set_force_file_reread();
             }
