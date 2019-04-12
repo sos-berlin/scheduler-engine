@@ -3071,7 +3071,22 @@ void Order::prepare_for_next_roundtrip() {
 
 void Order::restore_initial_settings() {
     if (is_in_folder() && !_spooler->settings()->_keep_order_content_on_reschedule) {  // Paranoid
-        _payload = _original_params? _original_params->clone() : NULL;
+        if (Order *o = _spooler->standing_order_subsystem()->order_or_null(_job_chain_path, _id.as_string())) {
+            try {  
+                xml::Element_ptr rootElement = xml::Document_ptr::from_xml_string(o->source_xml_bytes()).documentElement();
+                _payload = (IDispatch*)NULL;
+                DOM_FOR_EACH_ELEMENT(rootElement, e) {
+                    if (e.nodeName_is("params")) {
+                        set_params(e, &_spooler->_variable_set_map);
+                    }
+                }
+                return;  // OKAY!
+            } catch (exception & x){
+                log()->error(S() << x.what() << " - when reloading original parameters");
+            }
+        }
+        
+        _payload = _original_params ? _original_params->clone() : NULL;
     }
 }
 
