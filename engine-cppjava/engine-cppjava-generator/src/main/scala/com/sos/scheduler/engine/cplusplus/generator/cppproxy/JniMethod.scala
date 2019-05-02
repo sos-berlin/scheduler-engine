@@ -44,8 +44,7 @@ final class JniMethod(jniModule: JniModule, m: ProcedureSignature) {
     if (isClass(p.typ))
       if (classOf[CppProxy] isAssignableFrom p.typ)
         cppObjectByReference(CppName(p.typ), p.name)
-      else
-      if (classIsIntArray(p.typ))
+      else if (classIsIntArray(p.typ) ||classIsLongArray(p.typ))
         p.name
       else
         cppJavaClassName(p.typ) + "(" + p.name + ")"

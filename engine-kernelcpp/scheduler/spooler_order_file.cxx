@@ -184,6 +184,44 @@ struct Directory_file_order_source : Directory_file_order_source_interface, Depe
     public:
     Prefix_log* log() const { return Directory_file_order_source_interface::log(); }
 
+    public: const string& java_directory() const {
+       return _path;
+    }
+    
+    public: const string& java_regex() const {
+        return _regex_string; 
+    }
+    
+    public: int64 java_repeat_millis() const {
+        return _repeat.millis();
+    }
+    
+    public: int64 java_delay_after_error_millis() const {
+        return _delay_after_error.millis();
+    }
+    
+    public: bool java_alert_when_directory_missing() const {
+        return _alert_when_directory_missing;
+    }
+    
+    public: vector<string> java_files() const {
+        vector<string> result;
+        result.reserve(_new_files.size());
+        Z_FOR_EACH_CONST(vector< ptr<zschimmer::file::File_info> >, _new_files, it) {
+            if (*it) result.push_back((*it)->path());
+        }
+        return result;
+    }
+
+    public: vector<int64> java_files_last_modified() const {
+        vector<int64> result;
+        result.reserve(_new_files.size());
+        Z_FOR_EACH_CONST(vector< ptr<zschimmer::file::File_info> >, _new_files, it) {
+            if (*it) result.push_back((*it)->last_write_time());
+        }
+        return result;
+    }
+
   private:
     void                        send_mail               ( Scheduler_event_type, const exception* );
     void                        start_or_continue_notification( bool was_notified );

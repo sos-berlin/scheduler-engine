@@ -25,7 +25,7 @@ extends FileBasedSubsystemClient {
 
   def overview(path: companion.Path): JobChainOverview = inSchedulerThread { subsystem.fileBased(path).overview }
 
-  def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).details }
+  def detailed(path: companion.Path): JobChainDetailed = inSchedulerThread { subsystem.fileBased(path).detailed }
 
   @deprecated("Avoid direct access to C++ near objects")
   def jobChain(path: JobChainPath): JobChain = fileBased(path)

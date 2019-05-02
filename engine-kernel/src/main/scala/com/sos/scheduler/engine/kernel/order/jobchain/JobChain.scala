@@ -4,6 +4,7 @@ import com.google.inject.Injector
 import com.sos.scheduler.engine.base.utils.ScalaUtils._
 import com.sos.scheduler.engine.common.guice.GuiceImplicits._
 import com.sos.scheduler.engine.common.scalautil.Collections.emptyToNone
+import com.sos.scheduler.engine.common.time.ScalaTime.RichDuration
 import com.sos.scheduler.engine.cplusplus.runtime.annotation.ForCpp
 import com.sos.scheduler.engine.cplusplus.runtime.{CppProxyWithSister, Sister, SisterType}
 import com.sos.scheduler.engine.data.filebased.FileBasedType
@@ -18,14 +19,18 @@ import com.sos.scheduler.engine.kernel.cppproxy.{Job_chainC, OrderC}
 import com.sos.scheduler.engine.kernel.filebased.FileBased
 import com.sos.scheduler.engine.kernel.job.Job
 import com.sos.scheduler.engine.kernel.order.jobchain.JobChain._
-import com.sos.scheduler.engine.kernel.order.{Order, OrderSubsystem}
+import com.sos.scheduler.engine.kernel.order.{DatabaseOrders, Order, OrderSubsystem}
 import com.sos.scheduler.engine.kernel.persistence.hibernate.ScalaHibernate._
 import com.sos.scheduler.engine.kernel.persistence.hibernate.{HibernateJobChainNodeStore, HibernateJobChainStore}
 import com.sos.scheduler.engine.kernel.scheduler.HasInjector
+import com.typesafe.config.Config
+import java.nio.file.{Path, Paths}
+import java.time.{Duration, Instant}
 import javax.persistence.EntityManagerFactory
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.collection.{immutable, mutable}
+import scala.concurrent.{Await, ExecutionContext, Future, TimeoutException}
 
 @ForCpp
 private[engine] final class JobChain(
@@ -60,28 +65,40 @@ with UnmodifiableJobChain {
   private[kernel] val queryable = new QueryableJobChain {
     def path = JobChain.this.path
     def isDistributed = JobChain.this.isDistributed
+    def state = JobChain.this.state
   }
 
-  private[kernel] def overview = JobChainOverview(
-    path = path,
-    fileBasedState = fileBasedState,
-    isDistributed = isDistributed,
-    orderLimit = orderLimitOption,
-    orderIdSpaceName = orderIdSpaceNameOption,
-    obstacles = {
-      import JobChainObstacle._
-      val builder = Set.newBuilder[JobChainObstacle]
-      emptyToNone(fileBasedObstacles) switch {
-        case Some(o) ⇒ builder += FileBasedObstacles(o)
-      }
-      if (state == JobChainState.stopped) {
-        builder += Stopped
-      }
-      orderLimitOption switch {
-        case Some(limit) ⇒ builder += OrderLimitReached(limit)
-      }
-      builder.result
-    })
+  private[kernel] def overview = {
+    val (nonBlacklistedOrderCount, blacklistedOrderCount) = blockingOrderCount  // Synchronous database query
+    JobChainOverview(
+      path = path,
+      fileBasedState = fileBasedState,
+      state = state,
+      jobOrJobChainNodeCount = jobOrJobChainNodeCount,
+      nonBlacklistedOrderCount = nonBlacklistedOrderCount,
+      blacklistedOrderCount = blacklistedOrderCount,
+      hasJobChainNodes = hasJobChainNodes,
+      isDistributed = isDistributed,
+      orderLimit = orderLimitOption,
+      title = cppProxy.title,
+      orderIdSpaceName = orderIdSpaceNameOption,
+      defaultProcessClassPath = defaultProcessClassPathOption,
+      fileWatchingProcessClassPath = fileWatchingProcessClassPathOption,
+      obstacles = {
+        import JobChainObstacle._
+        val builder = Set.newBuilder[JobChainObstacle]
+        emptyToNone(fileBasedObstacles) switch {
+          case Some(o) ⇒ builder += FileBasedObstacles(o)
+        }
+        if (state == JobChainState.stopped) {
+          builder += Stopped
+        }
+        orderLimitOption switch {
+          case Some(limit) ⇒ builder += OrderLimitReached(limit)
+        }
+        builder.result
+      })
+  }
 
   def stringToPath(o: String) =
     JobChainPath(o)
@@ -125,10 +142,21 @@ with UnmodifiableJobChain {
   @ForCpp
   private def cppSkippedStates(orderStateString: String): java.util.ArrayList[String] = cppPredecessors(orderStateString)
 
-  private[kernel] def details =
+  private[kernel] def detailed =
     JobChainDetailed(
       overview = overview,
-      nodes = nodes map { _.overview })
+      nodes = nodes map { _.overview },
+      fileOrderSources = for ((o, i) <- orderSourceDefinitions.zipWithIndex) yield
+        JobChainDetailed.FileOrderSource(
+          directory = o.directory,
+          regex = o.regex,
+          repeat = o.repeat,
+          delayAfterError = o.delayAfterError,
+          alertWhenDirectoryMissing = o.alertWhenDirectoryMissing,
+          files =
+            for ((file, mod) <- cppProxy.java_file_order_source_files(i).toVector zip cppProxy.java_file_order_source_files_last_modified(i)) yield
+              JobChainDetailed.FileOrderSourceFile(Paths.get(file), Instant.ofEpochSecond(mod))),
+      blacklistedOrders = cppProxy.blacklistedOrderIds.map(o => order(o).overview).toVector)
 
   private[order] def refersToJob(job: Job): Boolean = nodes exists {
     case n: SimpleJobNode => n.getJob eq job
@@ -157,6 +185,40 @@ with UnmodifiableJobChain {
   private[order] lazy val nodes: immutable.Seq[Node] =
     (cppProxy.java_nodes map { _.asInstanceOf[CppProxyWithSister[_]].getSister.asInstanceOf[Node] }).toVector
 
+  private lazy val jobOrJobChainNodeCount: Int =
+    nodes count {
+      case _: JobNode => true
+      case _: NestedJobChainNode => true
+      case _ => false
+    }
+
+  private lazy val orderSourceDefinitions: immutable.Seq[OrderSourceDefinition] =
+    for (i <- 0 until cppProxy.order_source_count) yield
+      OrderSourceDefinition(
+        directory = Paths.get(cppProxy.java_file_order_source_directory(i)),
+        regex = cppProxy.java_file_order_source_regex(i),
+        repeat = Duration.ofMillis(cppProxy.java_file_order_source_repeat_millis(i)),
+        delayAfterError = Duration.ofMillis(cppProxy.java_file_order_source_delay_after_error_millis(i)),
+        alertWhenDirectoryMissing = cppProxy.java_file_order_source_alert_when_directory_missing(i))
+
+  private def blockingOrderCount: (Int, Int) =
+    if (isDistributed) {
+      val configKey = "jobscheduler.master.database.read-timeout"
+      val timeout = injector.instance[Config].getDuration(configKey).toFiniteDuration
+      implicit val ec = injector.instance[ExecutionContext]
+      val seqFuture = Future.sequence(Vector(
+        injector.instance[DatabaseOrders].distributedNonBlacklistedOrderCount(path),
+        injector.instance[DatabaseOrders].distributedBlacklistedOrderCount(path)))
+      val seq =
+        ( try Await.ready(seqFuture, timeout).value.get
+          catch { case _: TimeoutException =>
+            throw new TimeoutException(s"nonBlacklistedOrderCount: Database query did not respond before $configKey=$configKey")
+          }
+        ).get
+      (seq(0), seq(1))
+    } else
+      (cppProxy.nondistributed_order_count, cppProxy.nondistributed_blacklisted_order_count)
+
   def order(id: OrderId) =
     inSchedulerThread {
       orderOption(id)
@@ -175,6 +237,12 @@ with UnmodifiableJobChain {
 
   private[kernel] def state: JobChainState =
     JobChainState.values()(cppProxy.state)
+
+  private lazy val hasJobChainNodes: Boolean =
+    nodes exists {
+      case _: NestedJobChainNode => true
+      case _ => false
+    }
 
   private lazy val orderLimitOption: Option[Int] = someUnless(cppProxy.max_orders, none = Int.MaxValue)
 
@@ -219,4 +287,11 @@ object JobChain {
     }
     f(Set(from)) - from
   }
+
+  private case class OrderSourceDefinition(
+    directory: Path,
+    regex: String,
+    repeat: Duration,
+    delayAfterError: Duration,
+    alertWhenDirectoryMissing: Boolean)
 }

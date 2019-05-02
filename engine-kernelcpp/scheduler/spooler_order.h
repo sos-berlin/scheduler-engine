@@ -543,6 +543,14 @@ struct Order_source : Abstract_scheduler_object, Event_operation
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
+    
+    virtual const string& java_directory() const = 0;
+    virtual const string& java_regex() const = 0;
+    virtual int64 java_repeat_millis() const = 0;
+    virtual int64 java_delay_after_error_millis() const = 0;
+    virtual bool java_alert_when_directory_missing() const = 0;
+    virtual vector<string> java_files() const = 0;
+    virtual vector<int64> java_files_last_modified() const = 0;
 
   protected:
     Fill_zero                  _zero_;
@@ -562,7 +570,7 @@ struct Order_sources
     bool                        has_order_source        ()                                          { return !_order_source_list.empty(); }
 
 
-    typedef list< ptr<Order_source> >  Order_source_list;
+    typedef vector< ptr<Order_source> >  Order_source_list;
     Order_source_list          _order_source_list;
 };
 
@@ -1004,6 +1012,8 @@ struct Job_chain : Com_job_chain,
     ptr<Order>                  order_or_null               ( const Order::Id& );
     bool                        has_order_id                ( Read_transaction*, const Order::Id& );
     int                         order_count                 ( Read_transaction* ) const;
+    int                         nondistributed_order_count  () const;
+    int                         nondistributed_blacklisted_order_count() const { return (int)_blacklist_map.size(); }
     bool                        has_order                   () const;
     bool                        has_order_in_task           () const;
     void                        register_order              ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
@@ -1058,6 +1068,7 @@ struct Job_chain : Com_job_chain,
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&) const;
     xml::Element_ptr            WriterFilter_ptr            () const;
     bool                        is_stopped                  () const                                { return _state == jc_stopped; }
+    vector<string> blacklistedOrderIds() const;
 
     public: const Absolute_path& default_process_class_path() const {
         return _default_process_class_path;
@@ -1066,7 +1077,39 @@ struct Job_chain : Com_job_chain,
     public: const Absolute_path& file_watching_process_class_path() const {
         return _file_watching_process_class_path;
     }
+    
+    public: int order_source_count() const {
+        return _order_sources._order_source_list.size();
+    }
+    
+    public: const string& java_file_order_source_directory(int index) const {
+        return _order_sources._order_source_list.at(index)->java_directory();
+    }
 
+    public: const string& java_file_order_source_regex(int index) const {
+        return _order_sources._order_source_list.at(index)->java_regex();
+    };
+    
+    public: int64 java_file_order_source_repeat_millis(int index) const {
+        return _order_sources._order_source_list.at(index)->java_repeat_millis();
+    };
+    
+    public: int64 java_file_order_source_delay_after_error_millis(int index) const {
+        return _order_sources._order_source_list.at(index)->java_delay_after_error_millis();
+    };
+    
+    public: bool java_file_order_source_alert_when_directory_missing(int index) const {
+        return _order_sources._order_source_list.at(index)->java_alert_when_directory_missing();
+    };
+    
+    public: vector<string> java_file_order_source_files(int index) const {
+        return _order_sources._order_source_list.at(index)->java_files();
+    };
+    
+    public: vector<int64> java_file_order_source_files_last_modified(int index) const {
+        return _order_sources._order_source_list.at(index)->java_files_last_modified();
+    };
+    
   private:
     void                        check_for_removing          ();
     void                        database_record_store       ();
@@ -1082,7 +1125,6 @@ struct Job_chain : Com_job_chain,
     Fill_zero                  _zero_;
     const JobChainJ            _typed_java_sister;
     State                      _state;
-    bool                       _is_stopped;
     string                     _title;
     int                        _max_orders;
     Order_id_space*            _order_id_space;
@@ -1098,7 +1140,7 @@ struct Job_chain : Com_job_chain,
     typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
 
-    typedef list< ptr<job_chain::Node> >  Node_list;
+    typedef list< ptr<job_chain::Node> >  Node_list;        
     Node_list                  _node_list;
 
     Order_sources              _order_sources;

@@ -12,6 +12,9 @@ final class JavaMethod(m: ProcedureSignature) {
   private val returnTypeName = m.returnType match {
     case c if classIsByteArray(c) => "byte[]"
     case c if c.isArray && c.getComponentType == classOf[java.lang.String] => "String[]"
+    case c if c.isArray && c.getComponentType == classOf[java.lang.String] => "String[]"
+    case c if c.isArray && "int[]".equals(c.getCanonicalName) => c.getCanonicalName
+    case c if c.isArray && "long[]".equals(c.getCanonicalName) => c.getCanonicalName
     case c if c.isArray => "Object[]"
     case c => c.getName
   }
@@ -62,6 +65,8 @@ object JavaMethod {
   private def classToString[A](c: Class[A]) =
     if (classIsIntArray(c))
       "int[]"
+    else if (classIsLongArray(c))
+      "long[]"
     else
       c.getName
 }

@@ -13,7 +13,7 @@ import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.eve
 import com.sos.scheduler.engine.data.filebased.{FileBasedActivated, FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState, TypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, NodeId, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainOverview, JobChainPath, JobChainState, NodeId, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderDetailed, OrderKey, OrderOverview, OrderProcessingState, OrderSourceType, OrderStarted, OrderStepStarted, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassOverview, ProcessClassPath}
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, OrderQuery}
@@ -292,7 +292,8 @@ object OrderRouteTest {
   private val TestOrdersComplemented = OrdersComplemented[OrderOverview](
     TestOrderOverviews,
     Vector(
-      JobChainOverview(AJobChainPath, FileBasedState.active)),
+      JobChainOverview(AJobChainPath, FileBasedState.active, state = JobChainState.running,
+        jobOrJobChainNodeCount = 3, nonBlacklistedOrderCount = 7)),
     Vector(
       SimpleJobNodeOverview(AJobChainPath, NodeId("100"), NodeId("END"), NodeId(""), TestJobPath, orderCount = 1)),
     Vector(

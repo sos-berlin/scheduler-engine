@@ -3182,20 +3182,17 @@ int Job_chain::order_count( Read_transaction* ta ) const
         result = ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
     }
     else
-    {
-      //set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
+        return nondistributed_order_count();
+}
 
-        for( Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++ )
-        {
-            if( Order_queue_node* node = Order_queue_node::try_cast( *it ) )
-            {
-                result += node->order_queue()->order_count( (Read_transaction*)NULL );
-            }
-            //Job* job = (*it)->_job;
-            //if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( (Read_transaction*)NULL, this );
+int Job_chain::nondistributed_order_count() const
+{
+    int result = 0;
+    for (Node_list::const_iterator it = _node_list.begin(); it != _node_list.end(); it++) {
+        if (Order_queue_node *node = Order_queue_node::try_cast(*it)) {
+            result += node->order_queue()->order_count((Read_transaction *) NULL);
         }
     }
-
     return result;
 }
 
@@ -3255,6 +3252,15 @@ void Job_chain::add_order_to_blacklist( Order* order )
 void Job_chain::remove_order_from_blacklist( Order* order )
 {
     _blacklist_map.erase( order->string_id() );
+}
+
+vector<string> Job_chain::blacklistedOrderIds() const {
+    vector<string> result;
+    result.reserve(_blacklist_map.size());
+    Z_FOR_EACH_CONST(Blacklist_map, _blacklist_map, it) {
+        result.push_back(it->first);
+    }
+    return result;
 }
 
 //-------------------------------------------------------------Job_chain::blacklisted_order_or_null

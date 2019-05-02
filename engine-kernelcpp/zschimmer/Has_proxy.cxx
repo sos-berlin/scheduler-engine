@@ -130,6 +130,21 @@ string string_from_java_byte_array(jbyteArray a) {
     return result;
 }
 
+//--------------------------------------------------------------------------------java_array_from_c
+
+jlongArray java_array_from_c(const std::vector<int64>& v) {
+    Env jenv;
+    jlong n = int_cast(v.size());
+    jlongArray result = jenv->NewLongArray(n);
+    if (result != NULL) {  // Keine Exception
+        long* longs = new long[v.size()];
+        for (int i = 0; i < n; i++) longs[i] = v[i];
+        jenv->SetLongArrayRegion(result, 0, v.size(), longs);
+        delete[] longs;
+    }
+    return result;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace javabridge

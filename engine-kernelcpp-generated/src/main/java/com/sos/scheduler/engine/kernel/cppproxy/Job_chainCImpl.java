@@ -14,6 +14,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
         setSister(com.sos.scheduler.engine.kernel.cppproxy.Job_chainC$.MODULE$.sisterType().sister(this, context));
     }
 
+    @Override public String[] blacklistedOrderIds() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            String[] result = blacklistedOrderIds__native(cppReference());
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native String[] blacklistedOrderIds__native(long cppReference);
+
+
     @Override public java.lang.String default_process_class_path() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -154,6 +167,91 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native boolean is_visible__native(long cppReference);
 
 
+    @Override public boolean java_file_order_source_alert_when_directory_missing(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return java_file_order_source_alert_when_directory_missing__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native boolean java_file_order_source_alert_when_directory_missing__native(long cppReference, int p0);
+
+
+    @Override public long java_file_order_source_delay_after_error_millis(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return java_file_order_source_delay_after_error_millis__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long java_file_order_source_delay_after_error_millis__native(long cppReference, int p0);
+
+
+    @Override public java.lang.String java_file_order_source_directory(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = java_file_order_source_directory__native(cppReference(), p0);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String java_file_order_source_directory__native(long cppReference, int p0);
+
+
+    @Override public String[] java_file_order_source_files(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            String[] result = java_file_order_source_files__native(cppReference(), p0);
+            checkIsNotReleased(String[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native String[] java_file_order_source_files__native(long cppReference, int p0);
+
+
+    @Override public long[] java_file_order_source_files_last_modified(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            long[] result = java_file_order_source_files_last_modified__native(cppReference(), p0);
+            checkIsNotReleased(long[].class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long[] java_file_order_source_files_last_modified__native(long cppReference, int p0);
+
+
+    @Override public java.lang.String java_file_order_source_regex(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = java_file_order_source_regex__native(cppReference(), p0);
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String java_file_order_source_regex__native(long cppReference, int p0);
+
+
+    @Override public long java_file_order_source_repeat_millis(int p0) {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return java_file_order_source_repeat_millis__native(cppReference(), p0);
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native long java_file_order_source_repeat_millis__native(long cppReference, int p0);
+
+
     @Override public Object[] java_nodes() {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -241,6 +339,28 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     private static native boolean name_is_fixed__native(long cppReference);
 
 
+    @Override public int nondistributed_blacklisted_order_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return nondistributed_blacklisted_order_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int nondistributed_blacklisted_order_count__native(long cppReference);
+
+
+    @Override public int nondistributed_order_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return nondistributed_order_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int nondistributed_order_count__native(long cppReference);
+
+
     @Override public com.sos.scheduler.engine.kernel.cppproxy.OrderC order(java.lang.String p0) {
         com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
         try {
@@ -278,6 +398,17 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native com.sos.scheduler.engine.kernel.cppproxy.OrderC order_or_null__native(long cppReference, java.lang.String p0);
+
+
+    @Override public int order_source_count() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            return order_source_count__native(cppReference());
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native int order_source_count__native(long cppReference);
 
 
     @Override public java.lang.String path() {
@@ -350,6 +481,19 @@ implements com.sos.scheduler.engine.kernel.cppproxy.Job_chainC {
     }
 
     private static native int state__native(long cppReference);
+
+
+    @Override public java.lang.String title() {
+        com.sos.scheduler.engine.cplusplus.runtime.CppProxy$.MODULE$.requireCppThread();
+        try {
+            java.lang.String result = title__native(cppReference());
+            checkIsNotReleased(java.lang.String.class, result);
+            return result;
+        }
+        catch (Exception x) { throw com.sos.scheduler.engine.cplusplus.runtime.CppProxies.propagateCppException(x, this); }
+    }
+
+    private static native java.lang.String title__native(long cppReference);
 
 
     // </editor-fold>

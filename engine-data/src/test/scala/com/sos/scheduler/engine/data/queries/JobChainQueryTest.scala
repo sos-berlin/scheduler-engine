@@ -67,13 +67,23 @@ final class JobChainQueryTest extends FreeSpec {
       check(JobChainQuery.All, "{}")
     }
 
-    "JobChainQuery" in {
+    "JobChainQuery isDistributed" in {
       check(JobChainQuery(
         pathQuery = PathQuery(FolderPath("/FOLDER")),
         isDistributed = Some(true)),
         """{
           "path": "/FOLDER/",
           "isDistributed": true
+        }""")
+    }
+
+    "JobChainQuery isStopped" in {
+      check(JobChainQuery(
+        pathQuery = PathQuery(FolderPath("/FOLDER")),
+        isStopped = Some(true)),
+        """{
+          "path": "/FOLDER/",
+          "isStopped": true
         }""")
     }
 

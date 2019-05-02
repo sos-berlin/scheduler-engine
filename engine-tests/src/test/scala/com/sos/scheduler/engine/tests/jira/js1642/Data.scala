@@ -8,7 +8,7 @@ import com.sos.scheduler.engine.data.compounds.{OrderTreeComplemented, OrdersCom
 import com.sos.scheduler.engine.data.filebased.{FileBasedObstacle, FileBasedState}
 import com.sos.scheduler.engine.data.folder.{FolderPath, FolderTree}
 import com.sos.scheduler.engine.data.job.{JobObstacle, JobOverview, JobPath, JobState, TaskId, TaskOverview, TaskState}
-import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, NodeId, NodeObstacle, SimpleJobNodeOverview}
+import com.sos.scheduler.engine.data.jobchain.{JobChainObstacle, JobChainOverview, JobChainPath, JobChainState, NodeId, NodeObstacle, SimpleJobNodeOverview}
 import com.sos.scheduler.engine.data.lock.LockPath
 import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{OrderHistoryId, OrderId, OrderObstacle, OrderOverview, OrderProcessingState, OrderSourceType}
@@ -43,14 +43,18 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
     processes = Nil,
     agents = Nil)
 
-  val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active)
-  val bJobChainOverview = JobChainOverview(bJobChainPath, FileBasedState.active)
-  val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active,
+  val aJobChainOverview = JobChainOverview(aJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 3, title = "This is aJobChain")
+  val bJobChainOverview = JobChainOverview(bJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 1)
+  val xaJobChainOverview = JobChainOverview(xaJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 2,
     obstacles = Set(
       JobChainObstacle.FileBasedObstacles(Set(
         FileBasedObstacle.MissingRequisites(Set(
           XTestJobPath))))))
-  val xbJobChainOverview = JobChainOverview(xbJobChainPath, FileBasedState.active, isDistributed = true,
+  val xbJobChainOverview = JobChainOverview(xbJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 2, isDistributed = true,
     obstacles = Set(
       JobChainObstacle.FileBasedObstacles(Set(
         FileBasedObstacle.MissingRequisites(Set(
@@ -59,10 +63,10 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
           ProcessClassPath("/xFolder/MISSING-PROCESS-CLASS"),
           SchedulePath("/xFolder/MISSING-SCHEDULE"),
           XTestBJobPath))))))
-  val nestedOuterJobChainOverview = JobChainOverview(nestedOuterJobChainPath, FileBasedState.active,
-    orderIdSpaceName = Some("strawberries"))
-  val nestedInnerJobChainOverview = JobChainOverview(nestedInnerJobChainPath, FileBasedState.active,
-    orderIdSpaceName = Some("strawberries"))
+  val nestedOuterJobChainOverview = JobChainOverview(nestedOuterJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 0, hasJobChainNodes = true, orderIdSpaceName = Some("strawberries"))
+  val nestedInnerJobChainOverview = JobChainOverview(nestedInnerJobChainPath, FileBasedState.active, JobChainState.running,
+    jobOrJobChainNodeCount = 1, nonBlacklistedOrderCount = 1, orderIdSpaceName = Some("strawberries"))
 
   val a1OrderOverview = OrderOverview(
     a1OrderKey,
@@ -459,33 +463,63 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       {
         "path": "/aJobChain",
         "fileBasedState": "active",
+        "hasJobChainNodes": false,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 3,
+        "blacklistedOrderCount": 0,
         "isDistributed": false,
+        "state": "running",
+        "title": "This is aJobChain",
         "obstacles": []
       },
       {
         "path": "/bJobChain",
         "fileBasedState": "active",
+        "hasJobChainNodes": false,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 1,
+        "blacklistedOrderCount": 0,
         "isDistributed": false,
+        "state": "running",
+        "title": "",
         "obstacles": []
       },
       {
         "path": "/nested-inner",
         "fileBasedState": "active",
+        "hasJobChainNodes": false,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 1,
+        "blacklistedOrderCount": 0,
         "isDistributed": false,
+        "state": "running",
+        "title": "",
         "obstacles": [],
         "orderIdSpaceName": "strawberries"
       },
       {
         "path": "/outer/nested-outer",
         "fileBasedState": "active",
+        "hasJobChainNodes": true,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 0,
+        "blacklistedOrderCount": 0,
         "isDistributed": false,
+        "state": "running",
+        "title": "",
         "obstacles": [],
         "orderIdSpaceName": "strawberries"
       },
       {
         "path": "/xFolder/x-aJobChain",
         "fileBasedState": "active",
+        "hasJobChainNodes": false,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 2,
+        "blacklistedOrderCount": 0,
         "isDistributed": false,
+        "state": "running",
+        "title": "",
         "obstacles": [
           {
             "TYPE":"FileBasedObstacles",
@@ -503,7 +537,13 @@ private[js1642] final class Data(taskIdToStartedAt: TaskId ⇒ Instant) {
       {
         "path": "/xFolder/x-bJobChain",
         "fileBasedState": "active",
+        "hasJobChainNodes": false,
+        "jobOrJobChainNodeCount": 1,
+        "nonBlacklistedOrderCount": 2,
+        "blacklistedOrderCount": 0,
         "isDistributed": true,
+        "state": "running",
+        "title": "",
         "obstacles": [
           {
             "TYPE": "FileBasedObstacles",

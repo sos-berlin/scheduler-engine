@@ -139,6 +139,9 @@ object ClassOps {
   def classIsIntArray(t: Class[_]) =
     t.isArray && t.getComponentType.getName == "int"
 
+  def classIsLongArray(t: Class[_]) =
+    t.isArray && t.getComponentType.getName == "int"
+
   def compareClassSeqs(a: Seq[Class[_]], b: Seq[Class[_]]): Int =
     a zip b map { x => compareClasses(x._1, x._2) } find { _ != 0 } match {
       case None => a.length compare b.length

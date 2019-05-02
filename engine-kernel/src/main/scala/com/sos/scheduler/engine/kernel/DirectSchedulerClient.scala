@@ -137,7 +137,12 @@ extends SchedulerClient with DirectCommandClient with DirectEventClient with Dir
 
   def jobChainDetailed(jobChainPath: JobChainPath): Future[Snapshot[JobChainDetailed]] =
     respondWithSnapshotFuture {
-      orderSubsystem.jobChain(jobChainPath).details
+      orderSubsystem.jobChain(jobChainPath).detailed
+    }
+
+  def jobChainDetailedBy(query: JobChainQuery): Future[Snapshot[Seq[JobChainDetailed]]] =
+    respondWithSnapshotFuture {
+      (orderSubsystem.jobChainsByQuery(query) map { _.detailed }).toVector
     }
 
   def jobs[V <: JobView: JobView.Companion](query: JobQuery = JobQuery.All): Future[Snapshot[Vector[V]]] =

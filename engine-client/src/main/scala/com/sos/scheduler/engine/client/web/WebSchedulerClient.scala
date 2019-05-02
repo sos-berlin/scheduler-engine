@@ -126,11 +126,21 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
           for (o ← schedulerResponse) yield
             Vector(o) // Web service returns a single object (not an array), if path designate a single job chain path
       case _ ⇒
-        get[Snapshot[immutable.Seq[JobChainOverview]]](_.jobChain.overviews(query))
+        post[JobChainQuery, Snapshot[immutable.Seq[JobChainOverview]]](_.jobChain.forPost(returnType = "JobChainOverview"), query)
     }
 
   final def jobChainDetailed(jobChainPath: JobChainPath) =
     get[Snapshot[JobChainDetailed]](_.jobChain.detailed(jobChainPath))
+
+  final def jobChainDetailedBy(query: JobChainQuery): Future[Snapshot[immutable.Seq[JobChainDetailed]]] =
+    query.pathQuery match {
+      case single: PathQuery.SinglePath ⇒
+        for (schedulerResponse ← get[Snapshot[JobChainDetailed]](_.jobChain.detailed(single.as[JobChainPath]))) yield
+          for (o ← schedulerResponse) yield
+            Vector(o) // Web service returns a single object (not an array), if path designate a single job chain path
+      case _ ⇒
+        post[JobChainQuery, Snapshot[immutable.Seq[JobChainDetailed]]](_.jobChain.forPost(returnType = "JobChainDetailed"), query)
+    }
 
   final def jobChainEvents[E <: Event](jobChainPath: JobChainPath, eventRequest: SomeEventRequest[E]) =
     get[Snapshot[EventSeq[Seq, E]]](_.jobChain.events(jobChainPath, eventRequest))

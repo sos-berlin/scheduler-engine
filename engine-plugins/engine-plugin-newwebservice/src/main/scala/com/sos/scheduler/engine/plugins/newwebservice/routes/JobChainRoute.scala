@@ -1,6 +1,6 @@
 package com.sos.scheduler.engine.plugins.newwebservice.routes
 
-import com.sos.scheduler.engine.client.web.common.QueryHttp.pathQuery
+import com.sos.scheduler.engine.client.web.common.QueryHttp.jobChainQuery
 import com.sos.scheduler.engine.common.sprayutils.SprayJsonOrYamlSupport._
 import com.sos.scheduler.engine.data.event.{AnyEvent, Event, KeyedEvent}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -27,9 +27,11 @@ trait JobChainRoute {
   final def jobChainRoute: Route =
     getRequiresSlash(webServiceContext) {
       parameter("return".?) { returnType ⇒
-        pathQuery(JobChainPath) {
-          case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)
-          case query ⇒ multipleJobChainsRoute(JobChainQuery(query), returnType)
+        jobChainQuery { query ⇒
+          query.pathQuery match {
+            case single: PathQuery.SinglePath ⇒ singleJobChainRoute(single.as[JobChainPath], returnType)  // other query arguments are ignored
+            case _ ⇒ multipleJobChainsRoute(query, returnType)
+          }
         }
       }
     }
@@ -38,13 +40,15 @@ trait JobChainRoute {
     returnType match {
       case Some("JobChainOverview") ⇒ completeTryHtml(client.jobChainOverview(jobChainPath))
       case Some("JobChainDetailed") | None ⇒ completeTryHtml(client.jobChainDetailed(jobChainPath))
-      case Some(o) ⇒ singleKeyEvents[AnyEvent](jobChainPath)
+      case Some(_) ⇒ singleKeyEvents[AnyEvent](jobChainPath)
     }
 
   private def multipleJobChainsRoute(query: JobChainQuery, returnType: Option[String]): Route =
     returnType match {
       case Some("JobChainOverview") | None ⇒
         completeTryHtml(client.jobChainOverviewsBy(query))
+      case Some("JobChainDetailed") =>
+        completeTryHtml(client.jobChainDetailedBy(query))
       case Some(o) ⇒
         events[Event](
           predicate = {

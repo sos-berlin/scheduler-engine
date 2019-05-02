@@ -22,7 +22,7 @@ import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import javax.xml.stream.events.StartElement
 import javax.xml.transform.stream.StreamSource
-import scala.concurrent.blocking
+import scala.concurrent.{Future, blocking}
 import scala.util.control.ControlThrowable
 
 /**
@@ -58,7 +58,7 @@ private[order] final class DatabaseOrders @Inject private(
     select ++= " from "
     select ++= schedulerConfiguration.ordersTableName
     select ++= """  where "SPOOLER_ID"="""
-    select ++= DatabaseSubsystem.quoteSqlString(schedulerId.string.substitute("", "-"))
+    select ++= quoteSqlString(schedulerId.string.substitute("", "-"))
     select ++= """ and "DISTRIBUTED_NEXT_TIME" is not null"""
     if (conditionSql.nonEmpty) {
       select ++= s" and ($conditionSql)"
@@ -68,9 +68,41 @@ private[order] final class DatabaseOrders @Inject private(
     }
     select.toString
   }
+
+  private[order] def distributedNonBlacklistedOrderCount(jobChainPath: JobChainPath): Future[Int] = {
+    val sql = "select count(*) from " + schedulerConfiguration.ordersTableName +
+      """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
+      """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
+      """ and "DISTRIBUTED_NEXT_TIME" is not null""" +
+      """ and "DISTRIBUTED_NEXT_TIME" <> """ + quoteSqlString(BlacklistDatabaseDistributedNextTime.toString)
+
+    jdbcConnectionPool.readOnly { connection ⇒
+      autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒
+        val resultSet = stmt.executeQuery()
+        resultSet.next()
+        resultSet.getInt(1)
+      }
+    }
+  }
+
+  private[order] def distributedBlacklistedOrderCount(jobChainPath: JobChainPath): Future[Int] = {
+    val sql = "select count(*) from " + schedulerConfiguration.ordersTableName +
+      """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
+      """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
+      """ and "DISTRIBUTED_NEXT_TIME" = """ + quoteSqlString(BlacklistDatabaseDistributedNextTime.toString)
+
+    jdbcConnectionPool.readOnly { connection ⇒
+      autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒
+        val resultSet = stmt.executeQuery()
+        resultSet.next()
+        resultSet.getInt(1)
+      }
+    }
+  }
 }
 
-private[order] object DatabaseOrders {
+private[order] object DatabaseOrders
+{
   private[order] def fetchDistributedOrderStatistics(connection: sql.Connection, sqlStmt: String): JocOrderStatistics =
     autoClosing(connection.prepareStatement(sqlStmt)) { stmt ⇒
       val resultSet = stmt.executeQuery()

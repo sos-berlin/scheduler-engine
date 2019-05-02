@@ -96,6 +96,11 @@ final class SchedulerUris private(schedulerUri: Uri) {
   }
 
   object jobChain {
+    def forPost(returnType: String): String =
+      uriString(Uri(
+        path = Uri.Path(s"api/jobChain"),
+        query = Uri.Query(Map("return" → returnType))))
+
     def overviews(query: JobChainQuery = JobChainQuery.All): String = {
       val (subpath, parameters) = query.toPathAndParameters
       require(subpath endsWith "/", "JobChainQuery must denote folder, terminated by a slash")
