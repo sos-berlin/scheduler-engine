@@ -372,6 +372,9 @@
     <ClCompile Include="com__sos__scheduler__engine__data__event__KeyedEvent.cxx">
       <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
     </ClCompile>
+    <ClCompile Include="com__sos__scheduler__engine__kernel__processclass__agent__StartResult.cxx">
+      <Filter>Quelldateien\Generated C++/Java-Proxies</Filter>
+    </ClCompile>
     </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_precompiled.h">
