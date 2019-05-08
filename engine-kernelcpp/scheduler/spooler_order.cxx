@@ -3169,8 +3169,6 @@ bool Job_chain::has_order_in_task() const
 
 int Job_chain::order_count( Read_transaction* ta ) const
 {
-    int result = 0;
-
     if( _is_distributed && ta )
     {
         S select_sql;
@@ -3179,7 +3177,7 @@ int Job_chain::order_count( Read_transaction* ta ) const
                    <<    " and `distributed_next_time` " << ( _is_distributed? " is not null" 
                                                                              : " is null"     );
 
-        result = ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
+        return ta->open_result_set( select_sql, Z_FUNCTION ).get_record().as_int( 0 );
     }
     else
         return nondistributed_order_count();
