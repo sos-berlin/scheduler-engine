@@ -5,6 +5,7 @@ import akka.actor.{Actor, ActorRef, Props, Terminated}
 import akka.agent.Agent
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
+import com.sos.scheduler.engine.common.akkautils.Akkas.uniqueActorName
 import com.sos.scheduler.engine.common.scalautil.Collections.implicits._
 import com.sos.scheduler.engine.common.scalautil.{Logger, SetOnce}
 import com.sos.scheduler.engine.common.time.timer.TimerService
@@ -58,7 +59,9 @@ private[tunnel] final class ConnectorHandler private(implicit timerService: Time
         val peerPort = connected.remoteAddress.getPort
         s"Connector-TCP-$peerInterface:$peerPort"
       }
-      val connector = actorOf(Connector.props(connectorHandler = self, tcp = sender(), connected, timerService), name = name)
+      val connector = actorOf(
+        Connector.props(connectorHandler = self, tcp = sender(), connected, timerService),
+        name = uniqueActorName(name))
       watch(connector)
 
     case m @ NewTunnel(id, listener, startedByIpOption) ⇒

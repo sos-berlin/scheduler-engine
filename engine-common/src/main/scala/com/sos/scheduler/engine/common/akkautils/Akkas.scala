@@ -1,8 +1,9 @@
 package com.sos.scheduler.engine.common.akkautils
 
 import akka.actor.ActorSystem.Settings
-import akka.actor.Cancellable
+import akka.actor.{ActorContext, Cancellable}
 import akka.util.{ByteString, Timeout}
+import com.sos.scheduler.engine.common.scalautil.Logger
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
 import spray.http.Uri
@@ -11,6 +12,8 @@ import spray.http.Uri
  * @author Joacim Zschimmer
  */
 object Akkas {
+
+  private val logger = Logger(getClass)
 
   /**
    * Returns the a Timeout accepted for HTTP request, dependent on Akkas configuration akka.scheduler.tick-duration.
@@ -84,4 +87,14 @@ object Akkas {
 
   def decodeActorName(o: String): String =
     Uri.Path(o).head.toString
+
+  /** When an actor name to be re-used, the previous actor may still terminate, occupying the name. */
+  def uniqueActorName(name: String)(implicit context: ActorContext): String = {
+    var _name = name
+    if (context.child(name).isDefined) {
+      _name = Iterator.from(2).map(i => s"$name~$i").find { nam => context.child(nam).isEmpty }.get
+      logger.debug(s"Duplicate actor name. Replacement actor name is ${context.self.path}/$name")
+    }
+    _name
+  }
 }
