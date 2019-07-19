@@ -5,12 +5,11 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.log.ErrorLogEvent
+import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
-import com.sos.scheduler.engine.data.order.{OrderStepStartedEvent, OrderTouchedEvent}
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
-import com.sos.scheduler.engine.test.configuration.{DefaultDatabaseConfiguration, TestConfiguration}
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.{ImplicitTimeout, ProvidesTestEnvironment, TestSchedulerController}
 import java.nio.file.Files.{createDirectories, exists}
 import org.junit.runner.RunWith
@@ -47,7 +46,7 @@ final class JS1825IT extends FreeSpec
 
       envProvider.runScheduler() { implicit controller =>
         controller.scheduler executeXml jobChainXml
-        controller.eventBus.awaitingEvent[ErrorLogEvent](_.codeOption contains MessageCode("SCHEDULER-340")) {  // Has been set on blacklist
+        controller.eventBus.awaitingWhen[ErrorLogged](_.event.codeOption contains MessageCode("SCHEDULER-340")) {  // Has been set on blacklist
           touch(file)
         }
         assert(exists(file))
