@@ -2540,8 +2540,8 @@ bool Job_chain::on_load()
 
             if (orders_are_recoverable()) {
                 if (!_is_distributed) {
-                    list<Order_queue_node*> node_list;
-                    list<string>            state_sql_list;
+                    list<Node*>  node_list;
+                    list<string> state_sql_list;
 
                     Z_FOR_EACH(Node_list, _node_list, it) {
                         if (Order_queue_node* node = Order_queue_node::try_cast(*it)) {
@@ -2549,7 +2549,11 @@ bool Job_chain::on_load()
                                 node_list.push_back( node );
                                 state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
                             }
-                        }
+                        } else 
+                        if (End_node* node = End_node::try_cast(*it)) {  // JS-1825 Load blacklisted order sitting in end node
+                            node_list.push_back( node );
+                            state_sql_list.push_back( sql::quoted( node->order_state().as_string() ) );
+                        }  
                     }
 
                     if (!state_sql_list.empty()) {
@@ -2565,8 +2569,9 @@ bool Job_chain::on_load()
                         log()->debug(message_string("SCHEDULER-935", count));
                     }
 
-                    Z_FOR_EACH(list<Order_queue_node*>, node_list, it)
-                        (*it)->order_queue()->_is_loaded = true;
+                    Z_FOR_EACH(list<Node*>, node_list, it)
+                        if (Order_queue_node* node = Order_queue_node::try_cast(*it)) 
+                            node->order_queue()->_is_loaded = true;
                 }
             } else {
                 assert(!orders_are_recoverable());
@@ -2639,7 +2644,7 @@ Order* Job_chain::add_order_from_database_record(Transaction* ta, const Record& 
 
     if (   was_file_based != is_file_based  // XML Datei ist gelöscht oder angelegt worden
         || file_based_has_changed)          // XML Datei ist geändert worden
-    { 
+    {
         db_try_delete_non_distributed_order(ta, order_id);
     }
     else
@@ -2867,7 +2872,7 @@ void Job_chain::add_order( Order* order )
         order->set_state2( node->order_state() );
     }
 
-    if ((!order->_suspended || !order->_is_on_blacklist) && !node->is_type(Node::n_job))
+    if (!(node->is_type(Node::n_job) || order->_suspended || order->_is_on_blacklist))
         z::throw_xc("SCHEDULER-149", path().to_string(), debug_string_from_variant(order->_state));
 
     order->_job_chain      = this;
