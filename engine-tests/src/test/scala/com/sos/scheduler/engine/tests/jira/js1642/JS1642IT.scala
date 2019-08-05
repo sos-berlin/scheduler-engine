@@ -27,7 +27,7 @@ import com.sos.scheduler.engine.data.event.{EventId, EventRequest, EventSeq, Key
 import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetailed, FileBasedOverview, FileBasedState}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
-import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, JobChainState, NestedJobChainNodeOverview, NodeId}
+import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NestedJobChainNodeOverview, NodeId}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
@@ -670,6 +670,13 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           _.job[JobOverview](XTestBJobPath)
         }
         assert(jobOverview == XTestBJobOverview)
+      }
+
+      "Multiple" in {
+        val jobOverviews: immutable.Seq[JobOverview] = fetchWebAndDirect {
+          _.jobs[JobOverview](PathQuery.Multiple(PathQuery(TestJobPath) :: PathQuery(XTestBJobPath) :: Nil))
+        }
+        assert(jobOverviews.toSet == Set(TestJobOverview, XTestBJobOverview))
       }
     }
 

@@ -126,6 +126,11 @@ final class SchedulerUris private(schedulerUri: Uri) {
   }
 
   object job {
+    def forPost(returnType: String): String =
+      uriString(Uri(
+        path = Uri.Path(s"api/job"),
+        query = Uri.Query(Map("return" → returnType))))
+
     def apply[V <: JobView: JobView.Companion](path: JobPath): String =
       apply[V](JobQuery(path))
 

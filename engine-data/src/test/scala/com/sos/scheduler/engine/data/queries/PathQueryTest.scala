@@ -20,7 +20,6 @@ final class PathQueryTest extends FreeSpec {
 
   "All" in {
     val q = PathQuery.All
-    assert(q.patternString == "/")
     assert(q.toUriPath == "/")
     assert(q == PathQuery.All)
     assert(q matches AnyPath("/a"))
@@ -31,7 +30,6 @@ final class PathQueryTest extends FreeSpec {
 
   "Single JobPath" in {
     val q = PathQuery(AnyPath("/a/b"))
-    assert(q.patternString == "/a/b")
     assert(q.toUriPath == "/a/b")
     assert(q == PathQuery.SinglePath("/a/b"))
     assert(!(q matches AnyPath("/a")))
@@ -45,7 +43,6 @@ final class PathQueryTest extends FreeSpec {
 
   "PathQuery may apply to any TypedPath" in {
     val q = PathQuery(AnyPath("/a"))
-    assert(q.patternString == "/a")
     assert(q.toUriPath == "/a")
     assert(q matches JobPath("/a"))
     assert(q matches JobChainPath("/a"))
@@ -56,7 +53,6 @@ final class PathQueryTest extends FreeSpec {
 
   "FolderPath" in {
     val q: PathQuery.Folder = PathQuery(FolderPath("/a"), isRecursive = true)
-    assert(q.patternString == "/a/")
     assert(q.toUriPath == "/a/")
     assert(q == PathQuery(FolderPath("/a")))
     assert(q == PathQuery[AnyPath]("/a/"))
@@ -72,7 +68,6 @@ final class PathQueryTest extends FreeSpec {
 
   "FolderPath, not recursive" in {
     val q = PathQuery(FolderPath("/a"), isRecursive = false)
-    assert(q.patternString == "/a/*")
     assert(q.toUriPath == "/a/*")
     assert(q == PathQuery.FolderOnly(FolderPath("/a")))
     checkFolderQuery(q)
@@ -85,10 +80,43 @@ final class PathQueryTest extends FreeSpec {
   "Root folder, not recursive" in {
     // Special handling for pattern "/*", because FolderPath.Root is "/", not "".
     val q = PathQuery[AnyPath]("/*")
-    assert(q.patternString == "/*")
     assert(q.toUriPath == "/*")
     assert(q == PathQuery.FolderOnly(FolderPath.Root))
     checkJson(q, """{ "path": "/*" }""")
+  }
+
+  "Multiple paths" in {
+    val q = PathQuery.Multiple(PathQuery(AnyPath("/a/b")) :: PathQuery(FolderPath("/a/x")) :: Nil)
+    assert(PathQuery.fromUriPath[AnyPath]("/a/b|/a/x/") == q)
+    assert(q.toUriPath == "/a/b|/a/x/")
+    assert(q.folderPath == FolderPath("/a"))
+    assert(q.withRecursive(true) eq q)
+    assert(q.withRecursive(false) eq q)
+
+    assert(!(q matches AnyPath("/a")))
+    assert(q matches AnyPath("/a/b"))
+    assert(!(q matches AnyPath("/a/b/c")))
+
+    assert(!(q matches AnyPath("/a")))
+    assert(q matches AnyPath("/a/x/b"))
+    assert(q matches AnyPath("/a/x/c"))
+
+    checkJson(q,"""{
+      "paths": [
+        "/a/b",
+        "/a/x/"
+      ]
+     }""".stripMargin)
+
+    assert(PathQuery.Multiple(PathQuery(AnyPath("/a/b")) :: Nil).toUriPath == "/a/b")
+    assert(PathQuery.Multiple(PathQuery(AnyPath("/a/b")) :: Nil).folderPath == FolderPath("/a"))
+    assert(PathQuery.Multiple(PathQuery(AnyPath("/a/b")) :: PathQuery(AnyPath("/x")) :: Nil).folderPath == FolderPath.Root)
+  }
+
+  "paths array with only one path is deserialized as SinglePath" in {
+    implicit val jsonFormat = PathQuery.jsonFormat[UnknownTypedPath]
+    val jsObject = """{ "paths": [ "/a/b" ] }""".parseJson
+    assert(jsObject.convertTo[PathQuery] == PathQuery(AnyPath("/a/b")))
   }
 
   "matchesAnyType" - {

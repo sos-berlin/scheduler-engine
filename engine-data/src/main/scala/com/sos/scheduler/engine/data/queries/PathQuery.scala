@@ -2,19 +2,17 @@ package com.sos.scheduler.engine.data.queries
 
 import com.sos.scheduler.engine.base.serial.PathAndParameterSerializable
 import com.sos.scheduler.engine.base.sprayjson.SprayJson.implicits.RichJsValue
-import com.sos.scheduler.engine.base.utils.ScalazStyle.OptionRichBoolean
 import com.sos.scheduler.engine.data.filebased.{TypedPath, UnknownTypedPath}
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.queries.PathQuery._
+import scala.collection.immutable.Seq
 import scala.language.implicitConversions
-import spray.json.{JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json.{JsArray, JsObject, JsString, JsValue, RootJsonFormat}
 
 /**
   * @author Joacim Zschimmer
   */
 sealed trait PathQuery {
-
-  def patternString: String
 
   final def matchesAnyType(path: TypedPath): Boolean =
     path match {
@@ -34,11 +32,12 @@ sealed trait PathQuery {
       case o ⇒ o
     }
 
+  @deprecated("Does not work properly for PathQuery.Multiply")
   def typedPath[P <: TypedPath: TypedPath.Companion]: TypedPath
 
   def folderPath: FolderPath
 
-  def toUriPath: String = patternString
+  def toUriPath: String
 
   def toPathAndParameters[P <: TypedPath: TypedPath.Companion]: (String, Map[String, String]) =
     PathQuery.pathAndParameterSerializable.toPathAndParameters(this)
@@ -46,7 +45,6 @@ sealed trait PathQuery {
 
 object PathQuery {
   val All = FolderTree(FolderPath.Root)
-  val PathName = "path"
 
   def apply[P <: TypedPath: TypedPath.Companion](pattern: String): PathQuery =
     if (pattern endsWith "/*")
@@ -67,7 +65,11 @@ object PathQuery {
       case o: TypedPath ⇒ SinglePath(o.string)
     }
 
-  def fromUriPath[A <: TypedPath: TypedPath.Companion](path: String): PathQuery = apply[A](path)
+  def fromUriPath[A <: TypedPath: TypedPath.Companion](path: String): PathQuery =
+    if (path contains '|')
+      Multiple(path.split('|').map(PathQuery.apply[A]).toVector)
+    else
+      apply[A](path)
 
   sealed trait Folder extends PathQuery {
     def isRecursive: Boolean
@@ -79,7 +81,7 @@ object PathQuery {
   }
 
   final case class FolderTree(folderPath: FolderPath) extends Folder {
-    def patternString = folderPath.withTrailingSlash
+    def toUriPath = folderPath.withTrailingSlash
     def isRecursive = true
     override val matchesAll = folderPath == FolderPath.Root
     def matches[P <: TypedPath: TypedPath.Companion](path: P) = matchesAll || (folderPath isAncestorOf path)
@@ -87,14 +89,14 @@ object PathQuery {
   }
 
   final case class FolderOnly(folderPath: FolderPath) extends Folder {
-    def patternString = folderPath.withTrailingSlash + "*"
+    def toUriPath = folderPath.withTrailingSlash + "*"
     def isRecursive = false
     def matches[P <: TypedPath: TypedPath.Companion](path: P) = folderPath isParentOf path
     def typedPath[Ignored <: TypedPath: TypedPath.Companion] = folderPath
   }
 
   final case class SinglePath(pathString: String) extends PathQuery {
-    def patternString = pathString
+    def toUriPath = pathString
     def isRecursive = false
     val folderPath = FolderPath.parentOf(UnknownTypedPath(pathString))
     def matches[P <: TypedPath: TypedPath.Companion](path: P) = path == as[P]
@@ -102,14 +104,57 @@ object PathQuery {
     def as[P <: TypedPath: TypedPath.Companion]: P = implicitly[TypedPath.Companion[P]].apply(pathString)
   }
 
+  final case class Multiple(pathQueries: Seq[PathQuery]) extends PathQuery
+  {
+    require(pathQueries.nonEmpty, "PathQuery.Multiple must contain a path")
+
+    def toUriPath = pathQueries.map(_.toUriPath).mkString("|")
+
+    def matches[P <: TypedPath : TypedPath.Companion](path: P) =
+      pathQueries exists (_ matches path)
+
+    def typedPath[P <: TypedPath: TypedPath.Companion]: TypedPath =
+      implicitly[TypedPath.Companion[P]].apply("/")  // Wrong, but not used
+
+    def folderPath = {
+      var shortest: Vector[String] = null
+      for (segments <- pathQueries.map(_.folderPath.string.split("/").dropWhile(_.isEmpty).toVector)) {
+        if (shortest == null) {
+          shortest = segments
+        } else {
+          val n = shortest zip segments count { case (a, b) => a == b }
+          shortest = shortest.take(n)
+        }
+      }
+      FolderPath("/" + shortest.mkString("/"))
+    }
+  }
+
   def jsonFormat[P <: TypedPath: TypedPath.Companion]: RootJsonFormat[PathQuery] =
     new RootJsonFormat[PathQuery] {
-      def write(q: PathQuery) = JsObject((q != All option (PathName → JsString(q.toUriPath))).toMap)
+      def write(q: PathQuery) =
+        q match {
+          case All =>
+            JsObject()
+          case Multiple(queries) if queries.size > 1 =>
+            JsObject(Map("paths" → JsArray(queries.map(o => JsString(o.toUriPath)).toVector)))
+          case _ =>
+            JsObject(Map("path" → JsString(q.toUriPath)))
+      }
 
       def read(json: JsValue) =
-        json.asJsObject.fields.get(PathName) match {
-          case Some(path) ⇒ PathQuery[P](path.asJsString.value)
-          case None ⇒ PathQuery.All
+        json.asJsObject.fields.get("paths") match {
+          case Some(paths) ⇒
+            val a = paths.asJsArray
+            if (a.elements.length == 1)
+              PathQuery[P](a.elements.head.asJsString.value)
+            else
+              Multiple(a.elements.map(o => PathQuery[P](o.asJsString.value)))
+          case None ⇒
+            json.asJsObject.fields.get("path") match {
+              case Some(path) ⇒ PathQuery[P](path.asJsString.value)
+              case None ⇒ PathQuery.All
+            }
         }
   }
 
@@ -119,7 +164,7 @@ object PathQuery {
 
       def fromPathAndParameters(pathAndParameters: (String, Map[String, String])) = {
         val (path, _) = pathAndParameters
-        PathQuery[P](path)
+        PathQuery.fromUriPath[P](path)
       }
     }
 }

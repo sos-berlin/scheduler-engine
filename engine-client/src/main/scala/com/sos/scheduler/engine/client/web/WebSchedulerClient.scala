@@ -14,7 +14,7 @@ import com.sos.scheduler.engine.data.event.{Event, EventId, EventSeq, KeyedEvent
 import com.sos.scheduler.engine.data.events.SchedulerAnyKeyedEventJsonFormat.anyEventJsonFormat
 import com.sos.scheduler.engine.data.events.schedulerKeyedEventJsonFormat
 import com.sos.scheduler.engine.data.filebased.{FileBasedView, TypedPath}
-import com.sos.scheduler.engine.data.job.{JobPath, JobView, TaskId}
+import com.sos.scheduler.engine.data.job.{JobPath, JobState, JobView, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{JobChainDetailed, JobChainOverview, JobChainPath}
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, OrderKey, OrderView, Orders}
 import com.sos.scheduler.engine.data.processclass.{ProcessClassPath, ProcessClassView}
@@ -155,8 +155,13 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
   def job[V <: JobView: JobView.Companion](path: JobPath) =
     get[Snapshot[V]](_.job[V](path))
 
-  def jobs[V <: JobView: JobView.Companion](query: JobQuery) =
-    get[Snapshot[immutable.Seq[V]]](_.job[V](query))
+  def jobs[V <: JobView: JobView.Companion](query: JobQuery) = {
+    require(JobState.values forall query.isInState, "JobQuery.isInState not implemented")
+    implicit val x = PathQuery.jsonFormat[JobPath]
+    post[PathQuery, Snapshot[immutable.Seq[V]]](
+      uri = _.job.forPost(returnType = implicitly[JobView.Companion[V]].name),
+      data = query.pathQuery)
+  }
 
   def jobEvents[E <: Event](jobPath: JobPath, eventRequest: SomeEventRequest[E]) =
     get[Snapshot[EventSeq[Seq, E]]](_.job.events(PathQuery(jobPath), eventRequest))
