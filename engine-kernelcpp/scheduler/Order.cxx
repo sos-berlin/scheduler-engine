@@ -2546,13 +2546,14 @@ bool Order::try_place_in_job_chain( Job_chain* job_chain, Job_chain_stack_option
         }
 
         {
-            Node* referenced_node = job_chain->referenced_node_from_state(_state);
+            Node* referenced_node = job_chain->referenced_node_from_state_respecting_end_state(_state, _end_state);
             if (referenced_node != node) {
                 _log->info(message_string("SCHEDULER-859", referenced_node->order_state(), _state));
                 set_state2(referenced_node->order_state());
                 node = referenced_node;
                 suspend |= node->is_suspending_order();
             }
+            if (referenced_node->action() == Node::act_next_state) z::throw_xc("SCHEDULER-438", referenced_node->order_state().as_string());
         }
 
         if( !job_chain->node_from_state( _state )->is_type( Node::n_order_queue ) )

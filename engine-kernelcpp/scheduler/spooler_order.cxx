@@ -2958,6 +2958,19 @@ Node* Job_chain::referenced_node_from_state( const Order::State& state )
     return result;
 }
 
+Node* Job_chain::referenced_node_from_state_respecting_end_state(const Order::State &state,
+                                                                 const Order::State &end_state)
+{
+    Node *node = node_from_state(state);
+    Node *result = node;
+    int n = 1000;
+    while (result->action() == Node::act_next_state && result->order_state() != end_state) {
+        result = node_from_state(result->next_state());
+        if (--n <= 0) z::throw_xc("SCHEDULER-403", node->order_state());
+    }
+    return result;
+}
+
 //-----------------------------------------------------------------------Job_chain::node_from_state
 
 Node* Job_chain::node_from_state( const Order::State& state ) const

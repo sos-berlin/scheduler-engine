@@ -999,6 +999,7 @@ struct Job_chain : Com_job_chain,
 
     job_chain::Node*            first_node                  () const;
     job_chain::Node*            referenced_node_from_state  ( const Order::State& );
+    job_chain::Node*            referenced_node_from_state_respecting_end_state(const Order::State &state, const Order::State &end_state);
     job_chain::Node*            node_from_state             ( const Order::State& ) const;
     job_chain::Node*            node_from_state_or_null     ( const Order::State& ) const;
     job_chain::Job_node*        node_from_job               ( Job* );
