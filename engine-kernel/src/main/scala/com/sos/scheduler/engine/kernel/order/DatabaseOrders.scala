@@ -74,7 +74,7 @@ private[order] final class DatabaseOrders @Inject private(
       """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
       """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
       """ and "DISTRIBUTED_NEXT_TIME" is not null""" +
-      """ and "DISTRIBUTED_NEXT_TIME" <> """ + quoteSqlString(BlacklistDatabaseDistributedNextTime.toString)
+      """ and "DISTRIBUTED_NEXT_TIME" <> """ + databaseSubsystem.quoteSqlTimestamp(BlacklistDatabaseDistributedNextTime)
 
     jdbcConnectionPool.readOnly { connection ⇒
       autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒
@@ -89,7 +89,7 @@ private[order] final class DatabaseOrders @Inject private(
     val sql = "select count(*) from " + schedulerConfiguration.ordersTableName +
       """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
       """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
-      """ and "DISTRIBUTED_NEXT_TIME" = """ + quoteSqlString(BlacklistDatabaseDistributedNextTime.toString)
+      """ and "DISTRIBUTED_NEXT_TIME" = """ + databaseSubsystem.quoteSqlTimestamp(BlacklistDatabaseDistributedNextTime)
 
     jdbcConnectionPool.readOnly { connection ⇒
       autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒

@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.kernel.scheduler.Subsystem
 import com.sos.scheduler.engine.persistence.SchedulerDatabases.persistenceUnitName
 import java.io.Closeable
 import java.sql
+import java.time.Instant
 import javax.persistence.Persistence.createEntityManagerFactory
 import javax.persistence.{EntityManagerFactory, PersistenceException}
 import scala.collection.JavaConversions._
@@ -18,6 +19,7 @@ private[kernel] final class DatabaseSubsystem private[kernel](getCppProxy: () â‡
 extends Subsystem with HasCloser {
 
   private lazy val cppProxy = getCppProxy()
+  private lazy val productName = cppProxy.jdbc_connection.asInstanceOf[sql.Connection].getMetaData.getDatabaseProductName
   private val cppPropertiesOnce = new SetOnce[CppDatabaseProperties]
   private val inClauseLimitOnce = new SetOnce[Int]
 
@@ -28,8 +30,7 @@ extends Subsystem with HasCloser {
   private[kernel] def onDatabaseOpened(): Unit = {
     databaseOpened = true
     cppPropertiesOnce := CppDatabaseProperties(cppProxy.properties.getSister.toMap)
-    val connection = cppProxy.jdbc_connection.asInstanceOf[sql.Connection]
-    inClauseLimitOnce := (if (connection.getMetaData.getDatabaseProductName == "Oracle") 1000 else Int.MaxValue)
+    inClauseLimitOnce := (if (productName == "Oracle") 1000 else Int.MaxValue)
   }
 
   private[kernel] def cppProperties: CppDatabaseProperties = cppPropertiesOnce()
@@ -50,10 +51,17 @@ extends Subsystem with HasCloser {
       elements â‡’ quoteSqlName(column) + " in " + elements.mkString("(", ", ", ")")
     } mkString " or "
 
+  private[kernel] def quoteSqlTimestamp(instant: Instant) =
+    productName match {
+      case "Oracle" => "{ts" + quoteSqlString(instant.toString) + "}"
+      case "H2" | _ => quoteSqlString(instant.toString)
+    }
+
   private[kernel] def transformSql(string: String) = cppProxy.transform_sql(string)
 }
 
-object DatabaseSubsystem {
+object DatabaseSubsystem
+{
   def quoteSqlString(o: String) = {
     val quote = '\''
     require(!o.contains(quote), s"SQL string must not contain single quotes ($quote)")
