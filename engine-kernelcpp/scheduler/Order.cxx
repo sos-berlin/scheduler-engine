@@ -2774,17 +2774,20 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
             assert( _job_chain );
             if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
                 set_suspended();  // Like processing_error()
-            else
-            if (_outer_job_chain_path == ""  &&  _state == _end_state) {
-                log()->info( message_string( "SCHEDULER-704", _end_state ) );
-                set_end_state_reached();
-                handle_end_state();
+            else {
+                Order::State goto_state = !next_state.empty() ? normalized_state(next_state) : job_node->error_state();
+                Node* goto_node = goto_state.is_empty() ? NULL 
+                        : _job_chain->referenced_node_from_state_respecting_end_state(goto_state, _end_state); 
+                if (_outer_job_chain_path == "" &&
+                    (_state == _end_state ||
+                     goto_node && goto_node->order_state() == _end_state && goto_node->action() == Node::act_next_state)) 
+                {
+                    log()->info(message_string("SCHEDULER-704", _end_state));
+                    set_end_state_reached();
+                    handle_end_state();
+                } else 
+                    set_state1(goto_state);
             }
-            else
-            if (!next_state.empty())
-                set_state1(normalized_state(next_state));
-            else
-                set_state1(job_node->error_state());
         }
     }
     else

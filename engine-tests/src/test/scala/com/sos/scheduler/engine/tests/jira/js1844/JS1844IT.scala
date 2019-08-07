@@ -30,11 +30,10 @@ final class JS1844IT extends FreeSpec with ScalaSchedulerTest
     }
   }
 
-  "Order's end node are the same skipped node" in {
-    pending // Still fails
-    val skipping = notSkipping.copy(orderKey = notSkipping.orderKey.copy(id = OrderId("SKIPPING-2")), nodeId = None)
+  "Only the Order's end node is a skipped node" in {
+    val skipping = OrderCommand(jobChainPath orderKey "NOT-SKIPPED-2", endNodeId = Some(SkippedNodeId))
     val result = runOrder(skipping)
-    assert(result.nodeId == SkippedNodeId && !result.variables.contains("LAST-NODE-ID"))
+    assert(result.nodeId == NodeId("FIRST") && result.variables("LAST-NODE-ID") == "FIRST")
   }
 }
 
