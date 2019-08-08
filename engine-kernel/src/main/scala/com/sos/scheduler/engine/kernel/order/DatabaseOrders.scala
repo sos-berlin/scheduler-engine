@@ -33,7 +33,9 @@ private[order] final class DatabaseOrders @Inject private(
   schedulerId: SchedulerId,
   databaseSubsystem: DatabaseSubsystem,
   schedulerConfiguration: SchedulerConfiguration,
-  jdbcConnectionPool: JdbcConnectionPool) {
+  jdbcConnectionPool: JdbcConnectionPool)
+{
+  import schedulerConfiguration.ordersTableName
 
   def jobChainPathsToSql(jobChainPaths: TraversableOnce[JobChainPath]): String =
     databaseSubsystem.toInClauseSql(
@@ -56,7 +58,7 @@ private[order] final class DatabaseOrders @Inject private(
     if (limit < Int.MaxValue) select ++= s"%limit($limit) "
     select ++= """"ID", "JOB_CHAIN", "STATE", "DISTRIBUTED_NEXT_TIME", "OCCUPYING_CLUSTER_MEMBER_ID", "ORDER_XML""""
     select ++= " from "
-    select ++= schedulerConfiguration.ordersTableName
+    select ++= ordersTableName
     select ++= """  where "SPOOLER_ID"="""
     select ++= quoteSqlString(schedulerId.string.substitute("", "-"))
     select ++= """ and "DISTRIBUTED_NEXT_TIME" is not null"""
@@ -70,14 +72,16 @@ private[order] final class DatabaseOrders @Inject private(
   }
 
   private[order] def distributedNonBlacklistedOrderCount(jobChainPath: JobChainPath): Future[Int] = {
-    val sql = "select count(*) from " + schedulerConfiguration.ordersTableName +
-      """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
-      """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
-      """ and "DISTRIBUTED_NEXT_TIME" is not null""" +
-      """ and "DISTRIBUTED_NEXT_TIME" <> """ + databaseSubsystem.quoteSqlTimestamp(BlacklistDatabaseDistributedNextTime)
-
+    val sql = s"select count(*) from $ordersTableName where" +
+      """ "SPOOLER_ID" = ? and""" +
+      """ "JOB_CHAIN" = ? and""" +
+      """ "DISTRIBUTED_NEXT_TIME" is not null and""" +
+      """ "DISTRIBUTED_NEXT_TIME" <> ?"""
     jdbcConnectionPool.readOnly { connection ⇒
       autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒
+        stmt.setString(1, schedulerId.string.substitute("", "-"))
+        stmt.setString(2, jobChainPath.withoutStartingSlash)
+        stmt.setTimestamp(3, new java.sql.Timestamp(BlacklistDatabaseDistributedNextTime.toEpochMilli))
         val resultSet = stmt.executeQuery()
         resultSet.next()
         resultSet.getInt(1)
@@ -86,13 +90,15 @@ private[order] final class DatabaseOrders @Inject private(
   }
 
   private[order] def distributedBlacklistedOrderCount(jobChainPath: JobChainPath): Future[Int] = {
-    val sql = "select count(*) from " + schedulerConfiguration.ordersTableName +
-      """ where "SPOOLER_ID"=""" + quoteSqlString(schedulerId.string.substitute("", "-")) +
-      """ and "JOB_CHAIN"=""" + quoteSqlString(jobChainPath.withoutStartingSlash) +
-      """ and "DISTRIBUTED_NEXT_TIME" = """ + databaseSubsystem.quoteSqlTimestamp(BlacklistDatabaseDistributedNextTime)
-
+    val sql = s"select count(*) from $ordersTableName where" +
+      """ "SPOOLER_ID" = ? and""" +
+      """ "JOB_CHAIN" = ? and""" +
+      """ "DISTRIBUTED_NEXT_TIME" = ?"""
     jdbcConnectionPool.readOnly { connection ⇒
       autoClosing(connection.prepareStatement(sql.toString)) { stmt ⇒
+        stmt.setString(1, schedulerId.string.substitute("", "-"))
+        stmt.setString(2, jobChainPath.withoutStartingSlash)
+        stmt.setTimestamp(3, new java.sql.Timestamp(BlacklistDatabaseDistributedNextTime.toEpochMilli))
         val resultSet = stmt.executeQuery()
         resultSet.next()
         resultSet.getInt(1)

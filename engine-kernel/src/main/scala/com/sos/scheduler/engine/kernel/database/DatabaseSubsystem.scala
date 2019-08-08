@@ -53,8 +53,11 @@ extends Subsystem with HasCloser {
 
   private[kernel] def quoteSqlTimestamp(instant: Instant) =
     productName match {
-      case "Oracle" => "{ts" + quoteSqlString(instant.toString) + "}"
-      case "H2" | _ => quoteSqlString(instant.toString)
+      case "Oracle" =>
+        val ts = new java.sql.Timestamp(instant.toEpochMilli)
+        "{ts" + ts.toString + "}"
+      case "H2" | _ =>
+        quoteSqlString(instant.toString)
     }
 
   private[kernel] def transformSql(string: String) = cppProxy.transform_sql(string)
