@@ -3,10 +3,12 @@ package com.sos.scheduler.engine.tests.jira.js1825
 import com.google.common.io.Files.touch
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
 import com.sos.scheduler.engine.data.log.ErrorLogged
 import com.sos.scheduler.engine.data.message.MessageCode
+import com.sos.scheduler.engine.data.order.OrderStepStarted
 import com.sos.scheduler.engine.kernel.settings.{CppSettingName, CppSettings}
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits.RichEventBus
 import com.sos.scheduler.engine.test.configuration.TestConfiguration
@@ -54,8 +56,14 @@ final class JS1825IT extends FreeSpec
       }
 
       envProvider.runScheduler() { implicit controller =>
+        val orderStarted = controller.eventBus.eventFuture[OrderStepStarted](orderKey)
         controller.scheduler executeXml jobChainXml
         assert(exists(file))
+        assert(isOnBlacklist)
+        intercept[java.util.concurrent.TimeoutException] {
+          orderStarted.await(2.s)
+          fail("After JobScheduler restart, blacklisted order has been started")
+        }
         assert(isOnBlacklist)
       }
     }
