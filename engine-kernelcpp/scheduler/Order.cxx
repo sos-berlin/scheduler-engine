@@ -1470,6 +1470,7 @@ void Order::set_dom( const xml::Element_ptr& element, Variable_set_map* variable
     _setback_count          = element.int_getAttribute( "setback_count", _setback_count );
     _history_id             = element.int_getAttribute( "history_id"   , _history_id );
     _last_error = element.getAttribute("last_error");
+    _is_on_blacklist = element.bool_getAttribute("on_blacklist");
 
     if( element.bool_getAttribute( "replacement" ) )  set_replacement( true );
     _replaced_order_occupator = element.getAttribute( "replaced_order_occupator" );
