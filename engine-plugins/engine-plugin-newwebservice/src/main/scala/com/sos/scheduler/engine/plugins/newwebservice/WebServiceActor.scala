@@ -12,6 +12,7 @@ import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.cppproxy.SpoolerC
 import com.sos.scheduler.engine.kernel.event.JocOrderStatisticsChangedSource
+import com.sos.scheduler.engine.kernel.folder.FolderSubsystemClient
 import com.sos.scheduler.engine.kernel.job.TaskSubsystemClient
 import com.sos.scheduler.engine.kernel.log.PrefixLog
 import com.sos.scheduler.engine.kernel.order.OrderSubsystemClient
@@ -36,6 +37,7 @@ final class WebServiceActor @Inject private(
   protected val spoolerC: SpoolerC,
   protected val orderSubsystem: OrderSubsystemClient,
   protected val taskSubsystem: TaskSubsystemClient,
+  protected val folderSubsystem: FolderSubsystemClient,
   protected val prefixLog: PrefixLog,
   protected val schedulerThreadCallQueue: SchedulerThreadCallQueue,
   protected val disposableCppProxyRegister: DisposableCppProxyRegister,

@@ -30,21 +30,21 @@ final class ApiRouteTest extends org.scalatest.FreeSpec with ScalatestRouteTest 
 
   protected def schedulerThreadCallQueue = throw new NotImplementedError
 
-  protected def disposableCppProxyRegister = throw new NotImplementedError
-
-  protected def spoolerC = throw new NotImplementedError
-
   protected def orderSubsystem = throw new NotImplementedError
 
   protected def taskSubsystem = throw new NotImplementedError
-  protected def orderStatisticsChangedSource = throw new NotImplementedError
 
+  protected def folderSubsystem = throw new NotImplementedError
+
+  protected def orderStatisticsChangedSource = throw new NotImplementedError
 
   protected def prefixLog = null
 
   protected def isKnownAgentUriFuture(uri: AgentAddress) = throw new NotImplementedError
 
   protected def toAgentClient = throw new NotImplementedError
+
+  protected def schedulerConfiguration = throw new NotImplementedError
 
   override protected def afterAll() = {
     actorSystem.shutdown()

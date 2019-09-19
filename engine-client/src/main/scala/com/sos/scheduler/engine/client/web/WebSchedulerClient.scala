@@ -35,7 +35,6 @@ import spray.httpx.encoding.Gzip
 import spray.httpx.marshalling.Marshaller
 import spray.httpx.unmarshalling._
 import spray.json.DefaultJsonProtocol._
-import spray.json.JsValue
 
 /**
  * Client for JobScheduler Agent.
@@ -213,8 +212,18 @@ trait WebSchedulerClient extends SchedulerClient with WebCommandClient {
     else
       unmarshallingPipeline[A](accept = accept).apply(Get(uri(uris)))
 
+  final def getHttpResponse(uri: SchedulerUris ⇒ String, accept: MediaRange): Future[HttpResponse] =
+    (addHeader(Accept(accept)) ~> httpResponsePipeline)
+      .apply(Get(uri(uris)))
+
   private def unmarshallingPipeline[A: FromResponseUnmarshaller](accept: MediaType) =
     addHeader(Accept(accept)) ~> httpResponsePipeline ~> unmarshal[A]
+
+  final def putRaw(uri: SchedulerUris ⇒ String, content: HttpEntity): Future[HttpResponse] =
+    httpResponsePipeline.apply(Put(uri(uris), content))
+
+  final def delete(uri: SchedulerUris ⇒ String): Future[HttpResponse] =
+    httpResponsePipeline.apply(Delete(uri(uris)))
 
   private final def post[A: Marshaller, B: FromResponseUnmarshaller](uri: SchedulerUris ⇒ String, data: A): Future[B] =
     jsonUnmarshallingPipeline[B].apply(Post(uri(uris), data))

@@ -17,7 +17,7 @@ import spray.http.Uri
 /**
   * @author Joacim Zschimmer
   */
-final class SchedulerUris private(schedulerUri: Uri) {
+final class SchedulerUris private(val schedulerUri: Uri) {
 
   private[web] val masterUri = Uri(s"$schedulerUri/master/")
 

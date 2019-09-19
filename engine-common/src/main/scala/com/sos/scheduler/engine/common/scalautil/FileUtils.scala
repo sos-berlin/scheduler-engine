@@ -1,7 +1,7 @@
 package com.sos.scheduler.engine.common.scalautil
 
 import com.google.common.base.Charsets.UTF_8
-import com.google.common.io.{Closer, Files ⇒ GuavaFiles}
+import com.google.common.io.{Closer, Files => GuavaFiles}
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.Closers.withCloser
@@ -112,19 +112,30 @@ object FileUtils {
       body(file)
   }
 
-  def deleteDirectoryRecursively(dir: Path): Unit = {
+  def deleteDirectoryRecursively(dir: Path): Unit =
+    deleteDirectoryRecursively(dir, _ => {})
+
+  def deleteDirectoryRecursively(dir: Path, onDelete: Path => Unit): Unit = {
     require(dir.isDirectory, s"Not a directory: $dir")
     if (!isSymbolicLink(dir)) {
-      deleteDirectoryContentRecursively(dir)
+      deleteDirectoryContentRecursively(dir, onDelete)
     }
-    delete(dir)
+    deleteDirectory(dir, onDelete)
   }
 
-  def deleteDirectoryContentRecursively(dir: Path): Unit = {
+  def deleteDirectoryContentRecursively(dir: Path): Unit =
+    deleteDirectoryContentRecursively(dir, _ => {})
+
+  def deleteDirectoryContentRecursively(dir: Path, onDelete: Path => Unit): Unit = {
     for (f ← dir.pathSet) {
-      if (f.isDirectory && !isSymbolicLink(f)) deleteDirectoryContentRecursively(f)
-      delete(f)
+      if (f.isDirectory && !isSymbolicLink(f)) deleteDirectoryContentRecursively(f, onDelete)
+      deleteDirectory(f, onDelete)
     }
+  }
+
+  private def deleteDirectory(dir: Path, onDelete: Path => Unit): Unit = {
+    onDelete(Paths.get(dir.toString.stripSuffix("/") + File.separator))
+    delete(dir)
   }
 
   def nestedPathsIterator(directory: Path, options: FileVisitOption*): AutoCloseable with Iterator[Path] =

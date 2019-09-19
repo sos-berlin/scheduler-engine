@@ -34,8 +34,9 @@ with LogRoute
 with FrontEndRoute
 with OrderRoute
 with ProcessClassRoute
-with TaskRoute {
-
+with TaskRoute
+with LiveRoute
+{
   protected def client: DirectSchedulerClient
   protected def prefixLog: PrefixLog
   protected implicit def executionContext: ExecutionContext
@@ -89,6 +90,9 @@ with TaskRoute {
           case _ ⇒ reject
         }
       }
+    } ~
+    pathSegments("live") {
+      liveRoute
     } ~
     pathEndElseRedirect(webServiceContext) {
       get {
