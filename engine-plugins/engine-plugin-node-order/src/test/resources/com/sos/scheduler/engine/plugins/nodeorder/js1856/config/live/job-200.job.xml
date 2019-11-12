@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     stop_on_error="false"
+>
+    <script language="shell">
+        echo "**************************** job-200"
+        exit 22
+    </script>
+</job>

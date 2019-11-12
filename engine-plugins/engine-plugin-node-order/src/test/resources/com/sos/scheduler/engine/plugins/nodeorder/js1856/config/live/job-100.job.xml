@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+     stop_on_error="false"
+>
+    <script language="shell">
+        echo "++++++++++++++++++++++++++++ job-100"
+        exit 11
+    </script>
+    <monitor>
+        <script language="java:javascript"><![CDATA[
+            function spooler_task_after(result) {
+                spooler_task.order.log.info("### spooler_task.exit_code=" + spooler_task.exit_code)
+                if (spooler_task.exit_code == 11) {
+                    spooler_task.order.state = "200";
+                }
+            }
+        ]]></script>
+    </monitor>
+</job>

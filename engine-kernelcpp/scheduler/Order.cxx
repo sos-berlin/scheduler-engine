@@ -348,6 +348,7 @@ void Order::occupy_for_task( Task* task, const Time& now )
     _setback        = Time(0);
     _setback_called = false;
     _moved          = false;
+    _moved_from     = NULL;
     _task           = task;
     if( !_start_time )  _start_time = now;
 
@@ -2359,7 +2360,10 @@ void Order::move_to_node( Node* node )
     bool       is_same_node = node == _job_chain_node;
     ptr<Order> hold_me      = this;
 
-    if( _task )  _moved = true;
+    if (_task) {
+        _moved = true;
+        _moved_from = _job_chain_node;
+    }
 
     if( !is_same_node  &&  _job_chain_node  &&  _is_in_order_queue )
     {
@@ -2736,7 +2740,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
     _is_success_state = state_transition == Order_state_transition::success;
 
     Job*      last_job          = _task? _task->job() : NULL;
-    Job_node* job_node          = Job_node::cast( _job_chain_node );
+    Job_node* job_node          = Job_node::cast(_moved && _moved_from ? _moved_from : _job_chain_node );
     bool      force_error_state = false;
 
     string next_state = job_node ? job_node->next_order_state_string(state_transition) : "/UNUSED/";
@@ -2772,7 +2776,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
         if( job_node )
         {
             assert( _job_chain );
-            if( !_is_success_state  &&  job_node->is_on_error_suspend() )  
+            if( !_is_success_state  &&  job_node->is_on_error_suspend() )
                 set_suspended();  // Like processing_error()
             else {
                 Order::State goto_state = !next_state.empty() ? normalized_state(next_state) : job_node->error_state();
@@ -3127,6 +3131,7 @@ void Order::processing_error()
 void Order::postprocessing2( Job* last_job )
 {
     _moved = false;
+    _moved_from = NULL;
 
     if (Job* j = job())
         j->signal_earlier_order(this);
