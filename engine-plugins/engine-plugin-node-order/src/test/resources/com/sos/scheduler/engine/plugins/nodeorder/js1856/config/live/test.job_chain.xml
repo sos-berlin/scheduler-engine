@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job_chain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd"
+>
+    <job_chain_node state="100" job="job-100" error_state="100-ERROR"/>
+    <job_chain_node state="200" job="job-200" error_state="200-ERROR">
+        <on_return_codes>
+           <on_return_code return_code="11">
+               <add_order xmlns="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
+                          job_chain="/INVALID-EXIT-CODE-11"
+                          id="/INVALID-EXIT-CODE-11"/>
+           </on_return_code>
+           <on_return_code return_code="22">
+               <add_order xmlns="https://jobscheduler-plugins.sos-berlin.com/NodeOrderPlugin"
+                          job_chain="/second"
+                          id="SECOND"/>
+           </on_return_code>
+        </on_return_codes>
+    </job_chain_node>
+    <job_chain_node.end state="END"/>
+    <job_chain_node.end state="100-ERROR"/>
+    <job_chain_node.end state="200-ERROR"/>
+</job_chain>

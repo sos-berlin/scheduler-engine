@@ -55,7 +55,7 @@ extern const string scheduler_file_order_path_variable_name;
 
 //---------------------------------------------------------------------------Order_state_transition
 
-struct Order_state_transition { 
+struct Order_state_transition {
     public: static const Order_state_transition standard_error;
     public: static const Order_state_transition success;
     public: static const Order_state_transition keep;
@@ -63,11 +63,11 @@ struct Order_state_transition {
     public: static Order_state_transition of_exit_code(int i) {
         return Order_state_transition(i);
     }
-    
+
     public: static Order_state_transition of_bool(bool b) {
         return b? success : standard_error;
     }
-    
+
     public: Order_state_transition(int return_code) :
         _internal_value(return_code)
     {}
@@ -76,11 +76,11 @@ struct Order_state_transition {
         _internal_value(INT64_MAX)  // Out of range of Unix and Windows exit codes (max. 32 bits)
     {}
 
-    public: bool operator ==(const Order_state_transition& o) const { 
+    public: bool operator ==(const Order_state_transition& o) const {
         return internal_value() == o.internal_value();
     }
 
-    public: bool operator !=(const Order_state_transition& o) const { 
+    public: bool operator !=(const Order_state_transition& o) const {
         return !(*this == o);
     }
 
@@ -141,8 +141,8 @@ struct Order : Com_order,
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
-    bool                        on_initialize               (); 
-    bool                        on_load                     (); 
+    bool                        on_initialize               ();
+    bool                        on_load                     ();
     bool                        on_activate                 ();
 
     bool                        can_be_removed_now          ();
@@ -158,7 +158,7 @@ struct Order : Com_order,
     //
 
     Standing_order_folder*      standing_order_folder       () const                                { return typed_folder(); }
-    
+
     void                        load_record                 ( const Absolute_path&, const Record& );
     void                        load_blobs                  ( Read_transaction* );
     void                        load_order_xml_blob         ( Read_transaction* );
@@ -178,29 +178,29 @@ struct Order : Com_order,
     void                        open_log                ();
 
     void                        print_xml_child_elements_for_event( String_stream*, Scheduler_event* );
-    
+
     void                    set_id                      ( const Variant& );
     const Id&                   id                      ()                                          { return _id; }
     string                      string_id               ();
     static string               string_id               ( const Id& );
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { return _id == id; }
-    
+
     bool id_locked() const {
         return _id_locked;
     }
 
     void                    set_title                   ( const string& title )                     { _title = title,  _title_modified = true,  log()->set_prefix( obj_name() ); }
     string&                     title                   ()                                          { return _title; }
-                                                            
+
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
 
     void                        touch                   (Task*);
     bool                        is_touched              () const                                    { return _is_touched; }
 
-    bool is_touched_in_current_job_chain() const { 
-        return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched; 
+    bool is_touched_in_current_job_chain() const {
+        return _outer_job_chain_path.empty()? _is_touched : _is_nested_touched;
     }
 
     const Absolute_path& outer_job_chain_path() const {
@@ -257,7 +257,7 @@ struct Order : Com_order,
     bool                        is_agent_file_order     () const;
     string                      file_agent_address      () const;
     void on_blacklisted_file_removed();
-    
+
     void                    set_payload                 ( const VARIANT& );
     const Payload&              payload                 ()                                          { return _payload; }
     string                      string_payload          () const;
@@ -319,7 +319,7 @@ struct Order : Com_order,
     Time                        next_time               ();
     void                        set_next_start_time     ();
     void                    set_task_error              ( const Xc& x )                             { _task_error = x; }
-    
+
     const string& last_error() const {
         return _last_error;
     }
@@ -424,13 +424,13 @@ struct Order : Com_order,
     xml::Element_ptr            append_calendar_dom_element_for_setback(  const xml::Element_ptr& element, Show_calendar_options* options );
     void                        set_attributes_and_remove_duplicates( const xml::Element_ptr& element, xml::Simple_node_ptr node, xml::Element_ptr setback_element );
     bool                        order_is_removable_or_replaceable();
-    
+
     friend struct               job_chain::Order_queue_node;
     friend struct               Order_queue;
     friend struct               Job_chain;
 
 
-    Fill_zero                  _zero_;    
+    Fill_zero                  _zero_;
 
     string                     _file_based_job_chain_name;
     Absolute_path              _file_based_job_chain_path;
@@ -499,8 +499,9 @@ struct Order : Com_order,
 
     int                        _history_id;
     int                        _step_number;
-    Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
+    Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet
     bool                       _moved;                  // Nur wenn _task != NULL: true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    job_chain::Node*           _moved_from;
     bool                       _setback_called;
     Xc_copy                    _task_error;
 
@@ -543,7 +544,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
     virtual void                withdraw_order_request  ()                                          = 0;
 
     virtual xml::Element_ptr    dom_element             ( const xml::Document_ptr&, const Show_what& ) = 0;
-    
+
     virtual const string& java_directory() const = 0;
     virtual const string& java_regex() const = 0;
     virtual int64 java_repeat_millis() const = 0;
@@ -561,7 +562,7 @@ struct Order_source : Abstract_scheduler_object, Event_operation
 
 //------------------------------------------------------------------------------------Order_sources
 
-struct Order_sources 
+struct Order_sources
 {
     void                        close                   ();
     void                        initialize              ();
@@ -636,8 +637,8 @@ struct Node : Com_job_chain_node,
 
     enum Action
     {
-        act_process, 
-        act_stop, 
+        act_process,
+        act_stop,
         act_next_state
     };
 
@@ -679,7 +680,7 @@ struct Node : Com_job_chain_node,
     Absolute_path               job_chain_path              () const;
 
     Type                        type                        () const                                { return _type; }
-    
+
     void                    set_suspending_order            ( bool b )                              { _is_suspending_order = b; }
     bool                     is_suspending_order            () const                                { return _is_suspending_order; }
     void                    set_delay                       (const Duration& d)                     { _delay = d; }
@@ -740,9 +741,9 @@ struct End_node : Node, javabridge::has_proxy<End_node>
                                 End_node                    ( Job_chain* job_chain, const Order::State& state );
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<End_node>::java_sister(); }
-    
-    EndNodeJ& typed_java_sister() { 
-        return _typed_java_sister; 
+
+    EndNodeJ& typed_java_sister() {
+        return _typed_java_sister;
     }
 
     private:
@@ -859,7 +860,7 @@ struct Nested_job_chain_node : Node, javabridge::has_proxy<Nested_job_chain_node
   private:
     friend struct ::sos::scheduler::Job_chain;
 
-    Absolute_path              _nested_job_chain_path; 
+    Absolute_path              _nested_job_chain_path;
     reference< Nested_job_chain_node, Job_chain >  _nested_job_chain;
   //Job_chain_set              _using_job_chains_set;
     NestedJobChainNodeJ        _typed_java_sister;
@@ -895,7 +896,7 @@ struct Sink_node : Job_node, javabridge::has_proxy<Sink_node>
 
 //----------------------------------------------------------------------------------------Job_chain
 
-struct Job_chain : Com_job_chain, 
+struct Job_chain : Com_job_chain,
                    file_based< Job_chain, Job_chain_folder_interface, Order_subsystem >,
                    is_referenced_by<job_chain::Nested_job_chain_node,Job_chain>,
                    javabridge::has_proxy<Job_chain>
@@ -903,11 +904,11 @@ struct Job_chain : Com_job_chain,
     enum State      // Kann wegfallen, denn file_based_state() hat dieselbe Funktion
     {
         jc_under_construction,   // add_node() gesperrt, add_order() frei
-        jc_initialized,          
+        jc_initialized,
         jc_loaded,               // Aus Datenbank geladen
         jc_running,
         jc_stopped,
-        jc_closed                
+        jc_closed
     };
 
     //---------------------------------------------------------------------------------------------
@@ -920,9 +921,9 @@ struct Job_chain : Com_job_chain,
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Com_job_chain::Release(); }
 
     jobject                     java_sister                 ()                                      { return javabridge::has_proxy<Job_chain>::java_sister(); }
-    
-    const JobChainJ& typed_java_sister() const { 
-        return _typed_java_sister; 
+
+    const JobChainJ& typed_java_sister() const {
+        return _typed_java_sister;
     }
 
     // Abstract_scheduler_object:
@@ -957,13 +958,13 @@ struct Job_chain : Com_job_chain,
     void                    set_state                       ( const State& );
     State                       state                       () const                                { return _state; }
     string                      state_name                  () const;
-    
-    bool is_loaded_or_active() const { 
+
+    bool is_loaded_or_active() const {
         return _state == jc_loaded || is_active();
     }
 
-    bool is_active() const { 
-        return _state == jc_running || _state == jc_stopped; 
+    bool is_active() const {
+        return _state == jc_running || _state == jc_stopped;
     }
 
     void                    set_title                       ( const string& title )                 { _title = title; }
@@ -989,11 +990,11 @@ struct Job_chain : Com_job_chain,
     bool contains_nested_job_chains() const;
 
 
-    job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state, 
-                                                              const Order::State& next_state, 
+    job_chain::Node*            add_job_node                ( const Path& job_path, const Order::State& input_state,
+                                                              const Order::State& next_state,
                                                               const Order::State& error_state,
                                                               const xml::Element_ptr& = xml::Element_ptr() );
-    
+
     job_chain::Node*            add_end_node                ( const Order::State& input_state );
 
 
@@ -1078,11 +1079,11 @@ struct Job_chain : Com_job_chain,
     public: const Absolute_path& file_watching_process_class_path() const {
         return _file_watching_process_class_path;
     }
-    
+
     public: int order_source_count() const {
         return _order_sources._order_source_list.size();
     }
-    
+
     public: const string& java_file_order_source_directory(int index) const {
         return _order_sources._order_source_list.at(index)->java_directory();
     }
@@ -1090,27 +1091,27 @@ struct Job_chain : Com_job_chain,
     public: const string& java_file_order_source_regex(int index) const {
         return _order_sources._order_source_list.at(index)->java_regex();
     };
-    
+
     public: int64 java_file_order_source_repeat_millis(int index) const {
         return _order_sources._order_source_list.at(index)->java_repeat_millis();
     };
-    
+
     public: int64 java_file_order_source_delay_after_error_millis(int index) const {
         return _order_sources._order_source_list.at(index)->java_delay_after_error_millis();
     };
-    
+
     public: bool java_file_order_source_alert_when_directory_missing(int index) const {
         return _order_sources._order_source_list.at(index)->java_alert_when_directory_missing();
     };
-    
+
     public: vector<string> java_file_order_source_files(int index) const {
         return _order_sources._order_source_list.at(index)->java_files();
     };
-    
+
     public: vector<int64> java_file_order_source_files_last_modified(int index) const {
         return _order_sources._order_source_list.at(index)->java_files_last_modified();
     };
-    
+
   private:
     void                        check_for_removing          ();
     void                        database_record_store       ();
@@ -1141,7 +1142,7 @@ struct Job_chain : Com_job_chain,
     typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
 
-    typedef list< ptr<job_chain::Node> >  Node_list;        
+    typedef list< ptr<job_chain::Node> >  Node_list;
     Node_list                  _node_list;
 
     Order_sources              _order_sources;
@@ -1177,7 +1178,7 @@ struct Order_queue : Com_order_queue,
     string                      obj_name                    () const;
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     xml::Element_ptr            why_dom_element             (const xml::Document_ptr&, const Time& now);
-      
+
     job_chain::Order_queue_node* order_queue_node           () const                                { return _order_queue_node; }
     Job_chain*                  job_chain                   () const                                { return _job_chain; }
 
@@ -1226,7 +1227,7 @@ struct Order_queue : Com_order_queue,
     ptr<Com_order_queue>       _com_order_queue;
     Job_chain*                 _job_chain;
     job_chain::Order_queue_node* _order_queue_node;         // 1:1-Beziehung, _order_queue_node->order_queue() == this
-    
+
     time_t                     _next_distributed_order_check_time;
     int                        _next_distributed_order_check_delay;
     Time                       _next_announced_distributed_order_time;  // Gültig, wenn _is_distributed_order_requested
@@ -1252,7 +1253,7 @@ struct Job_chain_folder_interface : typed_folder< Job_chain >
 
 //----------------------------------------------------------------------------------Order_subsystem
 
-struct Order_subsystem: Object, 
+struct Order_subsystem: Object,
                         file_based_subsystem< Job_chain >,
                         javabridge::has_proxy<Order_subsystem>
 {
@@ -1361,7 +1362,7 @@ struct Standing_order_subsystem : file_based_subsystem< Order >,
     Absolute_path               make_path                   ( const Absolute_path& job_chain_path, const string& order_id ) const;
 
   //xml::Element_ptr            execute_xml                 ( Command_processor*, const xml::Element_ptr&, const Show_what& );
-    
+
     bool is_activating() const {
         return _is_activating;
     }
