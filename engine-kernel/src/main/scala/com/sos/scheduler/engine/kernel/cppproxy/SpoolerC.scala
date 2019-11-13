@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.kernel.cppproxy
 
 import com.sos.scheduler.engine.cplusplus.runtime.CppProxyWithSister
-import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppField, CppThreadSafe}
+import com.sos.scheduler.engine.cplusplus.runtime.annotation.{CppClass, CppExpression, CppThreadSafe}
 import com.sos.scheduler.engine.kernel.Scheduler
-import com.sos.scheduler.engine.kernel.http.SchedulerHttpRequest
-import com.sos.scheduler.engine.kernel.http.SchedulerHttpResponse
+import com.sos.scheduler.engine.kernel.http.{SchedulerHttpRequest, SchedulerHttpResponse}
 
 @CppClass(clas = "sos::scheduler::Spooler", directory = "scheduler", include = "spooler.h")
 trait SpoolerC extends CppProxyWithSister[Scheduler] {
@@ -74,6 +73,7 @@ trait SpoolerC extends CppProxyWithSister[Scheduler] {
   def process_class_subsystem: Process_class_subsystemC
   def schedule_subsystem: Schedule_subsystemC
   def standing_order_subsystem: Standing_order_subsystemC
+  def monitor_subsystem: Monitor_subsystemC
   def has_any_task: Boolean
   @CppThreadSafe def write_to_scheduler_log(category: String, text: String): Unit
   def time_zone_name: String

@@ -6,6 +6,7 @@ namespace scheduler {
 
 Monitor::Monitor(Spooler* spooler) : 
     file_based<Monitor, Monitor_folder, Monitor_subsystem>(spooler->monitor_subsystem(), this, Scheduler_object::type_monitor),
+    javabridge::has_proxy<Monitor>(spooler),
     _zero_(this+1),
     _module_monitor(Z_NEW(Module_monitor(Z_NEW(Module(spooler, this, spooler->include_path(), log(), true)))))
 {

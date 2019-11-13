@@ -7,7 +7,9 @@ namespace scheduler {
 struct Monitor_folder;
 struct Monitor_subsystem;
 
-struct Monitor : file_based<Monitor, Monitor_folder, Monitor_subsystem>, Object
+struct Monitor : file_based<Monitor, Monitor_folder, Monitor_subsystem>,      
+                 javabridge::has_proxy<Monitor>,
+                 Object
 {
     private: Fill_zero _zero_;
     private: ptr<Module_monitor> _module_monitor;
@@ -35,6 +37,10 @@ struct Monitor : file_based<Monitor, Monitor_folder, Monitor_subsystem>, Object
     public: xml::Element_ptr dom_element(const xml::Document_ptr&, const Show_what&);
 
     using File_based::obj_name;
+
+    public: jobject java_sister() { 
+        return javabridge::has_proxy<Monitor>::java_sister(); 
+    }
 };
 
 }}

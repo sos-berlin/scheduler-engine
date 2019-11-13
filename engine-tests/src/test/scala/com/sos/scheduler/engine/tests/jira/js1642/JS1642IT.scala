@@ -28,6 +28,7 @@ import com.sos.scheduler.engine.data.filebased.{FileBasedAdded, FileBasedDetaile
 import com.sos.scheduler.engine.data.folder.FolderPath
 import com.sos.scheduler.engine.data.job.{JobDescription, JobOverview, JobPath, JobState, TaskId}
 import com.sos.scheduler.engine.data.jobchain.{EndNodeOverview, JobChainDetailed, JobChainOverview, JobChainPath, NestedJobChainNodeOverview, NodeId}
+import com.sos.scheduler.engine.data.monitor.MonitorPath
 import com.sos.scheduler.engine.data.order.{JocOrderStatistics, JocOrderStatisticsChanged, OrderDetailed, OrderKey, OrderOverview, OrderStepStarted}
 import com.sos.scheduler.engine.data.processclass.ProcessClassDetailed
 import com.sos.scheduler.engine.data.queries.{JobChainNodeQuery, JobChainQuery, OrderQuery, PathQuery}
@@ -173,7 +174,8 @@ final class JS1642IT extends FreeSpec with ScalaSchedulerTest with SpeedTests {
           KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-aJobChain", "2")),
           KeyedEvent(FileBasedAdded)(JobChainPath("/xFolder/x-bJobChain")),
           KeyedEvent(FileBasedAdded)(OrderKey("/xFolder/x-bJobChain", "1")),
-          KeyedEvent(FileBasedAdded)(JobPath("/xFolder/test-b"))))
+          KeyedEvent(FileBasedAdded)(JobPath("/xFolder/test-b")),
+          KeyedEvent(FileBasedAdded)(MonitorPath("/xFolder/TEST-MONITOR"))))
         {
           nonEmpty.eventSnapshots
             .map { _.value }

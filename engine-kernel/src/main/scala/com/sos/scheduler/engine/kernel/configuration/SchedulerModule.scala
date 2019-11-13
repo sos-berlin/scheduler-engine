@@ -23,7 +23,7 @@ import com.sos.scheduler.engine.eventbus.{ColdEventBus, EventBus, SchedulerEvent
 import com.sos.scheduler.engine.kernel.DirectSchedulerClient
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadCallQueue
 import com.sos.scheduler.engine.kernel.async.SchedulerThreadFutures.inSchedulerThread
-import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers, PublishEvent, Result}
+import com.sos.scheduler.engine.kernel.command.{CommandHandler, CommandSubsystem, HasCommandHandlers, PublishEvent}
 import com.sos.scheduler.engine.kernel.configuration.SchedulerModule._
 import com.sos.scheduler.engine.kernel.cppproxy._
 import com.sos.scheduler.engine.kernel.database.{DatabaseSubsystem, JdbcConnectionPool}
@@ -89,6 +89,7 @@ with HasCloser {
     provideCppSingleton[Schedule_subsystemC] { spoolerC.schedule_subsystem }
     provideCppSingleton[Task_subsystemC] { spoolerC.task_subsystem }
     provideCppSingleton[Standing_order_subsystemC] { spoolerC.standing_order_subsystem }
+    provideCppSingleton[Monitor_subsystemC] { spoolerC.monitor_subsystem }
   }
 
   private def provideCppSingleton[A <: AnyRef : ClassTag](provider: ⇒ A) = {

@@ -8,11 +8,10 @@ namespace scheduler {
 
 
 struct Monitor_subsystem: Object, 
-                          file_based_subsystem<Monitor>
+                          file_based_subsystem<Monitor>,
+                          javabridge::has_proxy<Monitor_subsystem>
 {
-    protected: Monitor_subsystem(Spooler* spooler) : 
-        file_based_subsystem<Monitor>(spooler, this, type_monitor_subsystem) 
-    {}
+    protected: Monitor_subsystem(Spooler*);
 
     public: virtual ptr<Monitor_folder> new_monitor_folder(Folder*) = 0;
 
@@ -26,6 +25,10 @@ struct Monitor_subsystem: Object,
 
     public: xml::Element_ptr new_file_baseds_dom_element(const xml::Document_ptr& doc, const Show_what&) { 
         return doc.createElement("monitors"); 
+    }
+
+    public: jobject java_sister() { 
+        return javabridge::has_proxy<Monitor_subsystem>::java_sister(); 
     }
 };
 

@@ -3,11 +3,16 @@
 namespace sos {
 namespace scheduler {
 
+Monitor_subsystem::Monitor_subsystem(Spooler* spooler) :
+    file_based_subsystem<Monitor>(spooler, this, type_monitor_subsystem),
+    javabridge::has_proxy<Monitor_subsystem>(spooler)
+{}
+    
 
 struct Standard_monitor_subsystem : Monitor_subsystem
 {
     public: Standard_monitor_subsystem(Spooler* spooler) :
-        Monitor_subsystem(spooler) 
+        Monitor_subsystem(spooler)
     {}
 
     void close() {
