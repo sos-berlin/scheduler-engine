@@ -15,7 +15,7 @@ final class SimpleAgentClient private(val agentUri: Uri) extends AgentClient wit
 
   protected val licenseKeys = Nil
   protected val actorRefFactory = ActorSystem("SimpleAgentClient")
-  protected def hostConnectorSetupOption = None
+  def hostConnectorSetupOption = None
   protected def userAndPasswordOption = None
 
   def close() = actorRefFactory.shutdown()

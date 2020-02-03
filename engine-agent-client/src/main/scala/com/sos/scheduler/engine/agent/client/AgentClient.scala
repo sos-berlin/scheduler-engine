@@ -51,7 +51,7 @@ trait AgentClient {
   val agentUri: Uri
   protected def licenseKeys: immutable.Iterable[LicenseKeyString]
   implicit protected val actorRefFactory: ActorRefFactory
-  protected def hostConnectorSetupOption: Option[HostConnectorSetup]
+  def hostConnectorSetupOption: Option[HostConnectorSetup]
   protected def userAndPasswordOption: Option[UserAndPassword]
 
   private lazy val logger = Logger.withPrefix[AgentClient](agentUri.toString)
@@ -220,7 +220,7 @@ object AgentClient {
   private class Standard(
     val agentUri: Uri,
     protected val licenseKeys: immutable.Iterable[LicenseKeyString] = Nil,
-    protected val hostConnectorSetupOption: Option[HostConnectorSetup] = None,
+    val hostConnectorSetupOption: Option[HostConnectorSetup] = None,
     protected val userAndPasswordOption: Option[UserAndPassword] = None)
     (implicit protected val actorRefFactory: ActorRefFactory)
   extends AgentClient
