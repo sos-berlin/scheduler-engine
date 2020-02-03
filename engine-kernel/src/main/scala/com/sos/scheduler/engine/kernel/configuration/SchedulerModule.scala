@@ -120,8 +120,8 @@ with HasCloser {
   private def provideDirectSchedulerCollector(o: DirectSchedulerClient): DirectOrderClient = o
 
   @Provides @Singleton
-  private def provideSchedulerConfiguration(spoolerC: SpoolerC): SchedulerConfiguration =
-    new SchedulerConfiguration.Injectable(spoolerC)
+  private def provideSchedulerConfiguration(spoolerC: SpoolerC, config: Config): SchedulerConfiguration =
+    new SchedulerConfiguration.Injectable(spoolerC, config)
 
   @Provides @Singleton
   private def provideFileBasedSubsystemRegister(injector: Injector): FileBasedSubsystem.Register =

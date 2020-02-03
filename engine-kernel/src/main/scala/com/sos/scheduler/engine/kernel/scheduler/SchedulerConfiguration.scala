@@ -49,13 +49,7 @@ trait SchedulerConfiguration {
 
   def htmlDirOption: Option[Path]
 
-  lazy val keystoreReferenceOption = {
-    val file = mainConfigurationDirectory / "agent-https.jks"
-    exists(file) option KeystoreReference(
-      file.toUri.toURL,
-      Some(SecretString("jobscheduler")),
-      Some(SecretString("jobscheduler")))
-  }
+  def keystoreReferenceOption: Option[KeystoreReference]
 
   def jobHistoryTableName: String
 
@@ -75,7 +69,7 @@ trait SchedulerConfiguration {
 object SchedulerConfiguration {
   lazy val DefaultConfig: Config = Configs.loadResource(JavaResource("com/sos/scheduler/engine/kernel/configuration/master.conf"))
 
-  private[kernel] final class Injectable(spoolerC: SpoolerC) extends SchedulerConfiguration {
+  private[kernel] final class Injectable(spoolerC: SpoolerC, config: Config) extends SchedulerConfiguration {
     private lazy val settingsC = spoolerC.settings
 
     def initialize(): Unit = {
@@ -140,6 +134,15 @@ object SchedulerConfiguration {
     lazy val udpPort: Option[Int] = someUnless(spoolerC.udp_port, 0)
 
     lazy val htmlDirOption = emptyToNone(settingsC._html_dir) map { o ⇒ Paths.get(o) }
+
+    lazy val keystoreReferenceOption: Option[KeystoreReference] = {
+      val fileKey = "jobscheduler.master.agents.https.keystore.file"
+      val file = if (config.hasPath(fileKey)) new File(config.getString(fileKey)) else mainConfigurationDirectory / "agent-https.jks"
+      exists(file) option KeystoreReference(
+        file.toUri.toURL,
+        Some(SecretString(config.getString("jobscheduler.master.agents.https.keystore.password"))),
+        Some(SecretString(config.getString("jobscheduler.master.agents.https.keystore.key-password"))))
+    }
 
     lazy val jobHistoryTableName       = settingsC._job_history_tablename
     lazy val tasksTableName            = settingsC._tasks_tablename
