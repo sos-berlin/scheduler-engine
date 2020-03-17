@@ -2440,8 +2440,10 @@ void Order::remove_from_job_chain( Job_chain_stack_option job_chain_stack_option
 
     assert( !_is_db_occupied );
 
-    report_event_code(orderRemovedEvent, java_sister());  // Before effective removal, to let Scala resolve OrderKey via jobChain.path
-    if( _job_chain )  _job_chain->remove_order( this );
+    if (_job_chain) {
+        report_event_code(orderRemovedEvent, java_sister());  // Before effective removal, to let Scala resolve OrderKey via jobChain.path
+        _job_chain->remove_order( this );
+    }
 
     _setback_count = 0;
     _setback = Time(0);
