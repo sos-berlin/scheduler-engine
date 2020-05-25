@@ -2742,7 +2742,7 @@ void Order::postprocessing(const Order_state_transition& state_transition, const
     _is_success_state = state_transition == Order_state_transition::success;
 
     Job*      last_job          = _task? _task->job() : NULL;
-    Job_node* job_node          = Job_node::cast(_moved && _moved_from ? _moved_from : _job_chain_node );
+    Job_node* job_node          = Job_node::try_cast(_moved && _moved_from ? _moved_from : _job_chain_node );
     bool      force_error_state = false;
 
     string next_state = job_node ? job_node->next_order_state_string(state_transition) : "/UNUSED/";
@@ -3110,7 +3110,7 @@ void Order::restore_initial_settings() {
 
 void Order::processing_error()
 {
-    if (Job_node* n = Job_node::cast(_job_chain_node)) {
+    if (Job_node* n = Job_node::try_cast(_job_chain_node)) {
         if (n->is_on_error_suspend()) {
             set_suspended();  // Like postprocessing()
         }

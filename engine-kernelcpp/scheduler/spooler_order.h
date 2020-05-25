@@ -416,6 +416,10 @@ struct Order : Com_order,
     int64 setback_millis() const {
         return _setback_count ? _setback.millis() : 0;
     }
+    
+    bool moved() const { 
+        return _moved;
+    }
 
   private:
     Time                        first_start_time();

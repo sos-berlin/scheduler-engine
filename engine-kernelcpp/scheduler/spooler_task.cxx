@@ -1647,7 +1647,10 @@ bool Task::do_something()
                                 assert( !_delay_until_locks_available );
                                 check_if_shorter_than( now );
                                 // JS-448 something_done |= check_if_longer_than( now );
-                                if( !ok || has_error() )  set_state_direct( s_ending ), loop = true;
+                                if (!ok || has_error() || (_order && _order->moved())) {
+                                    set_state_direct( s_ending );
+                                    loop = true;
+                                }
                                 if( _state != s_ending  &&  !_end )  _order_for_task_end = NULL;
                                 _call_register.call<Try_next_step_call>();
                                 something_done = true;
