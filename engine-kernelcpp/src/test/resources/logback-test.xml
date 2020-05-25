@@ -6,7 +6,8 @@
             <pattern>%d{dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="stdout"/>
     </root>
+    <logger level="debug" name="com.sos.scheduler.engine"/>
 </configuration>
