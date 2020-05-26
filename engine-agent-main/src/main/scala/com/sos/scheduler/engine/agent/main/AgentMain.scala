@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.agent.main
 import com.sos.scheduler.engine.agent.Agent
 import com.sos.scheduler.engine.agent.configuration.AgentConfiguration
 import com.sos.scheduler.engine.agent.data.commands.Terminate
+import com.sos.scheduler.engine.base.MavenSettings.Version
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.EmptyAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
@@ -25,6 +26,7 @@ object AgentMain {
   private val ShutdownTimeout = OnJavaShutdownSigkillProcessesAfter + 2.s
 
   def main(args: Array[String]): Unit = {
+    logger.info(s"JobScheduler Agent $Version")
     val (conf, environment) = tryProvideDotnet(AgentConfiguration(args))
     try autoClosing(environment) { _ ⇒
       run(conf)
