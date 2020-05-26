@@ -7,7 +7,7 @@
 set -e
 
 log() {
-    echo "[$1]  $2" 1>&2
+    date "+%Y-%m-%d %T,%3N %z [$1]  $2" 1>&2
 }
 
 PID=""
@@ -48,7 +48,7 @@ fi
 log info "Killing task with PID $TASK_PID and its children"
 descendants=
 
-if [ "`uname`" = "SunOS" ]; then
+if [ "`uname`" = "SunOS" ] || [ "`uname`" = "AIX" ]; then
     psTree="ps -ef -o pid,ppid"
 else
     psTree="ps ax -o pid,ppid"

@@ -3435,7 +3435,20 @@ void Order::handle_changed_schedule()
 
         if (!is_touched()) {
             //_setback = 0;           // Änderung von <run_time> überschreibt Order.at
+            Time previous = _setback;
             set_next_start_time();      // Änderung von <run_time> Überschreibt Order.at
+            
+            if (previous != _setback &&
+                file_based_state() == s_active && 
+                _is_in_database && !_is_db_occupied && !_task && !_job_chain_path.empty())
+            {
+                for (Retry_transaction ta(db()); ta.enter_loop(); ta++) try {
+                    db_update_clob(&ta, "order_xml", database_xml());
+                    ta.commit(Z_FUNCTION);
+                } catch (exception &x) {
+                    ta.reopen_database_after_error(z::Xc("SCHEDULER-305", db()->_orders_tablename, x), Z_FUNCTION);
+                }
+            }
         }
     }
 }
