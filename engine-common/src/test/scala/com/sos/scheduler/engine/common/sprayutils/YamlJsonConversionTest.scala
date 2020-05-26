@@ -23,7 +23,8 @@ final class YamlJsonConversionTest extends FreeSpec {
       JsArray(JsNumber(2), JsNull)),
     "nested" → JsObject(
       "a" → JsBoolean(true)))
-  private val yaml = """number: 1.23
+  private val yaml = toYaml(jsObject)
+  private val expectedYaml = """number: 1.23
                        |string: STRING
                        |array:
                        |- 1
@@ -36,17 +37,27 @@ final class YamlJsonConversionTest extends FreeSpec {
                        |""".stripMargin
 
   "toYaml" in {
-    assert(toYaml(jsObject) == yaml)
+    assert(yaml contains "number: 1.23\n")
+    assert(yaml contains "string: STRING\n")
+    assert(yaml contains "array:\n")
+    assert(yaml contains "- 1\n")
+    assert(yaml contains "- true\n")
+    assert(yaml contains "- x: X\n")
+    assert(yaml contains "- - 2\n")
+    assert(yaml contains "  - null\n")
+    assert(yaml contains "nested:\n")
+    assert(yaml contains "  a: true\n")
   }
 
   ".toYaml" in {
     case class A(x: Int, y: String)
     implicit val jsonFormat = jsonFormat2(A.apply)
-    assert(A(123, "ABC").toYaml == "x: 123\n" + "y: ABC\n")
+    assert(A(123, "ABC").toYaml contains "x: 123\n")
+    assert(A(123, "ABC").toYaml contains "y: ABC\n")
   }
 
   ".toJson" in {
-    assert(yamlToJsValue(yaml) == jsObject)
+    assert(yamlToJsValue(expectedYaml) == jsObject)
   }
 
   ".toFlowYaml" in {
@@ -54,6 +65,11 @@ final class YamlJsonConversionTest extends FreeSpec {
     implicit val jsonFormat = jsonFormat3(A.apply)
     val a = A("test", 1, true)
 
-    assert(a.toFlowYaml == """{string: test, number: 1, '"quoted': true}""")
+    assert(a.toFlowYaml startsWith "{")
+    assert(a.toFlowYaml endsWith "}")
+    assert(!a.toFlowYaml.contains('\n'))
+    assert(a.toFlowYaml contains "string: test")
+    assert(a.toFlowYaml contains "number: 1")
+    assert(a.toFlowYaml contains """'"quoted': true""")
   }
 }

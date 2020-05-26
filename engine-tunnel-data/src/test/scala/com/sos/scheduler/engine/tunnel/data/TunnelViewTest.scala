@@ -7,7 +7,7 @@ import java.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.junit.JUnitRunner
-import spray.json.{pimpAny, pimpString}
+import spray.json._
 
 /**
  * @author Joacim Zschimmer
