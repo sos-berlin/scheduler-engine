@@ -194,6 +194,7 @@ struct Jdbc_file : Sos_database_file
     Global_jobject             _jdbc_result_set;
   //Global_jobject             _jdbc_output_stream;
     Global_jobject             _jdbc_input_stream;
+    Global_jobject             _jdbc_reader;
     bool                       _has_result_set;
     vector<int>                _jdbc_columns;
     vector<Jdbc_type>          _jdbc_column_types;
@@ -658,6 +659,14 @@ Jdbc_file::~Jdbc_file()
         _jdbc_input_stream = NULL;
     }
 
+    if (_jdbc_reader) {
+        try {
+            if( _debug )  Z_LOG2( "jdbc", "java.io.Reader.close()\n" );
+            _jdbc_reader.call_void_method( "close", "()V" );
+        } catch( const exception& ) {}
+        _jdbc_reader = NULL;
+    }
+
     _jdbc_column_types.clear();
     _type = NULL;
 
@@ -1007,7 +1016,13 @@ void Jdbc_file::open( const char*, Open_mode, const File_spec& )
                 bool ok = _jdbc_result_set.call_bool_method( "next", "()Z" );
                 if( !ok )  throw_not_exist_error( "SOS-1251" );
 
-                _jdbc_input_stream = _jdbc_result_set.call_object_method( _is_clob? "getAsciiStream" : "getBinaryStream", "(I)Ljava/io/InputStream;", 1 );
+                if (_is_clob) {
+                    _jdbc_reader = _jdbc_result_set.call_object_method(
+                            "getCharacterStream", "(I)Ljava/io/Reader;", 1); 
+                } else {
+                    _jdbc_input_stream = _jdbc_result_set.call_object_method(
+                            "getBinaryStream", "(I)Ljava/io/InputStream;", 1);
+                }
             } 
 
             if( ( _open_mode & out )  &&  _oracle_lob )
@@ -1191,6 +1206,7 @@ void Jdbc_file::close( Close_mode close_mode )
     }
 
     _jdbc_input_stream = NULL;
+    _jdbc_reader = NULL;
 
     _jdbc_column_types.clear();
     _type = NULL;
@@ -1408,16 +1424,31 @@ void Jdbc_file::get_lob_record( Area& buffer )
 
     Env env;
 
-    local_jobject<jbyteArray> jbyte_array ( env->NewByteArray( size ) );
+    if (!_jdbc_input_stream && !_jdbc_reader) throw_eof_error();
+    
+    if (_jdbc_input_stream) {
+        local_jobject<jbyteArray> jbyte_array ( env->NewByteArray( size ) );
+        int length = _jdbc_input_stream.call_int_method("read", "([B)I", (jbyteArray)jbyte_array);
+        if (length == -1) throw_eof_error();
 
-    if( !_jdbc_input_stream )  throw_eof_error();
+        jbyte* byte_array = env->GetByteArrayElements(jbyte_array, NULL);
+        buffer.assign(byte_array, length);
+        env->ReleaseByteArrayElements(jbyte_array, byte_array, JNI_ABORT);
+    } else {
+        local_jobject<jcharArray> j_array (env->NewCharArray(size));
+        int length = _jdbc_reader.call_int_method("read", "([C)I", (jcharArray)j_array);
+        if (length == -1) throw_eof_error();
 
-    int length = _jdbc_input_stream.call_int_method( "read", "([B)I", (jbyteArray)jbyte_array );
-    if( length == -1 )  throw_eof_error();
-
-    jbyte* byte_array = env->GetByteArrayElements( jbyte_array, NULL );
-    buffer.assign( byte_array, length );
-    env->ReleaseByteArrayElements( jbyte_array, byte_array, JNI_ABORT );
+        jchar *array = env->GetCharArrayElements(j_array, NULL);
+        buffer.set_length(length);
+        for (int i = 0; i < length; i++) {
+           jchar c = array[i];
+           if ((uint16)c >= 0xff) z::throw_xc(
+                   S() << "Unicode character > 0xff from CLOB read, but ASCII is expected" << " at position " << i);
+           buffer.char_ptr()[i] = (char)c;
+        }
+        env->ReleaseCharArrayElements(j_array, array, JNI_ABORT);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
