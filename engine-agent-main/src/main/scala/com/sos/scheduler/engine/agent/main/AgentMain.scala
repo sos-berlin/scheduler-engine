@@ -7,7 +7,6 @@ import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.EmptyAutoCloseable
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaShutdownHook
@@ -39,7 +38,7 @@ object AgentMain {
   private def tryProvideDotnet(conf: AgentConfiguration): (AgentConfiguration, AutoCloseable) =
     conf match {
       case c if isWindows ⇒
-        val env = new DotnetEnvironment(temporaryDirectory)
+        val env = new DotnetEnvironment(conf.temporaryDirectory)
         (c withDotnetAdapterDirectory Some(env.directory), env)
       case c ⇒ (c, EmptyAutoCloseable)
     }
