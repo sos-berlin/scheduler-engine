@@ -3,6 +3,7 @@ package com.sos.scheduler.engine.taskserver.dotnet.dlls
 import com.sos.scheduler.engine.common.scalautil.Logger
 import com.sos.scheduler.engine.common.utils.JavaResource
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 /**
   * @author Joacim Zschimmer
@@ -25,7 +26,7 @@ object DotnetDlls {
     for (resource ← DllsResourcePaths) yield {
       val file = directory resolve resource.simpleName
       logger.debug(s"Providing $file")
-      resource.copyToFile(file)
+      resource.copyToFile(file, REPLACE_EXISTING)
       file
     }
 }
