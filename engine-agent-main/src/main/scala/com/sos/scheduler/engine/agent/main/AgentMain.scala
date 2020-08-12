@@ -6,13 +6,14 @@ import com.sos.scheduler.engine.agent.data.commands.Terminate
 import com.sos.scheduler.engine.base.MavenSettings.Version
 import com.sos.scheduler.engine.common.scalautil.AutoClosing.autoClosing
 import com.sos.scheduler.engine.common.scalautil.Closers.EmptyAutoCloseable
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.awaitResult
 import com.sos.scheduler.engine.common.scalautil.Logger
-import com.sos.scheduler.engine.common.system.FileUtils.temporaryDirectory
 import com.sos.scheduler.engine.common.system.OperatingSystem.isWindows
 import com.sos.scheduler.engine.common.time.ScalaTime._
 import com.sos.scheduler.engine.common.utils.JavaShutdownHook
 import com.sos.scheduler.engine.taskserver.dotnet.DotnetEnvironment
+import java.nio.file.Files.createDirectories
 import scala.util.control.NonFatal
 
 /**
@@ -41,7 +42,9 @@ object AgentMain {
   private def tryProvideDotnet(conf: AgentConfiguration): (AgentConfiguration, AutoCloseable) =
     conf match {
       case c if isWindows ⇒
-        val env = new DotnetEnvironment(temporaryDirectory)
+        val dotnetDir = conf.temporaryDirectory / "dotnet"
+        createDirectories(dotnetDir)
+        val env = new DotnetEnvironment(dotnetDir)
         (c withDotnetAdapterDirectory Some(env.directory), env)
       case c ⇒ (c, EmptyAutoCloseable)
     }

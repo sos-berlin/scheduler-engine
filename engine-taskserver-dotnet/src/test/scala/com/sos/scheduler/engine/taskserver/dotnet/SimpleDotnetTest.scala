@@ -9,6 +9,7 @@ import com.sos.scheduler.engine.common.utils.Exceptions.ignoreException
 import com.sos.scheduler.engine.data.log.SchedulerLogLevel
 import com.sos.scheduler.engine.taskserver.dotnet.SimpleDotnetTest._
 import com.sos.scheduler.engine.taskserver.dotnet.api.{DotnetModuleReference, TaskContext}
+import java.nio.file.Files.createTempDirectory
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.{BeforeAndAfterAll, FreeSpec}
@@ -20,10 +21,13 @@ trait SimpleDotnetTest extends FreeSpec with HasCloser with BeforeAndAfterAll {
 
   protected def language: String
 
-  private lazy val dotnetEnvironment = new DotnetEnvironment(temporaryDirectory) sideEffect { o ⇒
-    onClose {
-      ignoreException(logger.asLazy.debug) {
-        o.close()
+  private lazy val dotnetEnvironment = {
+    val dotnetDir = createTempDirectory(temporaryDirectory, "dotnet")
+    new DotnetEnvironment(dotnetDir) sideEffect { o ⇒
+      onClose {
+        ignoreException(logger.asLazy.debug) {
+          o.close()
+        }
       }
     }
   }
