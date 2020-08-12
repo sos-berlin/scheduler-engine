@@ -9,9 +9,8 @@ import java.nio.file.Path
 /**
   * @author Joacim Zschimmer
   */
-final class DotnetEnvironment(baseTemporaryDirectory: Path) extends HasCloser {
+final class DotnetEnvironment(val directory: Path) extends HasCloser {
 
-  val directory = createTempDirectory(baseTemporaryDirectory, "dotnet")
   WindowsProcess.makeDirectoryAccessibleForEverybody(directory)
   private val files = DotnetDlls.provideDlls(directory)
 
