@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<order xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+  <params>
+    <param name="PARAMETER" value="TEST-ISO-8859-1-ÄÖÜ"/>
+  </params>
+  <run_time/>
+</order>
