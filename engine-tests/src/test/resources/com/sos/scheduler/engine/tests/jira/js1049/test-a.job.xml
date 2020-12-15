@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+<job xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
     <description>å</description>
-    <script language="shell">exit 0</script>
+    <script language="shell">
+        :;if false; then :
+        @echo off
+        goto WINDOWS
+        fi
+
+        echo "PARAMETER=$SCHEDULER_PARAM_PARAMETER"
+        exit
+
+        :WINDOWS
+        echo PARAMETER=%SCHEDULER_PARAM_PARAMETER%
+    </script>
 </job>

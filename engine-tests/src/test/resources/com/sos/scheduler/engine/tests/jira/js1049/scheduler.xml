@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.3.12/scheduler.xsd">
     <config>
         <params>
             <param name="Å" value="å"/>
         </params>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.newwebservice.NewWebServicePlugin">
+                <plugin.config test="true"/>
+            </plugin>
+        </plugins>
     </config>
 </spooler>

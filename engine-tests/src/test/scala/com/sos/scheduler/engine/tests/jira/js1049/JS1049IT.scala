@@ -1,15 +1,20 @@
 package com.sos.scheduler.engine.tests.jira.js1049
 
-import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits.RichFile
-import com.sos.scheduler.engine.common.scalautil.xmls.ScalaXmls.implicits.RichXmlFile
+import com.sos.scheduler.engine.client.web.StandardWebSchedulerClient
+import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
+import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
+import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
+import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
-import com.sos.scheduler.engine.data.order.{OrderFinished, OrderId, OrderStepEnded, OrderSuspended}
+import com.sos.scheduler.engine.data.order.{OrderDetailed, OrderFinished, OrderId, OrderKey, OrderSuspended}
 import com.sos.scheduler.engine.data.xmlcommands.OrderCommand
 import com.sos.scheduler.engine.kernel.scheduler.SchedulerConstants.schedulerEncoding
 import com.sos.scheduler.engine.kernel.variable.SchedulerVariableSet
 import com.sos.scheduler.engine.test.EventBusTestFutures.implicits._
 import com.sos.scheduler.engine.test.SchedulerTestUtils._
+import com.sos.scheduler.engine.test.configuration.TestConfiguration
 import com.sos.scheduler.engine.test.scalatest.ScalaSchedulerTest
 import com.sos.scheduler.engine.tests.jira.js1049.JS1049IT._
 import java.nio.charset.Charset
@@ -18,10 +23,15 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import com.sos.scheduler.engine.test.SchedulerTestUtils._
 
 @RunWith(classOf[JUnitRunner])
 final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
+
+  private lazy val httpPort = findRandomFreeTcpPort()
+  protected override lazy val testConfiguration = TestConfiguration(getClass,
+    mainArguments = s"-http-port=$httpPort" :: Nil,
+    logCategories = "scheduler.mainlog")
+  private lazy val client = new StandardWebSchedulerClient(s"http://127.0.0.1:$httpPort").closeWithCloser
 
   override def onBeforeSchedulerActivation(): Unit = {
     for (i ← JobIncludeSettings flatMap { _.includes })
@@ -91,19 +101,44 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   private def runOrderEncodingTest(runNumber: Int, orderId: OrderId): Unit = {
     val orderKey = JobChainPath("/test") orderKey orderId
+    val expected = s"TEST-${orderId.string}-ÄÖÜ"
+    logParameter(orderKey)
+    assert(orderDetailed(orderKey).variables("PARAMETER") == expected)
+    assert(httpOrderDetailed(orderKey).variables("PARAMETER") == expected)
+
     eventBus.awaiting[OrderSuspended.type](orderKey) {
       scheduler executeXml <modify_order job_chain="/test" order={orderKey.id.string} at="now"/>
     }
-    assert(orderLog(orderKey) contains s"#$runNumber PARAMETER=TEST-${orderId.string}-ÄÖÜ")
+    logParameter(orderKey)
+    assert(orderDetailed(orderKey).variables("PARAMETER") == expected)
+    assert(httpOrderDetailed(orderKey).variables("PARAMETER") == expected)
+    assert(orderLog(orderKey) contains s"#$runNumber PARAMETER=$expected")
+
     eventBus.awaiting[OrderFinished](orderKey) {
       scheduler executeXml <modify_order job_chain="/test" order={orderKey.id.string} suspended="false"/>
     }
+    logParameter(orderKey)
+    assert(orderDetailed(orderKey).variables("PARAMETER") == expected)
+    assert(httpOrderDetailed(orderKey).variables("PARAMETER") == expected)
+
+    assert(orderDetailed(orderKey).variables("PARAMETER") == s"TEST-${orderId.string}-ÄÖÜ")
   }
+
+
+  private def logParameter(orderKey: OrderKey): Unit = {
+    val p = orderDetailed(orderKey).variables("PARAMETER")
+    logger.info("PARAMETER=" + p + "  0x" + (p.filter(c => (c & 0x80) != 0).map(_.toInt).map(c => f"$c%02X").mkString))
+  }
+
+  private def httpOrderDetailed(orderKey: OrderKey): OrderDetailed =
+    client.order[OrderDetailed](orderKey).await(TestTimeout).value
 }
 
 
 object JS1049IT
 {
+  private val logger = Logger(getClass)
+
   private case class Include(filename: String, encoding: Charset, content: String) {
     override def toString = s"$filename $encoding"
   }
