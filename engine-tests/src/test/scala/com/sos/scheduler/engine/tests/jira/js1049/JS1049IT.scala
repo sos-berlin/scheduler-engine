@@ -5,6 +5,7 @@ import com.sos.scheduler.engine.common.scalautil.Closers.implicits._
 import com.sos.scheduler.engine.common.scalautil.FileUtils.implicits._
 import com.sos.scheduler.engine.common.scalautil.Futures.implicits._
 import com.sos.scheduler.engine.common.scalautil.Logger
+import com.sos.scheduler.engine.common.time.ScalaTime.DurationRichInt
 import com.sos.scheduler.engine.common.utils.FreeTcpPortFinder.findRandomFreeTcpPort
 import com.sos.scheduler.engine.data.job.{JobDescription, JobPath}
 import com.sos.scheduler.engine.data.jobchain.JobChainPath
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FreeSpec
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
+import scala.xml.XML
 
 @RunWith(classOf[JUnitRunner])
 final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
@@ -120,8 +122,8 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
     logParameter(orderKey)
     assert(orderDetailed(orderKey).variables("PARAMETER") == expected)
     assert(httpOrderDetailed(orderKey).variables("PARAMETER") == expected)
-
-    assert(orderDetailed(orderKey).variables("PARAMETER") == s"TEST-${orderId.string}-ÄÖÜ")
+    assert(orderDetailed(orderKey).variables("PARAMETER") == expected)
+    assert(httpShowOrderVariables(orderKey)("PARAMETER") == expected)
   }
 
 
@@ -132,8 +134,18 @@ final class JS1049IT extends FreeSpec with ScalaSchedulerTest {
 
   private def httpOrderDetailed(orderKey: OrderKey): OrderDetailed =
     client.order[OrderDetailed](orderKey).await(TestTimeout).value
-}
 
+  private def httpShowOrderVariables(orderKey: OrderKey): Map[String, String] = {
+    val responseXml = XML.loadString(
+      client.execute(<show_order what="payload" job_chain={orderKey.jobChainPath.string} order={orderKey.id.string}/>)
+        .await(99.s))
+    (responseXml \ "answer" \ "order" \ "payload" \ "params" \ "param")
+      .collect {
+        case e: xml.Elem => e.attributes.asAttrMap("name") -> e.attributes.asAttrMap("value")
+      }
+      .toMap
+  }
+}
 
 object JS1049IT
 {
