@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine-plugins</artifactId>
-        <version>1.13.8</version>
+        <version>1.13.9-SNAPSHOT</version>
     </parent>
 
     <inceptionYear>2015</inceptionYear>
