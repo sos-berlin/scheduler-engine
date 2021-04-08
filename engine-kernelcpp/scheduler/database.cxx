@@ -2106,16 +2106,17 @@ void Task_history::write( bool start )
                             {
                                 if( !_extra_record.null(i) )
                                 {
-                                    string s = _extra_record.as_string(i);
-                                    if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
-                                    update [ _job_history->_extra_names[i] ] = s;
+                                    update [ _job_history->_extra_names[i] ] = _extra_record.as_string(i);
                                 }
                             }
                         }
 
                         ta.execute( update, Z_FUNCTION );
 
-
+                        typedef stdext::hash_map<string, string> T; 
+                        Z_FOR_EACH_CONST(T, _extra_clobs, i){
+                            ta.update_clob(_spooler->_db->_job_history_tablename, i->first, "id", _task->_id, i->second);
+                        }
 
                         // Task-Protokoll
                         string log_filename = _task->_log->filename();
@@ -2195,11 +2196,17 @@ void Task_history::end()
 
 //--------------------------------------------------------------------Task_history::set_extra_field
     
-void Task_history::set_extra_field( const string& name, const Variant& value )
-{
-    if( !_job_history->_history_yes )  return;
-
-    _extra_record.set_field( name, variant_as_string(value) );
+void Task_history::set_extra_field( const string& name, const Variant& value ) {
+    if (!_job_history->_history_yes) return;
+    
+    string str = variant_as_string(value);
+    if (str.length() <= 1024) {
+        _extra_record.set_field(name, str);
+        _extra_clobs.erase(name);
+    } else {
+        _extra_record.set_field(name, "");
+        _extra_clobs[name] = str;
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

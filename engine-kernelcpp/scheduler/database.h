@@ -360,6 +360,7 @@ struct Task_history
 
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     Record                     _extra_record;
+    stdext::hash_map<string, string> _extra_clobs;
     int                        _task_id;
 };
 
