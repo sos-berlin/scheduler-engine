@@ -4,6 +4,8 @@
 
     public class SpoolerParams
     {
+        private const string ORDER_STATE_PARAM_DELIMITER = "/";
+
         private readonly Task spoolerTask;
         private readonly Spooler spooler;
         private readonly bool isOrderJob;
@@ -95,14 +97,28 @@
                 return;
             }
 
-            var parameters = getAll();
-            var parameterNames = getAll().names();
-            if (!String.IsNullOrEmpty(parameterNames))
-            {
-                var names = parameterNames.Split(';');
+            var taskParams = spoolerTask.@params();
+            if (taskParams != null) {
+                var names = taskParams.names().Split(';');
                 foreach (var name in names)
                 {
-                    SetEnvVar(name, parameters.var(name));
+                    SetEnvVar(name, taskParams.var(name));
+                }
+            }
+            if (isOrderJob)
+            {
+                var op = spoolerTask.order();
+                if (op != null)
+                {
+                    var orderParams = op.@params();
+                    if (orderParams != null) {
+                        var names = orderParams.names().Split(';');
+                        var orderStateAndDelimiter = op.state()+ ORDER_STATE_PARAM_DELIMITER;
+                        foreach (var name in names)
+                        {
+                            SetEnvVar(getOrderParameterName(name, orderStateAndDelimiter), orderParams.var(name));
+                        }
+                    }
                 }
             }
         }
@@ -111,9 +127,25 @@
 
         #region Private methods
 
+        private string getOrderParameterName(string paramName, string orderStateAndDelimiter) {
+            string name = paramName;
+            if (name.StartsWith(orderStateAndDelimiter))
+            {
+                name = name.Substring(orderStateAndDelimiter.Length);
+            }
+            if (name.StartsWith(ORDER_STATE_PARAM_DELIMITER))
+            {
+                name = "";
+            }
+            return name;
+        }
+
         private void SetEnvVar(string name, string value)
         {
-            Environment.SetEnvironmentVariable(schedulerVariableNamePrefix + name.ToUpper(), value);
+            if (!string.IsNullOrEmpty(name))
+            {
+                Environment.SetEnvironmentVariable(schedulerVariableNamePrefix + name.ToUpper(), value);
+            }
         }
 
         #endregion
