@@ -1,10 +1,9 @@
 package com.sos.scheduler.engine.cplusplus.scalautil.io
 
-import FileUtil._
-import com.google.common.io.Files
+import com.google.common.io.{Files, MoreFiles}
+import com.sos.scheduler.engine.cplusplus.scalautil.io.FileUtil._
 import java.io._
 import java.nio.charset.Charset
-import org.apache.commons.io.FileUtils
 import org.junit.Assert._
 import org.junit._
 
@@ -49,7 +48,9 @@ final class FileUtilTest {
       paths foreach { p => Files.touch(new File(dir, p)) }
       assertEquals(paths.toSet, listFilePathsRecursive(dir).toSet)
       assertEquals((paths filterNot { _ endsWith "ignore" }).toSet, listFilePathsRecursiveFiltered(dir){ _.getName != "ignore" } .toSet)
+    } finally {
+      MoreFiles.deleteDirectoryContents(dir.toPath)
+      dir.delete()
     }
-    finally FileUtils.deleteDirectory(dir)
   }
 }
