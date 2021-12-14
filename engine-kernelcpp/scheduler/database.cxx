@@ -1917,7 +1917,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) <<
                     " `id`, `spooler_id`, `job_name`, `start_time`, `end_time`, `cause`, `steps`, `error`, `error_code`, `error_text`, "
                     " `cluster_member_id`, `exit_code`, `pid`" <<
-                    join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
+                    //join( "", vector_map( quote_and_prepend_comma, _extra_names ) ) <<
                     " from " << _spooler->db()->_job_history_tablename <<
                     clause );
 
