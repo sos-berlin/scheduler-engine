@@ -15,7 +15,11 @@ final class H2DatabaseServer(configuration: H2DatabaseServer.Configuration) exte
   import configuration.{directory, tcpPort}
 
   private val name = s"database-$tcpPort"
-  private val server = createTcpServer("-tcpPort", tcpPort.toString, "-baseDir", directory.getPath) sideEffect { o ⇒
+  private val server = createTcpServer(
+    "-ifNotExists",
+    "-tcpAllowOthers",
+    "-tcpPort", tcpPort.toString,
+    "-baseDir", directory.getPath) sideEffect { o ⇒
     onClose { o.stop() }
   }
 
