@@ -89,7 +89,8 @@ final class ScriptInstanceTest extends FreeSpec with OneInstancePerTest {
     * Calls a groovy script and gives them some objects via the addObject method.
     * The script contains some funtions called by the call method. */
   "groovyScriptFromFile" in {
-    runScript("groovy", groovyResource.asUTF8String)
+    pending  // Groovy dependency has been removed
+    //runScript("groovy", groovyResource.asUTF8String)
   }
 
   /** Executes a simple java script.
@@ -124,7 +125,7 @@ final class ScriptInstanceTest extends FreeSpec with OneInstancePerTest {
 
 private object ScriptInstanceTest {
   private val javaScriptResource = JavaResource.apply("com/sos/scheduler/engine/jobapi/scripting/test.js")
-  private val groovyResource = JavaResource.apply("com/sos/scheduler/engine/jobapi/scripting/test.groovy")
+  //private val groovyResource = JavaResource.apply("com/sos/scheduler/engine/jobapi/scripting/test.groovy")
 
   private final class JavaScriptLogger {
     val lines = mutable.Buffer[String]()
