@@ -336,6 +336,7 @@ struct Spooler : Object,
         s_loading,
         s_starting,
         s_waiting_for_activation,
+        s_waiting_for_activation_paused,
         s_running,
         s_paused,
         s_stopping,
@@ -761,6 +762,7 @@ struct Spooler : Object,
 
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
+    bool                       _pause_at_start;
     State                      _state;
     State_cmd                  _state_cmd;
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!

@@ -11,6 +11,7 @@ public enum SchedulerState {
     loading("loading"),
     starting("starting"),
     waiting_for_activation("waiting_for_activation"),
+    waiting_for_activation_paused("waiting_for_activation_paused"),
     running("running"),
     paused("paused"),
     stopping("stopping"),

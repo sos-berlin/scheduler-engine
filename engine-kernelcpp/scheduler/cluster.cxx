@@ -1098,8 +1098,9 @@ void Exclusive_scheduler_watchdog::try_to_become_exclusive()
         {
             _next_precedence_check = 0;
         }
-        else
-        if( _cluster->is_member_allowed_to_start()  &&  check_has_backup_precedence() )
+        else if (_spooler->state() == Spooler::s_waiting_for_activation/*not paused*/
+                 && _cluster->is_member_allowed_to_start()
+                 && check_has_backup_precedence())
         {
             _announced_to_become_exclusive = true;
             _cluster->mark_as_exclusive();
@@ -1158,7 +1159,7 @@ bool Exclusive_scheduler_watchdog::check_has_backup_precedence()
                 _next_precedence_check = 0;
             }
         }
-        catch( exception& x )  { _log->error( S() << x.what() << ", while checking backup precendence" ); }
+        catch( exception& x )  { _log->error( S() << x.what() << ", while checking backup precedence" ); }
     }
     else
     {

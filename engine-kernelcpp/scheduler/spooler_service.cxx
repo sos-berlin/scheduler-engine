@@ -336,6 +336,7 @@ void My_scheduler_service::set_service_status( int spooler_error, int state )
                                                     : static_service_spooler->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
                                                     : static_service_spooler->state() == Spooler::s_starting        ? SERVICE_START_PENDING
                                                     : static_service_spooler->state() == Spooler::s_waiting_for_activation? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
+                                                    : static_service_spooler->state() == Spooler::s_waiting_for_activation_paused? SERVICE_RUNNING       // START_PENDING blockiert Bedienknöpfe der Dienstesteuerung (Windows XP)
                                                     : static_service_spooler->state() == Spooler::s_stopping        ? stop_pending
                                                     : static_service_spooler->state() == Spooler::s_stopping_let_run? stop_pending
                                                     : static_service_spooler->state() == Spooler::s_running         ? SERVICE_RUNNING

@@ -1315,6 +1315,16 @@ void Spooler::set_state( State state )
     assert( current_thread_id() == _thread_id );
 
     self_check();
+    
+    if (_pause_at_start) {
+        if (state == s_running) {
+            _pause_at_start = false;
+            state = s_paused;
+        } else if (state == s_waiting_for_activation) {
+            _pause_at_start = false;
+            state = s_waiting_for_activation_paused;
+        } 
+    }
 
 
     if( _state == state )  return;
@@ -1368,6 +1378,7 @@ string Spooler::state_name( State state )
         case s_loading:             return "loading";
         case s_starting:            return "starting";
         case s_waiting_for_activation: return "waiting_for_activation";
+        case s_waiting_for_activation_paused: return "waiting_for_activation_paused";
         case s_running:             return "running";
         case s_paused:              return "paused";
         case s_stopping:            return "stopping";
@@ -1653,7 +1664,9 @@ void Spooler::read_command_line_arguments()
             if( opt.flag      ( "exclusive"              ) )  _cluster_configuration._demand_exclusiveness   = opt.set();
             else
             if( opt.flag      ( "backup"                 ) )  _cluster_configuration._is_backup_member       = opt.set();
-            else
+            else if (opt.flag("pause")) {
+                _pause_at_start = true;
+            } else
             if( opt.with_value( "backup-precedence"      ) )  _cluster_configuration._backup_precedence      = opt.as_int();
             else
             if( opt.flag      ( "distributed-orders"     ) )  _cluster_configuration._orders_are_distributed = opt.set();
@@ -3990,6 +4003,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line, jobject j
                 }
                 else
                 if( opt.flag      ( "backup"           ) )  is_backup = opt.set();
+                else
+                if (opt.flag("pause")) {}
                 else
                 if (opt.with_value("configuration-directory")) {
                     string d = opt.value();
