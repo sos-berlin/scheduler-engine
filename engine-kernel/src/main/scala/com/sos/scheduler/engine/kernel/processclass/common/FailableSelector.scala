@@ -11,6 +11,8 @@ import com.sos.scheduler.engine.kernel.processclass.common.FailableSelector._
 import java.time.{Duration, Instant}
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
+import spray.http.StatusCode
+import spray.http.StatusCodes.{BadGateway, GatewayTimeout}
 
 /**
  * @author Joacim Zschimmer
@@ -54,6 +56,11 @@ class FailableSelector[Failable, Result](
             case f @ Failure(_: TimedCall.CancelledException) ⇒
               logger.debug(s"$f")
               promise.success(failable → Failure(new CancelledException))
+
+            case Failure(throwable: spray.httpx.UnsuccessfulResponseException)
+              if isTolerableHttpRejection(throwable.response.status) =>
+              onHandlableFailure(failable, throwable)
+
             case Failure(throwable) ⇒ // Failure lets abort FailableSelector
               failables.setFailure(failable, throwable)
               promise.success(failable → Failure(throwable))
@@ -114,6 +121,7 @@ class FailableSelector[Failable, Result](
 
 object FailableSelector {
   private val logger = Logger(getClass)
+  private val isTolerableHttpRejection = Set[StatusCode](BadGateway, GatewayTimeout)
 
   trait Callbacks[Failable, Result] {
     /**
