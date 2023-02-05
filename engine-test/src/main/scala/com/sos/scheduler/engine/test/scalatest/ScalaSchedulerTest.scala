@@ -22,7 +22,7 @@ trait ScalaSchedulerTest
 
   protected def testClass = getClass
 
-  protected lazy val testConfiguration = TestConfiguration(testClass = getClass)
+  protected def testConfiguration = TestConfiguration(testClass = getClass)
 
   protected final lazy val testEnvironment: TestEnvironment =
     TestEnvironment(testConfiguration, testDirectory).closeWithCloser

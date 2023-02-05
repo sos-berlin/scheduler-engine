@@ -77,7 +77,6 @@ struct Database_order_detector : Async_operation, Abstract_scheduler_object
     Time                       _now;                        // Zeitpunkt von async_continue_()
     time_t                     _now_utc;
     Time                       _now_database_distributed_next_time;
-    Time                       _never_database_distributed_next_time;
     Time                       _blacklist_database_distributed_next_time;
 };
 
@@ -215,7 +214,6 @@ Database_order_detector::Database_order_detector( Spooler* spooler )
     Abstract_scheduler_object( spooler, this, Scheduler_object::type_database_order_detector )
 {
     _now_database_distributed_next_time   = Time::of_utc_date_time( now_database_distributed_next_time   );
-    _never_database_distributed_next_time = Time::of_utc_date_time( never_database_distributed_next_time );
     _blacklist_database_distributed_next_time = Time::of_utc_date_time( blacklist_database_distributed_next_time );
 }
 
@@ -394,9 +392,8 @@ int Database_order_detector::read_result_set( Read_transaction* ta, const string
 
         Order_queue_node* node = Order_queue_node::cast( job_chain->node_from_state( record.as_string( "state" ) ) );
 
-        distributed_next_time = Time::of_utc_date_time( record.as_string( "distributed_next_time" ) );
+        distributed_next_time = Time::of_utc_date_time( record.as_string("distributed_next_time") );
         if( distributed_next_time == _now_database_distributed_next_time   )  distributed_next_time = Time(0);
-        if( distributed_next_time >= _never_database_distributed_next_time )  distributed_next_time = Time::never;
 
         bool is_now = distributed_next_time <= _now;
         node->order_queue()->set_next_announced_distributed_order_time( distributed_next_time, is_now );

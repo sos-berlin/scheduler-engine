@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<spooler xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://www.sos-berlin.com/repository/scheduler/1.9/scheduler.xsd">
+    <config>
+        <security>
+            <allowed_host host="127.0.0.1" level="all"/>  <!-- For UDP from cluster member -->
+        </security>
+        <plugins>
+            <plugin java_class="com.sos.scheduler.engine.plugins.newwebservice.NewWebServicePlugin"/>
+        </plugins>
+    </config>
+</spooler>

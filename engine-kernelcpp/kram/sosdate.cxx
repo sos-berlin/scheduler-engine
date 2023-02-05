@@ -404,6 +404,8 @@ time_t Sos_optional_date_time::as_time_t() const
     {
         return 0;
     }
+    else if (_year > 2038) // Especially 3111-11-11 used in distributed_next_time
+        return (time_t)INT_MAX;
     else
     {
         return ( day_count() - zero_day ) * 24*60*60 + _time;

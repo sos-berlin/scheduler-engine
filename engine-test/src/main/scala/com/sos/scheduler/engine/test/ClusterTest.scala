@@ -20,7 +20,7 @@ trait ClusterTest extends ScalaSchedulerTest with SharedDatabaseTest {
   protected lazy val databaseTcpPort :: ownHttpPort :: otherPorts = findRandomFreeTcpPorts(2 + 2 * clusterMemberCount)
   private lazy val ownUdpPort = ownHttpPort  // Cluster uses HTTP port number as UDP post number to to suspend order. See JS-1227 (JS1227IT)
 
-  override protected final lazy val testConfiguration = TestConfiguration(
+  override protected def testConfiguration = TestConfiguration(
     getClass,
     mainArguments = List(s"-udp-port=$ownUdpPort", s"-http-port=127.0.0.1:$ownHttpPort", "-distributed-orders"),
     database = Some(databaseConfiguration))
