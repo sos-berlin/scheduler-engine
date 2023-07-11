@@ -9,7 +9,7 @@
         <!-- Der Generator funktioniert nur für den Scheduler, weil dessen C++-Klassen vorausgesetzt werden. -->
         <groupId>com.sos-berlin.jobscheduler.engine</groupId>
         <artifactId>engine</artifactId>
-        <version>1.13.19-SNAPSHOT</version>
+        <version>1.13.19</version>
     </parent>
 
     <packaging>pom</packaging>
