@@ -654,7 +654,7 @@
                 <!-- Nur für com.sos.scheduler.engine.cplusplus.generator.visualstudio -->
                 <groupId>jaxen</groupId>
                 <artifactId>jaxen</artifactId>
-                <version>1.1.6</version>
+                <version>2.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>
